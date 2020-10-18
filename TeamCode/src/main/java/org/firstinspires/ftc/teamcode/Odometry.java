@@ -20,12 +20,14 @@ public class Odometry {
 
     final public double robotEncoderWheelDistance = 15.625; //Double.parseDouble(ReadWriteFile.readFile(wheelBaseSeparationFile).trim());// * calibration.encoderCountsPerIn;
     final public double horizontalEncoderTickPerDegreeOffset = Double.parseDouble(ReadWriteFile.readFile(horizontalTickOffsetFile).trim());
+    //3313.00833716; //
+    //15.625; //
 
     // Gets the h used in the odometry calculation
     private double getHypOrDistance(double leftDistance, double rightDistance, double deltaTheta) {
         if (deltaTheta != 0) {
             double r = (leftDistance / deltaTheta) + (robotEncoderWheelDistance / 2);
-            return ((r * Math.sin(deltaTheta)) / Math.cos(deltaTheta / 2));
+            return (r * Math.sin(deltaTheta)) / Math.cos(deltaTheta / 2);
         } else {
             // returns the distance travelled, averages L and R just to be accurate.
             return (leftDistance + rightDistance) / 2;
@@ -70,10 +72,12 @@ public class Odometry {
         } else if (displayedTheta < -(2*Math.PI)) {
             displayedTheta = displayedTheta + (2*Math.PI);
         }
-        double horizontalChange = deltaDistances[2] - (horizontalEncoderTickPerDegreeOffset*deltaTheta);
+        double horizontalChange = deltaDistances[2] - (horizontalEncoderTickPerDegreeOffset*deltaTheta/calibration.encoderCountsPerIn);
         double h = getHypOrDistance(deltaDistances[0], deltaDistances[1], deltaTheta);
-        double deltaX = (h * Math.sin(displayedTheta) + (horizontalChange * Math.cos(displayedTheta)));
-        double deltaY = (h * Math.cos(displayedTheta) - (horizontalChange * Math.sin(displayedTheta)));
+//        double deltaX = (h * Math.sin(displayedTheta) + (horizontalChange * Math.cos(displayedTheta)));
+//        double deltaY = (h * Math.cos(displayedTheta) - (horizontalChange * Math.sin(displayedTheta)));
+        double deltaX = (h * Math.cos(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.cos(oldTheta - (Math.PI/2) + (deltaTheta/2)));
+        double deltaY = (h * Math.sin(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.sin(oldTheta - (Math.PI/2) + (deltaTheta/2)));
 
         return new double[]{deltaX + oldX, deltaY + oldY, displayedTheta, deltaDistances[0], deltaDistances[1], deltaTheta, horizontalChange};
     }
