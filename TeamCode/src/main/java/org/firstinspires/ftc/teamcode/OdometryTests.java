@@ -139,9 +139,11 @@ public class OdometryTests extends LinearOpMode {
 
         waitForStart();
 
-//        while (opModeIsActive()) {
-            odometryRoutineA();
-//            testOdometry();
-//        }
+        while (opModeIsActive()) {
+            if (gamepad1.a) {
+                odometryRoutineA();
+            }
+            testOdometry();
+        }
     }
 }

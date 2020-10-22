@@ -10,14 +10,13 @@ import java.io.File;
 public class Odometry {
 
     OdometryCalibration calibration = new OdometryCalibration();
-    public double horizontalChange = 0;
 
     // length from left to right odometers and horizontal tick offset per degree
     double[] lastIterationOdometryInfo = {0, 0, 0};
     private File wheelBaseSeparationFile = AppUtil.getInstance().getSettingsFile("wheelBaseSeparation.txt");
     private File horizontalTickOffsetFile = AppUtil.getInstance().getSettingsFile("horizontalTickOffset.txt");
 
-    final public double robotEncoderWheelDistance = 15.625; //Double.parseDouble(ReadWriteFile.readFile(wheelBaseSeparationFile).trim());// * calibration.encoderCountsPerIn;
+    final public double robotEncoderWheelDistance = Double.parseDouble(ReadWriteFile.readFile(wheelBaseSeparationFile).trim());// * calibration.encoderCountsPerIn;
     final public double horizontalEncoderTickPerDegreeOffset = Double.parseDouble(ReadWriteFile.readFile(horizontalTickOffsetFile).trim());
     //15.625; //
     //3313.00833716; //
@@ -84,8 +83,9 @@ public class Odometry {
         return new double[]{deltaX + oldX, deltaY + oldY, newTheta, deltaDistances[0], deltaDistances[1], deltaTheta, horizontalChange};
     }
 
-    public void moveToPoint(double[] initialPosition, double[] finalPosition, GoBildaDrive drive) {
+    public void moveToPoint(double[] initialPosition, double[] finalPosition, double[] odometryInfo, GoBildaDrive drive, Telemetry telemetry) {
         double initialAngle;
+        double pivotSpeed = .4;
         double rawAngleToPosition = Math.atan2(finalPosition[1] - initialPosition[1], finalPosition[0] - initialPosition[0]);
 
         // make initial angle positive
@@ -98,8 +98,16 @@ public class Odometry {
         // will have to negate in case odometry theta is negative
         double angleToPosition = initialAngle - rawAngleToPosition;
 
-        
+        if (angleToPosition < 0) {
+            pivotSpeed = -pivotSpeed;
+        }
+
+        double[] currentPosition = initialPosition;
+//        while (currentPosition[2] < )
+        drive.circlepadMove(0, 0, pivotSpeed);
+
     }
+    //////// THIS IS A MASSIVE MESS ////////
 
     public void swerveToPoint(double[] position, GoBildaDrive drioe) {
 
