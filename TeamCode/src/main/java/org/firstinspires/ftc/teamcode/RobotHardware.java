@@ -18,6 +18,9 @@ public class RobotHardware {
     public DcMotor LeftBack;
     public DcMotor RightBack;
 
+    //Intake motor
+    public DcMotor Intake;
+
     // Odometers
     public DcMotor OLeft;
     public DcMotor ORight;
@@ -83,9 +86,20 @@ public class RobotHardware {
             telemetry.addData("Warning", "Motor: right_back not plugged in");    //
             RightBack = null;
         }
+        try {
+            Intake = hardwareMap.get(DcMotor.class, "Intake_Motor");
+            Intake.setDirection(DcMotor.Direction.REVERSE);
+            Intake.setPower(0);
 
-        ORight = RightFront;
-        OLeft = RightBack;
+
+            telemetry.addData("Status", "Motor: Intake identified");    //
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Motor: Intake not plugged in");    //
+            Intake = null;
+        }
+
+        OLeft = RightFront;
+        ORight = RightBack;
         OMiddle = LeftBack;
 
 //        // Odometry initialization

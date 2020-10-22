@@ -12,20 +12,21 @@ public class Odometry {
     OdometryCalibration calibration = new OdometryCalibration();
     public double horizontalChange = 0;
 
-    // length from left to right odometers
-    // TODO add  for length from l to r odometer and change encoderOverMm
+    // length from left to right odometers and horizontal tick offset per degree
     double[] lastIterationOdometryInfo = {0, 0, 0};
     private File wheelBaseSeparationFile = AppUtil.getInstance().getSettingsFile("wheelBaseSeparation.txt");
     private File horizontalTickOffsetFile = AppUtil.getInstance().getSettingsFile("horizontalTickOffset.txt");
 
     final public double robotEncoderWheelDistance = 15.625; //Double.parseDouble(ReadWriteFile.readFile(wheelBaseSeparationFile).trim());// * calibration.encoderCountsPerIn;
     final public double horizontalEncoderTickPerDegreeOffset = Double.parseDouble(ReadWriteFile.readFile(horizontalTickOffsetFile).trim());
+    //15.625; //
+    //3313.00833716; //
 
     // Gets the h used in the odometry calculation
     private double getHypOrDistance(double leftDistance, double rightDistance, double deltaTheta) {
         if (deltaTheta != 0) {
-            double r = (leftDistance / deltaTheta) + (robotEncoderWheelDistance / 2);
-            return ((r * Math.sin(deltaTheta)) / Math.cos(deltaTheta / 2));
+            double r = (leftDistance + rightDistance) / 2;
+            return (r / deltaTheta)*Math.sin(deltaTheta)/Math.cos(deltaTheta);
         } else {
             // returns the distance travelled, averages L and R just to be accurate.
             return (leftDistance + rightDistance) / 2;
@@ -63,24 +64,45 @@ public class Odometry {
         double[] deltaDistances = odometryInfoToDeltaIn(odometryInfo);
         double deltaTheta = getDeltaTheta(deltaDistances[0], deltaDistances[1]);
 
-        // do the calculations
-        double displayedTheta = deltaTheta + oldTheta;
-        if (displayedTheta > (2*Math.PI)) {
-            displayedTheta = displayedTheta - (2*Math.PI);
-        } else if (displayedTheta < -(2*Math.PI)) {
-            displayedTheta = displayedTheta + (2*Math.PI);
+        // Get the new theta and make it look pretty too (doesn't hurt calculations to make look pretty)
+        double newTheta = deltaTheta + oldTheta;
+        if (newTheta > (2*Math.PI)) {
+            newTheta = newTheta - (2*Math.PI);
+        } else if (newTheta < -(2*Math.PI)) {
+            newTheta = newTheta + (2*Math.PI);
         }
-        double horizontalChange = deltaDistances[2] - (horizontalEncoderTickPerDegreeOffset*deltaTheta);
-        double h = getHypOrDistance(deltaDistances[0], deltaDistances[1], deltaTheta);
-        double deltaX = (h * Math.sin(displayedTheta) + (horizontalChange * Math.cos(displayedTheta)));
-        double deltaY = (h * Math.cos(displayedTheta) - (horizontalChange * Math.sin(displayedTheta)));
 
-        return new double[]{deltaX + oldX, deltaY + oldY, displayedTheta, deltaDistances[0], deltaDistances[1], deltaTheta, horizontalChange};
+        // calculate horizontal change using the tick per degree offset and then proceed to get the
+        // hypotenuse of the triangle made when moving
+        double horizontalChange = deltaDistances[2] - (horizontalEncoderTickPerDegreeOffset*deltaTheta/calibration.encoderCountsPerIn);
+        double h = getHypOrDistance(deltaDistances[0], deltaDistances[1], deltaTheta);
+
+        // do a classic hyp * cos / sin to get x / y. also account for horizontal change
+        double deltaX = (h * Math.cos(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.cos(oldTheta + (deltaTheta/2) - (Math.PI/2)));
+        double deltaY = (h * Math.sin(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.sin(oldTheta + (deltaTheta/2) - (Math.PI/2)));
+
+        return new double[]{deltaX + oldX, deltaY + oldY, newTheta, deltaDistances[0], deltaDistances[1], deltaTheta, horizontalChange};
+    }
+
+    public void moveToPoint(double[] initialPosition, double[] finalPosition, GoBildaDrive drive) {
+        double initialAngle;
+        double rawAngleToPosition = Math.atan2(finalPosition[1] - initialPosition[1], finalPosition[0] - initialPosition[0]);
+
+        // make initial angle positive
+        if (initialPosition[2] < 0) {
+            initialAngle = initialPosition[2] + 2 * Math.PI;
+        } else {
+            initialAngle = initialPosition[2];
+        }
+
+        // will have to negate in case odometry theta is negative
+        double angleToPosition = initialAngle - rawAngleToPosition;
+
+        
+    }
+
+    public void swerveToPoint(double[] position, GoBildaDrive drioe) {
+
     }
 }
 //TODO: explain the code in cleaner fashion
-
-
-// more accurate encoder information (odometryInfoToDeltaIn???)
-// !have to account for the horizontal encoder moving when spinning. this is the reason for the offset
-//// per degree thingy, but NEED TO IMPLEMENT CORRECTLY!!!!!!!! AHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
