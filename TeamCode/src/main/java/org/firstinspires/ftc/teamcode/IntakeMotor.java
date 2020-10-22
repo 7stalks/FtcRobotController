@@ -26,7 +26,7 @@ public class IntakeMotor extends LinearOpMode {
                 robot.Intake.setPower(0);
             }
 
-
+            sleep(100);
 
         }
 
