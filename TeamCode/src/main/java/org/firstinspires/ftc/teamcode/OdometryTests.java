@@ -29,45 +29,100 @@ public class OdometryTests extends LinearOpMode {
     double[] odometryInfo;
     double[] robotPosition = {0, 0, 0};
 
-        private void testImu() {
-            // (goes before waitForStart())
-            // obtain the heading (is this 0 degrees? test it please)
-            double angle = robot.imu.getAngularOrientation().firstAngle;
-            telemetry.addData("ANGLE", angle);
+    private void testImu() {
+        // (goes before waitForStart())
+        // obtain the heading (is this 0 degrees? test it please)
+        double angle = robot.imu.getAngularOrientation().firstAngle;
+        telemetry.addData("ANGLE", angle);
 
-            // ONLY WORKS IF angle IS LESS THAN 270 TEST THIS
-            if (gamepad1.a) {
-                double initialAngle = robot.imu.getAngularOrientation().firstAngle;
+        // ONLY WORKS IF angle IS LESS THAN 270 TEST THIS
+        if (gamepad1.a) {
+            double initialAngle = robot.imu.getAngularOrientation().firstAngle;
 
-                while (angle < (initialAngle + 90) && opModeIsActive()) {
-                    drive.circlepadMove(1, 0, .5);
-                    angle = robot.imu.getAngularOrientation().firstAngle;
-                    telemetry.addData("ANGLE", angle);
-                    telemetry.update();
-                }
-                drive.stop();
+            while (angle < (initialAngle + 90) && opModeIsActive()) {
+                drive.circlepadMove(1, 0, .5);
+                angle = robot.imu.getAngularOrientation().firstAngle;
+                telemetry.addData("ANGLE", angle);
+                telemetry.update();
             }
+            drive.stop();
         }
+    }
 
-        private void testOdometry() {
-            drive.circlepadMove(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
-            drive.dpadMove(gamepad1.dpad_right, gamepad1.dpad_up, gamepad1.dpad_left,
-                    gamepad1.dpad_down);
+    //            if (gamepad1.a) {
+//                timer.reset();
+//                while (timer.time(TimeUnit.SECONDS) < 2 && opModeIsActive()) {
+//                    drive.circlepadMove(.8, 0, 0);
+//                    telemetry.addData("OLeft", robot.OLeft.getCurrentPosition());
+//                    telemetry.addData("ORight", robot.ORight.getCurrentPosition());
+//                    telemetry.addData("OMiddle", robot.OMiddle.getCurrentPosition());
+//                    telemetry.update();
+//                }
+//                drive.stop();
+//                sleep(1000);
+//                telemetry.addData("Left divided by right", robot.OLeft.getCurrentPosition() / robot.ORight.getCurrentPosition());
+//                telemetry.update();
+//                sleep(10000);
+//            }
 
-            odometryInfo = new double[]{robot.OLeft.getCurrentPosition(), robot.ORight.getCurrentPosition(),
-                    robot.OMiddle.getCurrentPosition()};
-            robotPosition = odometry.getPosition(robotPosition, odometryInfo, telemetry);
-            telemetry.addData("OLeft", odometryInfo[0]);
-            telemetry.addData("OMiddle", odometryInfo[2]);
-            telemetry.addData("ORight", odometryInfo[1]);
-            telemetry.addData("X", robotPosition[0]);
-            telemetry.addData("Y", robotPosition[1]);
-            telemetry.addData("Theta", robotPosition[2]);
+    private void testOdometry() {
+        drive.circlepadMove(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+        drive.dpadMove(gamepad1.dpad_right, gamepad1.dpad_up, gamepad1.dpad_left,
+                gamepad1.dpad_down);
+
+        odometryInfo = new double[]{robot.OLeft.getCurrentPosition(), robot.ORight.getCurrentPosition(),
+                robot.OMiddle.getCurrentPosition()};
+        robotPosition = odometry.getPosition(robotPosition, odometryInfo, telemetry);
+        telemetry.addData("OLeft", odometryInfo[0]);
+        telemetry.addData("OMiddle", odometryInfo[2]);
+        telemetry.addData("ORight", odometryInfo[1]);
+        telemetry.addData("X", robotPosition[0]);
+        telemetry.addData("Y", robotPosition[1]);
+        telemetry.addData("Theta", robotPosition[2]);
         telemetry.addData("DeltaLeft", robotPosition[3]);
         telemetry.addData("DeltaRight", robotPosition[4]);
         telemetry.addData("deltatheta", robotPosition[5]);
         telemetry.addData("hor change", robotPosition[6]);
         telemetry.update();
+    }
+
+    private void queryOdometry() {
+        odometryInfo = new double[]{robot.OLeft.getCurrentPosition(), robot.ORight.getCurrentPosition(),
+                robot.OMiddle.getCurrentPosition()};
+        robotPosition = odometry.getPosition(robotPosition, odometryInfo, telemetry);
+        telemetry.addData("X", robotPosition[0]);
+        telemetry.addData("Y", robotPosition[1]);
+        telemetry.addData("Theta", robotPosition[2]);
+        telemetry.update();
+    }
+
+    private void odometryRoutineA() {
+        timer.reset();
+        double initialAngle = robotPosition[2];
+        while (timer.seconds() < 2 && opModeIsActive()) {
+            drive.circlepadMove(-.35, 0, 0);
+            queryOdometry();
+        }
+        while (robotPosition[2] < initialAngle + Math.PI && opModeIsActive()) {
+            drive.circlepadMove(0, 0, .25);
+            queryOdometry();
+        }
+        drive.stop();
+        timer.reset();
+        initialAngle = robotPosition[2];
+        while (timer.seconds() < 2 && opModeIsActive()) {
+            drive.circlepadMove(-.35, 0, 0);
+            queryOdometry();
+        }
+        while (robotPosition[2] > initialAngle - Math.PI && opModeIsActive()) {
+            drive.circlepadMove(0, 0, -.25);
+            queryOdometry();
+        }
+        drive.stop();
+        timer.reset();
+        while (timer.seconds() < 30 && opModeIsActive()) {
+            queryOdometry();
+        }
     }
 
 
@@ -84,23 +139,9 @@ public class OdometryTests extends LinearOpMode {
 
         waitForStart();
 
-        while (opModeIsActive()) {
-            testOdometry();
-//            if (gamepad1.a) {
-//                timer.reset();
-//                while (timer.time(TimeUnit.SECONDS) < 2 && opModeIsActive()) {
-//                    drive.circlepadMove(.8, 0, 0);
-//                    telemetry.addData("OLeft", robot.OLeft.getCurrentPosition());
-//                    telemetry.addData("ORight", robot.ORight.getCurrentPosition());
-//                    telemetry.addData("OMiddle", robot.OMiddle.getCurrentPosition());
-//                    telemetry.update();
-//                }
-//                drive.stop();
-//                sleep(1000);
-//                telemetry.addData("Left divided by right", robot.OLeft.getCurrentPosition() / robot.ORight.getCurrentPosition());
-//                telemetry.update();
-//                sleep(10000);
-//            }
-        }
+//        while (opModeIsActive()) {
+            odometryRoutineA();
+//            testOdometry();
+//        }
     }
 }

@@ -26,7 +26,7 @@ public class Odometry {
     private double getHypOrDistance(double leftDistance, double rightDistance, double deltaTheta) {
         if (deltaTheta != 0) {
             double r = (leftDistance + rightDistance) / 2;
-            return (r / deltaTheta) * Math.tan(deltaTheta);
+            return (r / deltaTheta)*Math.sin(deltaTheta)/Math.cos(deltaTheta);
         } else {
             // returns the distance travelled, averages L and R just to be accurate.
             return (leftDistance + rightDistance) / 2;
@@ -82,6 +82,27 @@ public class Odometry {
         double deltaY = (h * Math.sin(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.sin(oldTheta + (deltaTheta/2) - (Math.PI/2)));
 
         return new double[]{deltaX + oldX, deltaY + oldY, newTheta, deltaDistances[0], deltaDistances[1], deltaTheta, horizontalChange};
+    }
+
+    public void moveToPoint(double[] initialPosition, double[] finalPosition, GoBildaDrive drive) {
+        double initialAngle;
+        double rawAngleToPosition = Math.atan2(finalPosition[1] - initialPosition[1], finalPosition[0] - initialPosition[0]);
+
+        // make initial angle positive
+        if (initialPosition[2] < 0) {
+            initialAngle = initialPosition[2] + 2 * Math.PI;
+        } else {
+            initialAngle = initialPosition[2];
+        }
+
+        // will have to negate in case odometry theta is negative
+        double angleToPosition = initialAngle - rawAngleToPosition;
+
+        
+    }
+
+    public void swerveToPoint(double[] position, GoBildaDrive drioe) {
+
     }
 }
 //TODO: explain the code in cleaner fashion

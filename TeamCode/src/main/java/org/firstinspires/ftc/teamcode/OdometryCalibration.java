@@ -28,7 +28,7 @@ public class OdometryCalibration extends LinearOpMode {
     File wheelBaseSeparationFile = AppUtil.getInstance().getSettingsFile("wheelBaseSeparation.txt");
     File horizontalTickOffsetFile = AppUtil.getInstance().getSettingsFile("horizontalTickOffset.txt");
 
-    double encoderCountsPerIn = 307.699557;
+    double encoderCountsPerIn = 306.3816404153158;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -48,9 +48,10 @@ public class OdometryCalibration extends LinearOpMode {
 
 
         double angle = robot.imu.getAngularOrientation().firstAngle;
+        double firstAngle = angle;
         telemetry.addData("angle", angle);
 
-        telemetry.setMsTransmissionInterval(10);
+        telemetry.setMsTransmissionInterval(5);
         telemetry.addData("Status", "Waiting to be started");
         telemetry.update();
         waitForStart();
@@ -62,7 +63,7 @@ public class OdometryCalibration extends LinearOpMode {
                 drive.circlepadMove(0, 0, robot.PIVOT_SPEED / 2);
             }
 
-            angle = robot.imu.getAngularOrientation(AxesReference.INTRINSIC.reverse(), AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            angle = robot.imu.getAngularOrientation().firstAngle;
 
             telemetry.addData("IMU Angle", angle);
             telemetry.update();
@@ -78,7 +79,7 @@ public class OdometryCalibration extends LinearOpMode {
         //Encoder difference (leftEncoder - rightEncoder)
         double encoderDifference = Math.abs(robot.OLeft.getCurrentPosition()) +
                 Math.abs(robot.ORight.getCurrentPosition());
-        double verticalEncoderTickOffsetPerDegree = encoderDifference / angle;
+        double verticalEncoderTickOffsetPerDegree = encoderDifference / (robot.imu.getAngularOrientation().firstAngle - firstAngle); //changed from angle to imu.getangle
         double wheelBaseSeparation = (2 * 90 * verticalEncoderTickOffsetPerDegree) / (Math.PI * encoderCountsPerIn);
 
         horizontalTickOffset = ((robot.OMiddle.getCurrentPosition()) / (Math.toRadians(robot.imu.getAngularOrientation().firstAngle)));

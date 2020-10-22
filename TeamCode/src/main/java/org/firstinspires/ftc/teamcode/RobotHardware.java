@@ -84,8 +84,8 @@ public class RobotHardware {
             RightBack = null;
         }
 
-        ORight = RightFront;
-        OLeft = RightBack;
+        OLeft = RightFront;
+        ORight = RightBack;
         OMiddle = LeftBack;
 
 //        // Odometry initialization
