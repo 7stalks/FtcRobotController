@@ -20,6 +20,7 @@ public class RobotHardware {
 
     //Intake motor
     public DcMotor Intake;
+    public DcMotor Shooter;
 
     // Odometers
     public DcMotor OLeft;
@@ -97,7 +98,17 @@ public class RobotHardware {
             telemetry.addData("Warning", "Motor: Intake not plugged in");    //
             Intake = null;
         }
-
+        try {
+            Shooter = hardwareMap.get(DcMotor.class, "shooter");
+            Shooter.setDirection(DcMotor.Direction.FORWARD);
+            Shooter.setPower(0);
+            Shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            Shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            telemetry.addData("Status", "Motor: shooter identified");    //
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Motor: shooter not plugged in");    //
+            Shooter = null;
+        }
         OLeft = RightFront;
         ORight = RightBack;
         OMiddle = LeftBack;
