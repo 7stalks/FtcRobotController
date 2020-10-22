@@ -34,9 +34,4 @@ public class IntakeMotor extends LinearOpMode {
     }
 
 
-
-
-
-
-
 }
