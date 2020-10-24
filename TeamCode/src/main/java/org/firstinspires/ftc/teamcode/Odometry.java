@@ -83,6 +83,7 @@ public class Odometry {
         return new double[]{deltaX + oldX, deltaY + oldY, newTheta, deltaDistances[0], deltaDistances[1], deltaTheta, horizontalChange};
     }
 
+    //  Needs to be iterative if we want to do other processes. Thread???
     public void moveToPoint(double[] initialPosition, double[] finalPosition, double[] odometryInfo, GoBildaDrive drive, Telemetry telemetry) {
         double initialAngle;
         double pivotSpeed = .4;
