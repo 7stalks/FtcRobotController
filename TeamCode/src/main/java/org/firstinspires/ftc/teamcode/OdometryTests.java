@@ -103,6 +103,7 @@ public class OdometryTests extends LinearOpMode {
             drive.circlepadMove(-.35, 0, 0);
             queryOdometry();
         }
+        //// why dont we get initialAngle here. See if it's more/less accurate
         while (robotPosition[2] < initialAngle + Math.PI && opModeIsActive()) {
             drive.circlepadMove(0, 0, .25);
             queryOdometry();
@@ -125,6 +126,31 @@ public class OdometryTests extends LinearOpMode {
         }
     }
 
+    private void odometryRoutineB() {
+        timer.reset();
+        queryOdometry();
+        double initialAngle = robotPosition[2];
+        while (timer.seconds() <= 7 && opModeIsActive()) {
+            drive.circlepadMove(.53, 0, 0);
+            queryOdometry();
+        }
+        drive.stop();
+        timer.reset();
+        while (timer.seconds() < 60 && opModeIsActive()) {
+            queryOdometry();
+            telemetry.addData("OLeft", odometryInfo[0]);
+            telemetry.addData("OMiddle", odometryInfo[2]);
+            telemetry.addData("ORight", odometryInfo[1]);
+        }
+    }
+    private void odometryMaybeFindCountsPerIn() {
+        drive.circlepadMove(-.5, 0, 0);
+        
+    }
+
+    private void odometryAndVuforia() {
+
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -142,6 +168,8 @@ public class OdometryTests extends LinearOpMode {
         while (opModeIsActive()) {
             if (gamepad1.a) {
                 odometryRoutineA();
+            } else if (gamepad1.b) {
+                odometryRoutineB();
             }
             testOdometry();
         }

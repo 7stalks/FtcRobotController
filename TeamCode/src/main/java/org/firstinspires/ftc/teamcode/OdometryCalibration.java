@@ -82,7 +82,7 @@ public class OdometryCalibration extends LinearOpMode {
         double verticalEncoderTickOffsetPerDegree = encoderDifference / (robot.imu.getAngularOrientation().firstAngle - firstAngle); //changed from angle to imu.getangle
         double wheelBaseSeparation = (2 * 90 * verticalEncoderTickOffsetPerDegree) / (Math.PI * encoderCountsPerIn);
 
-        horizontalTickOffset = ((robot.OMiddle.getCurrentPosition()) / (Math.toRadians(robot.imu.getAngularOrientation().firstAngle)));
+        horizontalTickOffset = ((robot.OMiddle.getCurrentPosition()) / (Math.toRadians(robot.imu.getAngularOrientation().firstAngle - firstAngle)));
 
         // Write constants to the text files
         ReadWriteFile.writeFile(wheelBaseSeparationFile, String.valueOf(wheelBaseSeparation));
@@ -90,16 +90,17 @@ public class OdometryCalibration extends LinearOpMode {
 
         // Telemetry
         while (opModeIsActive()) {
-            telemetry.addData("Odometry Calibration Status", "Calibration Success");
+//            telemetry.addData("Odometry Calibration Status", "Calibration Success");
             telemetry.addData("Wheel Base Separation", wheelBaseSeparation);
-            telemetry.addData("base separation location", wheelBaseSeparationFile);
+//            telemetry.addData("base separation location", wheelBaseSeparationFile);
             telemetry.addData("Horizontal Encoder Offset", horizontalTickOffset);
-            telemetry.addData("offset file locationm", horizontalTickOffsetFile);
-            telemetry.addData("IMU angle", angle);
-            telemetry.addData("NEW IMY ANGLE LOOK HERE", robot.imu.getAngularOrientation().firstAngle);
+//            telemetry.addData("offset file locationm", horizontalTickOffsetFile);
+//            telemetry.addData("IMU angle", angle);
+            telemetry.addData("Current angle", robot.imu.getAngularOrientation().firstAngle);
             telemetry.addData("Left Position", robot.OLeft.getCurrentPosition());
             telemetry.addData("Right Position", robot.ORight.getCurrentPosition());
             telemetry.addData("Middle Position", robot.OMiddle.getCurrentPosition());
+            telemetry.addData("initial angle", firstAngle);
 
             telemetry.update();
         }
