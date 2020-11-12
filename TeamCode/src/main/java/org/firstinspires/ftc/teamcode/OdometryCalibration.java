@@ -30,6 +30,8 @@ public class OdometryCalibration extends LinearOpMode {
 
     double encoderCountsPerIn = 306.3816404153158;
 
+    //5.42657564915
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -58,9 +60,9 @@ public class OdometryCalibration extends LinearOpMode {
 
         while (angle < 90 && opModeIsActive()) {
             if (angle < 60) {
-                drive.circlepadMove(0, 0, robot.PIVOT_SPEED);
+                drive.circlepadMove(0, 0, robot.PIVOT_SPEED );
             } else {
-                drive.circlepadMove(0, 0, robot.PIVOT_SPEED / 2);
+                drive.circlepadMove(0, 0, robot.PIVOT_SPEED * .85);
             }
 
             angle = robot.imu.getAngularOrientation().firstAngle;

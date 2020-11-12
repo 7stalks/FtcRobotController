@@ -16,10 +16,10 @@ public class Odometry {
     private File wheelBaseSeparationFile = AppUtil.getInstance().getSettingsFile("wheelBaseSeparation.txt");
     private File horizontalTickOffsetFile = AppUtil.getInstance().getSettingsFile("horizontalTickOffset.txt");
 
-    final public double robotEncoderWheelDistance = Double.parseDouble(ReadWriteFile.readFile(wheelBaseSeparationFile).trim());// * calibration.encoderCountsPerIn;
-    final public double horizontalEncoderTickPerDegreeOffset = Double.parseDouble(ReadWriteFile.readFile(horizontalTickOffsetFile).trim());
-    //15.625; //
-    //3313.00833716; //
+    final public double robotEncoderWheelDistance = 15.66551181; //Double.parseDouble(ReadWriteFile.readFile(wheelBaseSeparationFile).trim());// * calibration.encoderCountsPerIn;
+    final public double horizontalEncoderTickPerDegreeOffset = 1662.60314922; //Double.parseDouble(ReadWriteFile.readFile(horizontalTickOffsetFile).trim());
+    //15.625; //15.75; //15.66551181; //
+    //3313.00833716; //1662.60314922; //
 
     // Gets the h used in the odometry calculation
     private double getHypOrDistance(double leftDistance, double rightDistance, double deltaTheta) {
@@ -65,15 +65,15 @@ public class Odometry {
 
         // Get the new theta and make it look pretty too (doesn't hurt calculations to make look pretty)
         double newTheta = deltaTheta + oldTheta;
-        if (newTheta > (2*Math.PI)) {
-            newTheta = newTheta - (2*Math.PI);
-        } else if (newTheta < -(2*Math.PI)) {
-            newTheta = newTheta + (2*Math.PI);
-        }
+//        if (newTheta > (2*Math.PI)) {
+//            newTheta = newTheta - (2*Math.PI);
+//        } else if (newTheta < -(2*Math.PI)) {
+//            newTheta = newTheta + (2*Math.PI);
+//        }
 
         // calculate horizontal change using the tick per degree offset and then proceed to get the
         // hypotenuse of the triangle made when moving
-        double horizontalChange = deltaDistances[2] - (horizontalEncoderTickPerDegreeOffset*deltaTheta/calibration.encoderCountsPerIn);
+        double horizontalChange = deltaDistances[2] - ((horizontalEncoderTickPerDegreeOffset*deltaTheta)/calibration.encoderCountsPerIn);
         double h = getHypOrDistance(deltaDistances[0], deltaDistances[1], deltaTheta);
 
         // do a classic hyp * cos / sin to get x / y. also account for horizontal change

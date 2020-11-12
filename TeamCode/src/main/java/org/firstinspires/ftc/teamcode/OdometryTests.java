@@ -143,6 +143,64 @@ public class OdometryTests extends LinearOpMode {
             telemetry.addData("ORight", odometryInfo[1]);
         }
     }
+
+    private void odometryRoutineX() {
+        queryOdometry();
+        goToPoint(72);
+//        timer.reset();
+//        while (timer.seconds() < 20 && opModeIsActive()) {
+//            queryOdometry();
+//        }
+    }
+
+    void goToPoint(double x) {
+        double moveSpeed = .5;
+        if (x < 10) {
+            moveSpeed = .2 + (.03*x);
+        }
+        while (robotPosition[0] < (x-.1) || robotPosition[0] > (x+.1) && opModeIsActive()) {
+            if (robotPosition[0] < (x-.2)) {
+                drive.circlepadMove(moveSpeed, 0, 0);
+                queryOdometry();
+            } else if (robotPosition[0] > (x+.2)) {
+                drive.circlepadMove(-moveSpeed, 0, 0);
+                queryOdometry();
+            } else if (robotPosition[0] < (x-.1) || robotPosition[0] > (x+.1)) {
+                drive.stop();
+                break;
+            }
+            if (Math.abs(robotPosition[0] - x) < 10) {
+                moveSpeed = .15 + (((.5-.15)/(10)) * (Math.abs(robotPosition[0] - x)));
+            }
+        }
+    }
+
+    void goToStrafePoint(double y) {
+        while (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1) && opModeIsActive()) {
+            if (robotPosition[1] < (y-.2)) {
+                drive.circlepadMove(0, -.4, 0);
+                queryOdometry();
+            } else if (robotPosition[1] > (y+.2)) {
+                drive.circlepadMove(0, .4, 0);
+                queryOdometry();
+            } else if (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1)) {
+                drive.stop();
+                break;
+            }
+        }
+    }
+
+    void pleaseRotate (double angle) {
+        double initialAngle = robotPosition[2];
+        while (robotPosition[2] < initialAngle + 2*Math.PI) {
+            drive.circlepadMove(0, 0, .5);
+            queryOdometry();
+        }
+        drive.stop();
+    }
+
+    // need to do rotate now
+
     private void odometryMaybeFindCountsPerIn() {
         drive.circlepadMove(-.5, 0, 0);
         
@@ -170,6 +228,8 @@ public class OdometryTests extends LinearOpMode {
                 odometryRoutineA();
             } else if (gamepad1.b) {
                 odometryRoutineB();
+            } else if (gamepad1.x) {
+                odometryRoutineX();
             }
             testOdometry();
         }
