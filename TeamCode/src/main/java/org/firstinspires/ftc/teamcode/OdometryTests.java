@@ -146,53 +146,76 @@ public class OdometryTests extends LinearOpMode {
 
     private void odometryRoutineX() {
         queryOdometry();
+        goToStrafePoint(-12);
+        goToPoint(48);
+        drive.stop();
+
+        timer.reset();
+        while ((timer.seconds() < 4) && opModeIsActive()) {
+            telemetry.addData("X", robotPosition[0]);
+            telemetry.addData("Y", robotPosition[1]);
+            telemetry.addData("Theta", robotPosition[2]);
+            telemetry.addData("Status", "shooting");
+            telemetry.update();
+        }
+
         goToPoint(72);
-//        timer.reset();
-//        while (timer.seconds() < 20 && opModeIsActive()) {
-//            queryOdometry();
-//        }
+        goToStrafePoint(36);
+        drive.stop();
+
+        timer.reset();
+        while ((timer.seconds() < 10) && opModeIsActive()) {
+            telemetry.addData("X", robotPosition[0]);
+            telemetry.addData("Y", robotPosition[1]);
+            telemetry.addData("Theta", robotPosition[2]);
+            telemetry.addData("Status", "wobble goal");
+            telemetry.update();
+        }
     }
 
     void goToPoint(double x) {
-        double moveSpeed = .5;
-        if (x < 10) {
-            moveSpeed = .2 + (.03*x);
-        }
-        while (robotPosition[0] < (x-.1) || robotPosition[0] > (x+.1) && opModeIsActive()) {
-            if (robotPosition[0] < (x-.2)) {
-                drive.circlepadMove(moveSpeed, 0, 0);
+        double moveSpeed = .7;
+        double thetaSpeed = 0;
+        while ((-robotPosition[0] < (x-.1) || -robotPosition[0] > (x+.1)) && opModeIsActive()) {
+            thetaSpeed = -robotPosition[2];
+            if (-robotPosition[0] < (x-.2)) {
+                drive.circlepadMove(-moveSpeed, 0, thetaSpeed);
                 queryOdometry();
-            } else if (robotPosition[0] > (x+.2)) {
-                drive.circlepadMove(-moveSpeed, 0, 0);
+            } else if (-robotPosition[0] > (x+.2)) {
+                drive.circlepadMove(moveSpeed, 0, thetaSpeed);
                 queryOdometry();
-            } else if (robotPosition[0] < (x-.1) || robotPosition[0] > (x+.1)) {
+            } else if (-robotPosition[0] < (x-.1) || -robotPosition[0] > (x+.1)) {
                 drive.stop();
                 break;
             }
-            if (Math.abs(robotPosition[0] - x) < 10) {
-                moveSpeed = .15 + (((.5-.15)/(10)) * (Math.abs(robotPosition[0] - x)));
+            if (Math.abs(-robotPosition[0] - x) < 10) {
+                moveSpeed = .2 + (((.7-.2)/(10)) * (Math.abs(-robotPosition[0] - x)));
             }
         }
     }
 
     void goToStrafePoint(double y) {
+        double moveSpeed = .55;
         while (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1) && opModeIsActive()) {
             if (robotPosition[1] < (y-.2)) {
-                drive.circlepadMove(0, -.4, 0);
+                drive.circlepadMove(0, -moveSpeed, 0);
                 queryOdometry();
             } else if (robotPosition[1] > (y+.2)) {
-                drive.circlepadMove(0, .4, 0);
+                drive.circlepadMove(0, moveSpeed, 0);
                 queryOdometry();
             } else if (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1)) {
                 drive.stop();
                 break;
+            }
+            if (Math.abs(robotPosition[1] - y) < 7) {
+                moveSpeed = .2 + (((.55-.2)/(7)) * (Math.abs(robotPosition[1] - y)));
             }
         }
     }
 
     void pleaseRotate (double angle) {
         double initialAngle = robotPosition[2];
-        while (robotPosition[2] < initialAngle + 2*Math.PI) {
+        while (robotPosition[2] < initialAngle + 2*Math.PI && opModeIsActive()) {
             drive.circlepadMove(0, 0, .5);
             queryOdometry();
         }
@@ -231,7 +254,8 @@ public class OdometryTests extends LinearOpMode {
             } else if (gamepad1.x) {
                 odometryRoutineX();
             }
-            testOdometry();
+            drive.circlepadMove(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+            queryOdometry();
         }
     }
 }
