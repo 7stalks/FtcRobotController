@@ -149,6 +149,10 @@ public class OdometryTests extends LinearOpMode {
         goToStrafePoint(-12);
         goToPoint(48);
         drive.stop();
+        boolean middle = false;
+        boolean top = false;
+        double wobbleX;
+        double wobbleY;
 
         timer.reset();
         while ((timer.seconds() < 4) && opModeIsActive()) {
@@ -156,11 +160,28 @@ public class OdometryTests extends LinearOpMode {
             telemetry.addData("Y", robotPosition[1]);
             telemetry.addData("Theta", robotPosition[2]);
             telemetry.addData("Status", "shooting");
+            telemetry.addLine("NOTHING FOR BOTTOM, A FOR MIDDLE, B FOR TOP");
             telemetry.update();
+            if (gamepad1.a) {
+                middle = true;
+            }
+            if (gamepad1.b) {
+                top = true;
+            }
+        }
+        if (middle) {
+            wobbleX = 96;
+            wobbleY = 12;
+        } else if (top) {
+            wobbleX = 120;
+            wobbleY = 36;
+        } else {
+            wobbleX = 72;
+            wobbleY = 36;
         }
 
-        goToPoint(72);
-        goToStrafePoint(36);
+        goToPoint(wobbleX);
+        goToStrafePoint(wobbleY);
         drive.stop();
 
         timer.reset();
@@ -196,12 +217,14 @@ public class OdometryTests extends LinearOpMode {
 
     void goToStrafePoint(double y) {
         double moveSpeed = .55;
+        double thetaSpeed = 0;
         while (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1) && opModeIsActive()) {
+            thetaSpeed = -robotPosition[2];
             if (robotPosition[1] < (y-.2)) {
-                drive.circlepadMove(0, -moveSpeed, 0);
+                drive.circlepadMove(0, -moveSpeed, thetaSpeed);
                 queryOdometry();
             } else if (robotPosition[1] > (y+.2)) {
-                drive.circlepadMove(0, moveSpeed, 0);
+                drive.circlepadMove(0, moveSpeed, thetaSpeed);
                 queryOdometry();
             } else if (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1)) {
                 drive.stop();
@@ -220,13 +243,6 @@ public class OdometryTests extends LinearOpMode {
             queryOdometry();
         }
         drive.stop();
-    }
-
-    // need to do rotate now
-
-    private void odometryMaybeFindCountsPerIn() {
-        drive.circlepadMove(-.5, 0, 0);
-        
     }
 
     private void odometryAndVuforia() {
