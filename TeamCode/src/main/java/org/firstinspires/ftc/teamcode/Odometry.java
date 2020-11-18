@@ -25,7 +25,7 @@ public class Odometry {
     private double getHypOrDistance(double leftDistance, double rightDistance, double deltaTheta) {
         if (deltaTheta != 0) {
             double r = (leftDistance + rightDistance) / 2;
-            return (r / deltaTheta)*Math.sin(deltaTheta)/Math.cos(deltaTheta);
+            return (r / deltaTheta)*(Math.sin(deltaTheta)/Math.cos(deltaTheta));
         } else {
             // returns the distance travelled, averages L and R just to be accurate.
             return (leftDistance + rightDistance) / 2;

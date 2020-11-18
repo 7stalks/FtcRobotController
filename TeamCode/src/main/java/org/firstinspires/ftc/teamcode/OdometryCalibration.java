@@ -48,43 +48,42 @@ public class OdometryCalibration extends LinearOpMode {
         robot.imu.write8(BNO055IMU.Register.OPR_MODE, BNO055IMU.SensorMode.IMU.bVal & 0x0F);
         sleep(100); //Changing modes again requires a delay
 
+            double angle = robot.imu.getAngularOrientation().firstAngle;
+            double firstAngle = angle;
+            telemetry.addData("angle", angle);
 
-        double angle = robot.imu.getAngularOrientation().firstAngle;
-        double firstAngle = angle;
-        telemetry.addData("angle", angle);
+            telemetry.setMsTransmissionInterval(5);
+            telemetry.addData("Status", "Waiting to be started");
+            telemetry.update();
+            waitForStart();
 
-        telemetry.setMsTransmissionInterval(5);
-        telemetry.addData("Status", "Waiting to be started");
-        telemetry.update();
-        waitForStart();
+            while (angle < 90 && opModeIsActive()) {
+                if (angle < 60) {
+                    drive.circlepadMove(0, 0, robot.PIVOT_SPEED );
+                } else {
+                    drive.circlepadMove(0, 0, robot.PIVOT_SPEED * .85);
+                }
 
-        while (angle < 90 && opModeIsActive()) {
-            if (angle < 60) {
-                drive.circlepadMove(0, 0, robot.PIVOT_SPEED );
-            } else {
-                drive.circlepadMove(0, 0, robot.PIVOT_SPEED * .85);
+                angle = robot.imu.getAngularOrientation().firstAngle;
+
+                telemetry.addData("IMU Angle", angle);
+                telemetry.update();
+            }
+            drive.stop();
+            timer.reset();
+            // Record IMU and encoder values to calculate the constants
+            while (timer.milliseconds() < 1000 && opModeIsActive()) {
+                telemetry.addData("IMU Angle", angle);
+                telemetry.update();
             }
 
-            angle = robot.imu.getAngularOrientation().firstAngle;
+            //Encoder difference (leftEncoder - rightEncoder)
+            double encoderDifference = Math.abs(robot.OLeft.getCurrentPosition()) +
+                    Math.abs(robot.ORight.getCurrentPosition());
+            double verticalEncoderTickOffsetPerDegree = encoderDifference / (robot.imu.getAngularOrientation().firstAngle - firstAngle); //changed from angle to imu.getangle
+            double wheelBaseSeparation = (2 * 90 * verticalEncoderTickOffsetPerDegree) / (Math.PI * encoderCountsPerIn);
 
-            telemetry.addData("IMU Angle", angle);
-            telemetry.update();
-        }
-        drive.stop();
-        timer.reset();
-        // Record IMU and encoder values to calculate the constants
-        while (timer.milliseconds() < 1000 && opModeIsActive()) {
-            telemetry.addData("IMU Angle", angle);
-            telemetry.update();
-        }
-
-        //Encoder difference (leftEncoder - rightEncoder)
-        double encoderDifference = Math.abs(robot.OLeft.getCurrentPosition()) +
-                Math.abs(robot.ORight.getCurrentPosition());
-        double verticalEncoderTickOffsetPerDegree = encoderDifference / (robot.imu.getAngularOrientation().firstAngle - firstAngle); //changed from angle to imu.getangle
-        double wheelBaseSeparation = (2 * 90 * verticalEncoderTickOffsetPerDegree) / (Math.PI * encoderCountsPerIn);
-
-        horizontalTickOffset = ((robot.OMiddle.getCurrentPosition()) / (Math.toRadians(robot.imu.getAngularOrientation().firstAngle - firstAngle)));
+            horizontalTickOffset = ((robot.OMiddle.getCurrentPosition()) / (Math.toRadians(robot.imu.getAngularOrientation().firstAngle - firstAngle)));
 
         // Write constants to the text files
         ReadWriteFile.writeFile(wheelBaseSeparationFile, String.valueOf(wheelBaseSeparation));

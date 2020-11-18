@@ -5,6 +5,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -18,8 +19,9 @@ public class RobotHardware {
     public DcMotor LeftBack;
     public DcMotor RightBack;
 
-    //Intake motor
-    public DcMotor Intake;
+    //Misc motors
+    public DcMotor TopIntake;
+    public DcMotor BottomIntake;
     public DcMotor Shooter;
 
     // Odometers
@@ -27,12 +29,18 @@ public class RobotHardware {
     public DcMotor ORight;
     public DcMotor OMiddle;
 
+    public Servo ShooterServo;
+    public Servo ShooterElevator;
+
     // Gyro (and temp sensor haha)
     BNO055IMU imu;
 
 
     final public double stickThres = 0.05;
     final public double PIVOT_SPEED = -0.5;
+    final public double SHOOTER_SERVO_START = 0.55;
+    final public double SHOOTER_SERVO_MAX = 0.3;
+
 
     // This will be used on robotTeleop. Inits everything
     public void init(HardwareMap hardwareMap, Telemetry telemetry) {
@@ -81,22 +89,33 @@ public class RobotHardware {
             RightBack.setPower(0);
             RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             RightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            RightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            RightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
             telemetry.addData("Status", "Motor: right_back identified");    //
         } catch (IllegalArgumentException err) {
             telemetry.addData("Warning", "Motor: right_back not plugged in");    //
             RightBack = null;
         }
         try {
-            Intake = hardwareMap.get(DcMotor.class, "Intake_Motor");
-            Intake.setDirection(DcMotor.Direction.REVERSE);
-            Intake.setPower(0);
-
-
-            telemetry.addData("Status", "Motor: Intake identified");    //
+            TopIntake = hardwareMap.get(DcMotor.class, "top_intake");
+            TopIntake.setDirection(DcMotor.Direction.FORWARD);
+            TopIntake.setPower(0);
+            TopIntake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            TopIntake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            telemetry.addData("Status", "Motor: Top intake identified");    //
         } catch (IllegalArgumentException err) {
-            telemetry.addData("Warning", "Motor: Intake not plugged in");    //
-            Intake = null;
+            telemetry.addData("Warning", "Motor: Top intake not plugged in");    //
+            TopIntake = null;
+        }
+        try {
+            BottomIntake = hardwareMap.get(DcMotor.class, "bottom_intake");
+            BottomIntake.setDirection(DcMotor.Direction.REVERSE);
+            BottomIntake.setPower(0);
+            BottomIntake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            BottomIntake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            telemetry.addData("Status", "Motor: Bottom intake identified");    //
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Motor: Bottom intake not plugged in");    //
+            BottomIntake = null;
         }
         try {
             Shooter = hardwareMap.get(DcMotor.class, "shooter");
@@ -108,6 +127,20 @@ public class RobotHardware {
         } catch (IllegalArgumentException err) {
             telemetry.addData("Warning", "Motor: shooter not plugged in");    //
             Shooter = null;
+        }
+        try {
+            ShooterServo = hardwareMap.get(Servo.class, "shooter_servo");
+            telemetry.addData("Status", "Servo: Shooter servo identified");    //
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Servo: Shooter servo not plugged in");    //
+            ShooterServo = null;
+        }
+        try {
+            ShooterElevator = hardwareMap.get(Servo.class, "shooter_elevator");
+            telemetry.addData("Status", "Servo: Shooter elevator identified");    //
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Servo: Shooter elevator not plugged in");    //
+            ShooterElevator = null;
         }
         OLeft = RightFront;
         ORight = RightBack;
