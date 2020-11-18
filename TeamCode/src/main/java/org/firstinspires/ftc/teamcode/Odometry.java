@@ -77,8 +77,8 @@ public class Odometry {
         double h = getHypOrDistance(deltaDistances[0], deltaDistances[1], deltaTheta);
 
         // do a classic hyp * cos / sin to get x / y. also account for horizontal change
-        double deltaX = (h * Math.cos(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.cos(oldTheta + (deltaTheta/2) - (Math.PI/2)));
-        double deltaY = (h * Math.sin(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.sin(oldTheta + (deltaTheta/2) - (Math.PI/2)));
+        double deltaX = (h * Math.cos(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.sin(oldTheta + (deltaTheta/2)));
+        double deltaY = (h * Math.sin(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.cos(oldTheta + (deltaTheta/2)));
 
         return new double[]{deltaX + oldX, deltaY + oldY, newTheta, deltaDistances[0], deltaDistances[1], deltaTheta, horizontalChange};
     }
