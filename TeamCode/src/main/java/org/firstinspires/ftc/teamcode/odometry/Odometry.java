@@ -1,9 +1,8 @@
-package org.firstinspires.ftc.teamcode;
-
-import com.qualcomm.robotcore.util.ReadWriteFile;
+package org.firstinspires.ftc.teamcode.odometry;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
+import org.firstinspires.ftc.teamcode.GoBildaDrive;
 
 import java.io.File;
 
@@ -34,7 +33,7 @@ public class Odometry {
 
     // Changes raw odometry info into useful changes in distance
     // Finds the delta and turns it to in, Sort of a 2-in-1
-    private double[] odometryInfoToDeltaIn(double[] odometryInfo) {
+    private double[] odometryInfoToDeltaInches(double[] odometryInfo) {
         double deltaOLeft = -((odometryInfo[0]) - lastIterationOdometryInfo[0]) / calibration.encoderCountsPerIn;
         double deltaORight = (odometryInfo[1] - lastIterationOdometryInfo[1]) / calibration.encoderCountsPerIn;
         double deltaOMiddle = (odometryInfo[2] - lastIterationOdometryInfo[2]) / calibration.encoderCountsPerIn;
@@ -60,7 +59,7 @@ public class Odometry {
 
         // get the changes (deltas) in distances/theta
         // deltaDistances has all 3 odometers (L, R, M)
-        double[] deltaDistances = odometryInfoToDeltaIn(odometryInfo);
+        double[] deltaDistances = odometryInfoToDeltaInches(odometryInfo);
         double deltaTheta = getDeltaTheta(deltaDistances[0], deltaDistances[1]);
 
         // Get the new theta and make it look pretty too (doesn't hurt calculations to make look pretty)
