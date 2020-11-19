@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
-import org.firstinspires.ftc.teamcode.odometry.Odometry;
 
 @TeleOp(name = "OdometryTests")
 public class OdometryTests extends LinearOpMode {
@@ -22,16 +21,16 @@ public class OdometryTests extends LinearOpMode {
     private void testImu() {
         // (goes before waitForStart())
         // obtain the heading (is this 0 degrees? test it please)
-        double angle = robot.imu.getAngularOrientation().firstAngle;
+        double angle = robot.bottom_imu.getAngularOrientation().firstAngle;
         telemetry.addData("ANGLE", angle);
 
         // ONLY WORKS IF angle IS LESS THAN 270 TEST THIS
         if (gamepad1.a) {
-            double initialAngle = robot.imu.getAngularOrientation().firstAngle;
+            double initialAngle = robot.bottom_imu.getAngularOrientation().firstAngle;
 
             while (angle < (initialAngle + 90) && opModeIsActive()) {
                 drive.circlepadMove(1, 0, .5);
-                angle = robot.imu.getAngularOrientation().firstAngle;
+                angle = robot.bottom_imu.getAngularOrientation().firstAngle;
                 telemetry.addData("ANGLE", angle);
                 telemetry.update();
             }
@@ -83,6 +82,7 @@ public class OdometryTests extends LinearOpMode {
         telemetry.addData("X", robotPosition[0]);
         telemetry.addData("Y", robotPosition[1]);
         telemetry.addData("Theta", robotPosition[2]);
+
         telemetry.update();
     }
 

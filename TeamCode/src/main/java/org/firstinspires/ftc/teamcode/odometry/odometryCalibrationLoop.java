@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.odometry;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
@@ -9,9 +10,8 @@ import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
 import java.io.File;
-import java.lang.reflect.Array;
-import java.util.List;
 
+@TeleOp(name = "loop de loop")
 public class odometryCalibrationLoop extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
@@ -20,11 +20,13 @@ public class odometryCalibrationLoop extends LinearOpMode {
     ElapsedTime timer = new ElapsedTime();
 
     double encoderCountsPerIn = 306.3816404153158;
+    double CumLeft = 0;
+    double CumRight = 0;
 
     boolean doneTesting = false;
 
-    Array wheelBaseSeparationValues;
-    Array horizontalOffsetValues;
+    double[] wheelBaseSeparationValues = new double[200];
+    int counter = 0;
 
     File wheelBaseSeparationFile = AppUtil.getInstance().getSettingsFile("wheelBaseSeparation.txt");
     File horizontalTickOffsetFile = AppUtil.getInstance().getSettingsFile("horizontalTickOffset.txt");
@@ -35,17 +37,6 @@ public class odometryCalibrationLoop extends LinearOpMode {
 
         robot.init(hardwareMap, telemetry);
 
-        //// Makes the imu work upside down by assigning bytes to the register
-        byte AXIS_MAP_SIGN_BYTE = 0x1; //This is what to write to the AXIS_MAP_SIGN register to negate the z axis
-        //Need to be in CONFIG mode to write to registers
-        robot.imu.write8(BNO055IMU.Register.OPR_MODE, BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
-        sleep(100); //Changing modes requires a delay before doing anything
-        //Write to the AXIS_MAP_SIGN register
-        robot.imu.write8(BNO055IMU.Register.AXIS_MAP_SIGN, AXIS_MAP_SIGN_BYTE & 0x0F);
-        //Need to change back into the IMU mode to use the gyro
-        robot.imu.write8(BNO055IMU.Register.OPR_MODE, BNO055IMU.SensorMode.IMU.bVal & 0x0F);
-        sleep(100); //Changing modes again requires a delay
-
         // set telemetry
         telemetry.setMsTransmissionInterval(5);
         telemetry.addData("Status", "Waiting to be started");
@@ -53,49 +44,72 @@ public class odometryCalibrationLoop extends LinearOpMode {
 
         waitForStart();
 
-        while (!doneTesting) {
-            // init the imu
-            robot.initImu(hardwareMap, telemetry);
-            sleep(500);
-
+        while (!doneTesting && opModeIsActive()) {
             // initialize some values
-            double angle = robot.imu.getAngularOrientation().firstAngle;
+            double top_angle = robot.top_imu.getAngularOrientation().firstAngle;
+            double bottom_angle = robot.bottom_imu.getAngularOrientation().firstAngle;
+
+            double angle = (top_angle + bottom_angle) / 2;
             double firstAngle = angle;
 
             // do the turn
-            while (angle < 90 && opModeIsActive()) {
+            while (bottom_angle < 90 && opModeIsActive()) {
                 if (angle < 60) {
-                    drive.circlepadMove(0, 0, robot.PIVOT_SPEED );
+                    drive.circlepadMove(0, 0, robot.PIVOT_SPEED);
                 } else {
                     drive.circlepadMove(0, 0, robot.PIVOT_SPEED * .85);
                 }
+                top_angle = robot.top_imu.getAngularOrientation().firstAngle;
+                bottom_angle = robot.bottom_imu.getAngularOrientation().firstAngle;
+                angle = (top_angle + bottom_angle) / 2;
+                telemetry.addData("top_angle", top_angle);
+                telemetry.addData("bottom_angle", bottom_angle );
+                telemetry.addData("angle", angle);
             }
             drive.stop();
 
             // Record IMU and encoder values to calculate the constants
-            angle = robot.imu.getAngularOrientation().firstAngle;
+            double newTopAngle = robot.top_imu.getAngularOrientation().firstAngle;
+            double newBottomAngle = robot.bottom_imu.getAngularOrientation().firstAngle;
+
+            double newAngle = (newTopAngle + newBottomAngle) / 2 ;
+            double finalAngle = newAngle - firstAngle;
             timer.reset();
             while (timer.milliseconds() < 1000 && opModeIsActive()) {
-                telemetry.addData("IMU Angle", angle);
+                telemetry.addData("top_angle", top_angle);
+                telemetry.addData("bottom_angle", bottom_angle );
+                telemetry.addData("IMU Angle", newAngle);
+                telemetry.addData("final angle", finalAngle);
                 telemetry.update();
             }
 
             //TODO Rewrite this
-            double encoderDifference = Math.abs(robot.OLeft.getCurrentPosition()) +
-                    Math.abs(robot.ORight.getCurrentPosition());
-            double verticalEncoderTickOffsetPerDegree = encoderDifference / (robot.imu.getAngularOrientation().firstAngle - firstAngle); //changed from angle to imu.getangle
-            double wheelBaseSeparation = (2 * 90 * verticalEncoderTickOffsetPerDegree) / (Math.PI * encoderCountsPerIn);
-            double horizontalTickOffset = ((robot.OMiddle.getCurrentPosition()) / (Math.toRadians(robot.imu.getAngularOrientation().firstAngle - firstAngle)));
+//            double encoderDifference = Math.abs(robot.OLeft.getCurrentPosition()) +
+//                    Math.abs(robot.ORight.getCurrentPosition());
+//            double verticalEncoderTickOffsetPerDegree = encoderDifference / (robot.imu.getAngularOrientation().firstAngle - firstAngle); //changed from angle to imu.getangle
 
+            double left = robot.ORight.getCurrentPosition() - CumLeft;
+            double right = robot.OLeft.getCurrentPosition() - CumRight;
+            CumLeft = robot.OLeft.getCurrentPosition();
+            CumRight = robot.ORight.getCurrentPosition();
+            double middle = robot.OMiddle.getCurrentPosition();
+            double encoderPerDegree = -(left + right) / (2 * finalAngle);
+            double wheelBaseSeparation = (encoderPerDegree * 360) / (Math.PI * encoderCountsPerIn);
+            double horizontalTickOffset = (middle / finalAngle);
+
+            telemetry.addData("Right", right);
+            telemetry.addData("Left", left);
+            telemetry.addData("Right minus left", right - left);
             telemetry.addData("Wheel base separation", wheelBaseSeparation);
             telemetry.addData("Horizontal tick offset per degree", horizontalTickOffset);
             telemetry.addLine("Press A to accept these values");
             telemetry.addLine("Press X to decline these values");
             telemetry.addLine("Press B and Y together to conclude testing");
             telemetry.update();
-            while (true) {
+            while (opModeIsActive()) {
                 if (gamepad1.a) {
-                    wheelBaseSeparationValues.push()
+                    wheelBaseSeparationValues[counter] = wheelBaseSeparation;
+                    counter += 1;
                     break;
                 }
                 if (gamepad1.x) {

@@ -6,9 +6,6 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.ReadWriteFile;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
@@ -39,18 +36,7 @@ public class OdometryCalibration extends LinearOpMode {
 
         robot.init(hardwareMap, telemetry);
 
-        //// Makes the imu work upside down by assigning bytes to the register
-        byte AXIS_MAP_SIGN_BYTE = 0x1; //This is what to write to the AXIS_MAP_SIGN register to negate the z axis
-        //Need to be in CONFIG mode to write to registers
-        robot.imu.write8(BNO055IMU.Register.OPR_MODE, BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
-        sleep(100); //Changing modes requires a delay before doing anything
-        //Write to the AXIS_MAP_SIGN register
-        robot.imu.write8(BNO055IMU.Register.AXIS_MAP_SIGN, AXIS_MAP_SIGN_BYTE & 0x0F);
-        //Need to change back into the IMU mode to use the gyro
-        robot.imu.write8(BNO055IMU.Register.OPR_MODE, BNO055IMU.SensorMode.IMU.bVal & 0x0F);
-        sleep(100); //Changing modes again requires a delay
-
-            double angle = robot.imu.getAngularOrientation().firstAngle;
+            double angle = robot.bottom_imu.getAngularOrientation().firstAngle;
             double firstAngle = angle;
             telemetry.addData("angle", angle);
 
@@ -66,7 +52,7 @@ public class OdometryCalibration extends LinearOpMode {
                     drive.circlepadMove(0, 0, robot.PIVOT_SPEED * .85);
                 }
 
-                angle = robot.imu.getAngularOrientation().firstAngle;
+                angle = robot.bottom_imu.getAngularOrientation().firstAngle;
 
                 telemetry.addData("IMU Angle", angle);
                 telemetry.update();
@@ -82,10 +68,10 @@ public class OdometryCalibration extends LinearOpMode {
             //Encoder difference (leftEncoder - rightEncoder)
             double encoderDifference = Math.abs(robot.OLeft.getCurrentPosition()) +
                     Math.abs(robot.ORight.getCurrentPosition());
-            double verticalEncoderTickOffsetPerDegree = encoderDifference / (robot.imu.getAngularOrientation().firstAngle - firstAngle); //changed from angle to imu.getangle
+            double verticalEncoderTickOffsetPerDegree = encoderDifference / (robot.bottom_imu.getAngularOrientation().firstAngle - firstAngle); //changed from angle to imu.getangle
             double wheelBaseSeparation = (2 * 90 * verticalEncoderTickOffsetPerDegree) / (Math.PI * encoderCountsPerIn);
 
-            horizontalTickOffset = ((robot.OMiddle.getCurrentPosition()) / (Math.toRadians(robot.imu.getAngularOrientation().firstAngle - firstAngle)));
+            horizontalTickOffset = ((robot.OMiddle.getCurrentPosition()) / (Math.toRadians(robot.bottom_imu.getAngularOrientation().firstAngle - firstAngle)));
 
         // Write constants to the text files
         ReadWriteFile.writeFile(wheelBaseSeparationFile, String.valueOf(wheelBaseSeparation));
@@ -99,7 +85,7 @@ public class OdometryCalibration extends LinearOpMode {
             telemetry.addData("Horizontal Encoder Offset", horizontalTickOffset);
 //            telemetry.addData("offset file locationm", horizontalTickOffsetFile);
 //            telemetry.addData("IMU angle", angle);
-            telemetry.addData("Current angle", robot.imu.getAngularOrientation().firstAngle);
+            telemetry.addData("Current angle", robot.bottom_imu.getAngularOrientation().firstAngle);
             telemetry.addData("Left Position", robot.OLeft.getCurrentPosition());
             telemetry.addData("Right Position", robot.ORight.getCurrentPosition());
             telemetry.addData("Middle Position", robot.OMiddle.getCurrentPosition());
