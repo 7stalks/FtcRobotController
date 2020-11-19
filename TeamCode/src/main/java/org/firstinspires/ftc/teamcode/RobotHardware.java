@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
+import static java.lang.Thread.*;
+
 public class RobotHardware {
 
     private HardwareMap hardwareMap = null;
@@ -33,7 +35,8 @@ public class RobotHardware {
     public Servo ShooterElevator;
 
     // Gyro (and temp sensor haha)
-    public BNO055IMU imu;
+    public BNO055IMU bottom_imu;
+    public BNO055IMU top_imu;
 
 
     final public double stickThres = 0.05;
@@ -146,79 +149,50 @@ public class RobotHardware {
         ORight = RightBack;
         OMiddle = LeftBack;
 
-//        // Odometry initialization
-//        try {
-//            OLeft = hardwareMap.get(DcMotor.class, "left_front");
-//            OLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//            OLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//            OLeft.setDirection(DcMotorSimple.Direction.REVERSE);
-//            telemetry.addData("Good", "o_left identified");    //
-//        } catch (IllegalArgumentException err) {
-//            telemetry.addData("Warning", "Odometry: o_left not plugged in");    //
-//            OLeft = null;
-//        }
-//        try {
-//            ORight = hardwareMap.get(DcMotor.class, "right_back");
-//            ORight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//            ORight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//            ORight.setDirection(DcMotorSimple.Direction.FORWARD);
-//            telemetry.addData("Good", "o_right identified");    //
-//        } catch (IllegalArgumentException err) {
-//            telemetry.addData("Warning", "Odometry: o_right not plugged in");    //
-//            ORight = null;
-//        }
-//        try {
-//            OMiddle = hardwareMap.get(DcMotor.class, "left_back");
-//            OMiddle.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//            OMiddle.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//            OMiddle.setDirection(DcMotorSimple.Direction.REVERSE);
-//            telemetry.addData("Good", "o_middle identified");    //
-//        } catch (IllegalArgumentException err) {
-//            telemetry.addData("Warning", "Odometry: o_middle not plugged in");    //
-//            OMiddle = null;
-//        }
-
         // Init the IMU/Gyro
         try {
-            imu = hardwareMap.get(BNO055IMU.class, "imu");
+            bottom_imu = hardwareMap.get(BNO055IMU.class, "imu");
+
+            //// Makes the imu work upside down by assigning bytes to the register
+            byte AXIS_MAP_SIGN_BYTE = 0x1; //This is what to write to the AXIS_MAP_SIGN register to negate the z axis
+            //Need to be in CONFIG mode to write to registers
+            bottom_imu.write8(BNO055IMU.Register.OPR_MODE, BNO055IMU.SensorMode.CONFIG.bVal & 0x0F);
+            sleep(100); //Changing modes requires a delay before doing anything
+            //Write to the AXIS_MAP_SIGN register
+            bottom_imu.write8(BNO055IMU.Register.AXIS_MAP_SIGN, AXIS_MAP_SIGN_BYTE & 0x0F);
+            //Need to change back into the IMU mode to use the gyro
+            bottom_imu.write8(BNO055IMU.Register.OPR_MODE, BNO055IMU.SensorMode.IMU.bVal & 0x0F);
+            sleep(100); //Changing modes again requires a delay
 
             BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
             parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
             parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
             parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
             parameters.loggingEnabled = true;
-            parameters.loggingTag = "IMU";
+            parameters.loggingTag = "IMU_TOP";
             parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-
-            imu.initialize(parameters);
-
-
-            telemetry.addData("Good", "Imu initialized");
-        } catch (IllegalArgumentException err) {
-            telemetry.addData("Warning", "Imu not initialized");
+            bottom_imu.initialize(parameters);
+            telemetry.addData("Good", "Bottom Imu initialized");
+        } catch (IllegalArgumentException | InterruptedException err) {
+            telemetry.addData("Warning", "Bottom Imu not initialized");
         }
-    }
 
-    public void initImu(HardwareMap hardwareMap, Telemetry telemetry) {
         try {
-            imu = hardwareMap.get(BNO055IMU.class, "imu");
+            top_imu = hardwareMap.get(BNO055IMU.class, "imu 1");
 
             BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
             parameters.angleUnit = BNO055IMU.AngleUnit.DEGREES;
             parameters.accelUnit = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
             parameters.calibrationDataFile = "BNO055IMUCalibration.json"; // see the calibration sample opmode
             parameters.loggingEnabled = true;
-            parameters.loggingTag = "IMU";
+            parameters.loggingTag = "IMU_TOP";
             parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
-
-            imu.initialize(parameters);
-
-            telemetry.addData("Good", "Imu initialized");
+            top_imu.initialize(parameters);
+            telemetry.addData("Good", "Top Imu initialized");
         } catch (IllegalArgumentException err) {
-            telemetry.addData("Warning", "Imu not initialized");
+            telemetry.addData("Warning", "Top Imu not initialized");
         }
     }
-
 
     // Inits just the mecanum drive (nothing else)
     public void initMecanum(HardwareMap hardwareMap, Telemetry telemetry) {
