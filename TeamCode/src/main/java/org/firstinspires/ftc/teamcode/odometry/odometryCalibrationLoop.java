@@ -23,8 +23,8 @@ public class odometryCalibrationLoop extends LinearOpMode {
 
     boolean doneTesting = false;
 
-    double[] wheelBaseSeparationValues = {};
-    double[] horizontalOffsetValues = {};
+    Array wheelBaseSeparationValues;
+    Array horizontalOffsetValues;
 
     File wheelBaseSeparationFile = AppUtil.getInstance().getSettingsFile("wheelBaseSeparation.txt");
     File horizontalTickOffsetFile = AppUtil.getInstance().getSettingsFile("horizontalTickOffset.txt");
@@ -80,7 +80,7 @@ public class odometryCalibrationLoop extends LinearOpMode {
                 telemetry.update();
             }
 
-            //Do the maths!
+            //TODO Rewrite this
             double encoderDifference = Math.abs(robot.OLeft.getCurrentPosition()) +
                     Math.abs(robot.ORight.getCurrentPosition());
             double verticalEncoderTickOffsetPerDegree = encoderDifference / (robot.imu.getAngularOrientation().firstAngle - firstAngle); //changed from angle to imu.getangle
@@ -95,7 +95,7 @@ public class odometryCalibrationLoop extends LinearOpMode {
             telemetry.update();
             while (true) {
                 if (gamepad1.a) {
-                    // TODO CODE TO ADD STUFF GOES HERE
+                    wheelBaseSeparationValues.push()
                     break;
                 }
                 if (gamepad1.x) {
