@@ -35,7 +35,7 @@ public class RyanTest extends LinearOpMode {
         double driveSpeed = .6;
 
         // while outside of the bounds (less than bottom and greater than the top bounds), get there
-        while (robotPosition[2] < newTheta - .01 || robotPosition[2] > newTheta + .01) {
+        while (robotPosition[2] < newTheta - .01 || robotPosition[2] > newTheta + .01 && opModeIsActive()) {
             if (robotPosition[2] < newTheta - .01) {
                 drive.circlepadMove(0, 0, driveSpeed);
             } else if (robotPosition[2] > newTheta + .01) {
@@ -43,11 +43,21 @@ public class RyanTest extends LinearOpMode {
             }
             // once there's a radian to go, start proportionally reducing drivespeed to .3
             if (Math.abs(robotPosition[2] - newTheta) < 1) {
-                driveSpeed = .3 + (.3 * Math.abs(robotPosition[2] - newTheta));
+                driveSpeed = .2 + (.2 * Math.abs(robotPosition[2] - newTheta));
             }
             queryOdometry();
         }
         drive.stop();
+    }
+
+    void getOffset() {
+        rotateToPoint(2*Math.PI);
+        while (!gamepad1.b && opModeIsActive()) {
+            telemetry.addLine("Press B to return");
+            telemetry.addData("horizontal ticks", robot.OMiddle.getCurrentPosition());
+            telemetry.addData("ticks per inch", 306.3816404153158);
+            queryOdometry();
+        }
     }
 
     @Override
@@ -64,6 +74,7 @@ public class RyanTest extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
+            telemetry.addLine("Press A for theta test and X for hor offset test");
             if (gamepad1.a) {
                 rotateToPoint(2*Math.PI);
                 while (opModeIsActive()) {
@@ -89,6 +100,9 @@ public class RyanTest extends LinearOpMode {
                 for (int i = 0; i<=2; i++) {
                     robotPosition[i] = 0;
                 }
+            }
+            if (gamepad1.x) {
+                getOffset();
             }
             queryOdometry();
         }
