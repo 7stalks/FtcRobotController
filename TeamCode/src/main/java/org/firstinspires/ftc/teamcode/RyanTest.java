@@ -35,10 +35,10 @@ public class RyanTest extends LinearOpMode {
         double driveSpeed = .6;
 
         // while outside of the bounds (less than bottom and greater than the top bounds), get there
-        while (robotPosition[2] < initialTheta + dTheta - .01 || robotPosition[2] > initialTheta + dTheta + .01) {
-            if (robotPosition[2] < initialTheta + dTheta - .01) {
+        while (robotPosition[2] < newTheta - .01 || robotPosition[2] > newTheta + .01) {
+            if (robotPosition[2] < newTheta - .01) {
                 drive.circlepadMove(0, 0, driveSpeed);
-            } else if (robotPosition[2] > initialTheta + dTheta + .01) {
+            } else if (robotPosition[2] > newTheta + .01) {
                 drive.circlepadMove(0, 0, -driveSpeed);
             }
             // once there's a radian to go, start proportionally reducing drivespeed to .3
@@ -47,6 +47,7 @@ public class RyanTest extends LinearOpMode {
             }
             queryOdometry();
         }
+        drive.stop();
     }
 
     @Override
@@ -65,11 +66,11 @@ public class RyanTest extends LinearOpMode {
         while (opModeIsActive()) {
             if (gamepad1.a) {
                 rotateToPoint(2*Math.PI);
-                while (true) {
+                while (opModeIsActive()) {
                     telemetry.addLine("Change the wheel base separation");
                     telemetry.addLine("Use the left stick's y to change it");
                     telemetry.addLine("Press B to quit");
-                    if (gamepad1.left_stick_y < .3) {
+                    if (gamepad1.left_stick_y < -.3) {
                         odometry.robotEncoderWheelDistance += .01;
                         sleep(200);
                     } else if (gamepad1.left_stick_y > .3) {

@@ -136,7 +136,7 @@ public class OdometryTests extends LinearOpMode {
 
     private void odometryRoutineX() {
         queryOdometry();
-        goToStrafePoint(-12);
+        goToStrafePoint(12);
         goToPoint(48);
         drive.stop();
         boolean middle = false;
@@ -161,13 +161,13 @@ public class OdometryTests extends LinearOpMode {
         }
         if (middle) {
             wobbleX = 96;
-            wobbleY = 12;
+            wobbleY = -12;
         } else if (top) {
             wobbleX = 120;
-            wobbleY = 36;
+            wobbleY = -36;
         } else {
             wobbleX = 72;
-            wobbleY = 36;
+            wobbleY = -36;
         }
 
         goToPoint(wobbleX);
@@ -211,10 +211,10 @@ public class OdometryTests extends LinearOpMode {
         while (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1) && opModeIsActive()) {
             thetaSpeed = -robotPosition[2];
             if (robotPosition[1] < (y-.2)) {
-                drive.circlepadMove(0, -moveSpeed, thetaSpeed);
+                drive.circlepadMove(0, moveSpeed, thetaSpeed);
                 queryOdometry();
             } else if (robotPosition[1] > (y+.2)) {
-                drive.circlepadMove(0, moveSpeed, thetaSpeed);
+                drive.circlepadMove(0, -moveSpeed, thetaSpeed);
                 queryOdometry();
             } else if (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1)) {
                 drive.stop();
