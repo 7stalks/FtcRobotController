@@ -92,7 +92,7 @@ public class RobotHardware {
             RightBack.setPower(0);
             RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             RightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            RightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            RightBack.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             telemetry.addData("Status", "Motor: right_back identified");    //
         } catch (IllegalArgumentException err) {
             telemetry.addData("Warning", "Motor: right_back not plugged in");    //

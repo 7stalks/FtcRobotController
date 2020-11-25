@@ -175,7 +175,7 @@ public class OdometryTests extends LinearOpMode {
         drive.stop();
 
         timer.reset();
-        while ((timer.seconds() < 10) && opModeIsActive()) {
+        while ((timer.seconds() < 3) && opModeIsActive()) {
             telemetry.addData("X", robotPosition[0]);
             telemetry.addData("Y", robotPosition[1]);
             telemetry.addData("Theta", robotPosition[2]);
@@ -199,8 +199,8 @@ public class OdometryTests extends LinearOpMode {
                 drive.stop();
                 break;
             }
-            if (Math.abs(-robotPosition[0] - x) < 10) {
-                moveSpeed = .2 + (((.7-.2)/(10)) * (Math.abs(-robotPosition[0] - x)));
+            if (Math.abs(-robotPosition[0] - x) < 15) {
+                moveSpeed = .15 + (((.7-.15)/(15)) * (Math.abs(-robotPosition[0] - x)));
             }
         }
     }

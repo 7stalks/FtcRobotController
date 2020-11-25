@@ -92,10 +92,7 @@ public class RyanTest extends LinearOpMode {
                         break;
                     }
                     telemetry.addData("wheel separation", odometry.robotEncoderWheelDistance);
-                    telemetry.addData("Theta", robotPosition[2]);
-                    telemetry.addData("X", robotPosition[0]);
-                    telemetry.addData("Y", robotPosition[1]);
-                    telemetry.update();
+                    queryOdometry();
                 }
                 for (int i = 0; i<=2; i++) {
                     robotPosition[i] = 0;

@@ -27,7 +27,7 @@ public class MotorTestTeleop extends LinearOpMode {
             telemetry.addData("leftstick y", gamepad1.left_stick_y);
             telemetry.addData("rightstick x", gamepad1.right_stick_x);
             telemetry.update();
-//            gobilda.motorTest(gamepad1.y, gamepad1.b, gamepad1.a, gamepad1.x);
+            gobilda.motorTest(gamepad1.y, gamepad1.b, gamepad1.a, gamepad1.x);
         }
     }
 }

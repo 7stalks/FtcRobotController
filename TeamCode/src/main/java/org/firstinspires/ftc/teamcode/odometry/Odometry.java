@@ -15,9 +15,9 @@ public class Odometry {
     private File wheelBaseSeparationFile = AppUtil.getInstance().getSettingsFile("wheelBaseSeparation.txt");
     private File horizontalTickOffsetFile = AppUtil.getInstance().getSettingsFile("horizontalTickOffset.txt");
 
-    public double robotEncoderWheelDistance = 15.35; //Double.parseDouble(ReadWriteFile.readFile(wheelBaseSeparationFile).trim());// * calibration.encoderCountsPerIn;
-    final public double horizontalEncoderTickPerDegreeOffset = 1662.60314922; //Double.parseDouble(ReadWriteFile.readFile(horizontalTickOffsetFile).trim());
-    //15.625; //15.75; //15.66551181; //
+    public double robotEncoderWheelDistance = 15.617; //Double.parseDouble(ReadWriteFile.readFile(wheelBaseSeparationFile).trim());// * calibration.encoderCountsPerIn;
+    final public double horizontalEncoderTickPerDegreeOffset = 1680; //Double.parseDouble(ReadWriteFile.readFile(horizontalTickOffsetFile).trim());
+    //15.625; //15.75; //15.66551181; //15.35
     //3313.00833716; //1662.60314922; //
 
     // Gets the h used in the odometry calculation
