@@ -136,13 +136,15 @@ public class OdometryTests extends LinearOpMode {
 
     private void odometryRoutineX() {
         queryOdometry();
-        goToStrafePoint(12);
-        goToPoint(48);
+        goToStrafePoint(-12);
+        goToPoint(-48);
         drive.stop();
         boolean middle = false;
         boolean top = false;
         double wobbleX;
         double wobbleY;
+
+        shoot();
 
         timer.reset();
         while ((timer.seconds() < 4) && opModeIsActive()) {
@@ -160,14 +162,14 @@ public class OdometryTests extends LinearOpMode {
             }
         }
         if (middle) {
-            wobbleX = 96;
-            wobbleY = -12;
+            wobbleX = -96;
+            wobbleY = 12;
         } else if (top) {
-            wobbleX = 120;
-            wobbleY = -36;
+            wobbleX = -120;
+            wobbleY = 36;
         } else {
-            wobbleX = 72;
-            wobbleY = -36;
+            wobbleX = -72;
+            wobbleY = 36;
         }
 
         goToPoint(wobbleX);
@@ -182,6 +184,32 @@ public class OdometryTests extends LinearOpMode {
             telemetry.addData("Status", "wobble goal");
             telemetry.update();
         }
+    }
+
+    void shoot() {
+        robot.Shooter.setPower(1);
+        sleep(750);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(1000);
+        robot.Shooter.setPower(0);
     }
 
     void goToPoint(double x) {
