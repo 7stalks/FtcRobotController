@@ -30,14 +30,18 @@ public class RobotHardware {
     public DcMotor TopIntake;
     public DcMotor BottomIntake;
     public DcMotor Shooter;
+    public DcMotor WobbleMotor;
 
     // Odometers
     public DcMotor OLeft;
     public DcMotor ORight;
     public DcMotor OMiddle;
 
+    // Servos
     public Servo ShooterServo;
     public Servo ShooterElevator;
+    public Servo WobbleServo;
+    public Servo WobbleCatcher;
 
     // Gyro (and temp sensor haha)
     public BNO055IMU bottom_imu;
@@ -175,6 +179,31 @@ public class RobotHardware {
             telemetry.addData("Warning", "Servo: Shooter elevator not plugged in");    //
             ShooterElevator = null;
         }
+        try {
+            WobbleMotor = hardwareMap.get(DcMotor.class, "wobble_motor");
+            WobbleMotor.setDirection(DcMotor.Direction.FORWARD);
+            WobbleMotor.setPower(0);
+            WobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            WobbleMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            telemetry.addData("Status", "Motor: wobble motor identified");    //
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Motor: wobble motor not plugged in");    //
+            WobbleMotor = null;
+        }
+        try {
+            WobbleServo = hardwareMap.get(Servo.class, "wobble_servo");
+            telemetry.addData("Status", "Servo: wobble servo identified");    //
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Servo: wobble serbo not plugged in");    //
+            WobbleServo = null;
+        }
+        try {
+            WobbleCatcher = hardwareMap.get(Servo.class, "wobble_catcher");
+            telemetry.addData("Status", "Servo: wobble catcher identified");    //
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Servo: wobble catcher not plugged in");    //
+            WobbleCatcher = null;
+        }
         OLeft = RightFront;
         ORight = RightBack;
         OMiddle = LeftBack;
@@ -223,8 +252,8 @@ public class RobotHardware {
             telemetry.addData("Warning", "Top Imu not initialized");
         }
 
-        initVuforia(hardwareMap, telemetry);
-        initTFOD(telemetry);
+//        initVuforia(hardwareMap, telemetry);
+//        initTFOD(telemetry);
     }
 
     // Inits just the mecanum drive (nothing else)

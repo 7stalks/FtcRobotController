@@ -289,6 +289,9 @@ public class OdometryTests extends LinearOpMode {
                 odometryRoutineX();
             }
             drive.circlepadMove(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+            telemetry.addData("Left Odometer", robot.OLeft.getCurrentPosition());
+            telemetry.addData("Right Odometer", robot.ORight.getCurrentPosition());
+            telemetry.addData("Middle Odometer", robot.OMiddle.getCurrentPosition());
             queryOdometry();
         }
     }

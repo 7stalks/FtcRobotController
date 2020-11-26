@@ -10,6 +10,9 @@ public class IntakeMotor extends LinearOpMode {
     RobotHardware robot = new RobotHardware();
     GoBildaDrive gobilda = new GoBildaDrive(robot);
 
+    boolean wobbleDown = true;
+    boolean wobbleCaught = false;
+
     public void runOpMode() {
         robot.init(hardwareMap, telemetry);
 
@@ -19,7 +22,7 @@ public class IntakeMotor extends LinearOpMode {
 
             gobilda.circlepadMove(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-            if (gamepad1.y) {
+            if (gamepad2.a) {
                 robot.TopIntake.setPower(.85);
                 robot.BottomIntake.setPower(1);
             } else  {
@@ -27,16 +30,49 @@ public class IntakeMotor extends LinearOpMode {
                 robot.BottomIntake.setPower(0);
             }
 
-            if (gamepad1.left_bumper) {
+            if (gamepad2.left_bumper) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
             } else if (robot.ShooterServo.getPosition() >= robot.SHOOTER_SERVO_MAX) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
             }
 
-            if (gamepad1.a) {
+            if (gamepad2.right_trigger > .1) {
                 robot.Shooter.setPower(1);
             } else {
                 robot.Shooter.setPower(0);
+            }
+
+            if (gamepad2.dpad_up) {
+                robot.WobbleMotor.setPower(.8);
+            } else {
+                robot.WobbleMotor.setPower(0);
+            }
+
+            if (gamepad2.dpad_down) {
+                robot.WobbleMotor.setPower(-.8);
+            } else {
+                robot.WobbleMotor.setPower(0);
+            }
+
+            if (gamepad2.dpad_left) {
+                if (wobbleDown) {
+                    robot.WobbleServo.setPosition(1);
+                    wobbleDown = false;
+                } else {
+                    robot.WobbleServo.setPosition(0);
+                    wobbleDown = true;
+                }
+            }
+
+            if (gamepad2.dpad_right) {
+                if (!wobbleCaught) {
+                    robot.WobbleCatcher.setPosition(1);
+                    wobbleCaught = true;
+                    sleep(20);
+                } else {
+                    robot.WobbleCatcher.setPosition(0);
+                    wobbleCaught = false;
+                }
             }
         }
     }

@@ -101,6 +101,9 @@ public class RyanTest extends LinearOpMode {
             if (gamepad1.x) {
                 getOffset();
             }
+            telemetry.addData("Left Odometer", robot.OLeft.getCurrentPosition());
+            telemetry.addData("Right Odometer", robot.ORight.getCurrentPosition());
+            telemetry.addData("Middle Odometer", robot.OMiddle.getCurrentPosition());
             queryOdometry();
         }
     }

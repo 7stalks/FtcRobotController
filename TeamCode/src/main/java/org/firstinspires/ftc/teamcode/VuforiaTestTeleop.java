@@ -15,6 +15,28 @@ public class VuforiaTestTeleop extends LinearOpMode {
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
 
+    public void checkForRings() {
+        List<Recognition> updatedRecognitions = robot.tensorFlowEngine.getUpdatedRecognitions();
+        while (true) {
+            telemetry.addData("# Object Detected", updatedRecognitions.size());
+            // step through the list of recognitions and display boundary info.
+            int i = 0;
+            for (Recognition recognition : updatedRecognitions) {
+                telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+                telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
+                        recognition.getLeft(), recognition.getTop());
+                telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
+                        recognition.getRight(), recognition.getBottom());
+                if (recognition.getLabel().equals("Quad") || recognition.getLabel().equals("Single")) {
+                    telemetry.addLine(String.format("I found a %s", recognition.getLabel()));
+
+                }
+            }
+            telemetry.update();
+
+        }
+    }
+
     @Override
     public void runOpMode() throws InterruptedException {
 
