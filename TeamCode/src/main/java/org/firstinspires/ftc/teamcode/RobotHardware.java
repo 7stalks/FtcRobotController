@@ -7,7 +7,12 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.robotcore.internal.vuforia.VuforiaException;
 
 import static java.lang.Thread.*;
 
@@ -38,11 +43,36 @@ public class RobotHardware {
     public BNO055IMU bottom_imu;
     public BNO055IMU top_imu;
 
+    public WebcamName webcam;
 
     final public double stickThres = 0.05;
     final public double PIVOT_SPEED = -0.5;
     final public double SHOOTER_SERVO_START = 0.9;
     final public double SHOOTER_SERVO_MAX = 0.3;
+
+    private static final float mmPerInch        = 25.4f;
+    private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
+
+    // Constants for perimeter targets
+    public static final float halfField = 72 * mmPerInch;
+    public static final float quadField  = 36 * mmPerInch;
+
+    private static final String VUFORIA_KEY = "AXl4o5z/////AAABmQyBF0iAaUTcguyLoBFeK1A7RHUVrQdTS" +
+            "sPDqn4DelLm7BtbLuahVuZvBzuq5tPGrvi7D25P3xRzVgT1d+cADoNAMxuRVZs24o87S6gH0mM+Q/OrrQr5" +
+            "7pTiumNffyuzBI728d+XgQJImM0rBxGcpwej8Ok0ZSCNIzzxVNf06dRwLEwu6jf0mCiA9yyffMFzreeL8UR" +
+            "wm/xxuDsYxY7NrVtjlmslMTiu3nAUboaDP8jkhKvl8623x57MhYt4hof+iegRYjJzt+Knb5m5SfY5urWFGF" +
+            "sLjZ4dqAhzXNiJmmKbKojUfjgvUld91gWm0UOXHkoezBuBVnLFasNmChD2uxpGGGeNdW1MvGitjFEvckKJ";
+
+    public VuforiaLocalizer vuforia;
+
+    public TFObjectDetector tensorFlowEngine;
+
+    private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
+    private static final String LABEL_FIRST_ELEMENT = "Quad";
+    private static final String LABEL_SECOND_ELEMENT = "Single";
+
+
+
 
 
     // This will be used on robotTeleop. Inits everything
@@ -192,6 +222,9 @@ public class RobotHardware {
         } catch (IllegalArgumentException err) {
             telemetry.addData("Warning", "Top Imu not initialized");
         }
+
+        initVuforia(hardwareMap, telemetry);
+        initTFOD(telemetry);
     }
 
     // Inits just the mecanum drive (nothing else)
@@ -236,6 +269,43 @@ public class RobotHardware {
         } catch (IllegalArgumentException err) {
             telemetry.addData("Warning", "Motor: right_back not plugged in");    //
             RightBack = null;
+        }
+    }
+
+    public void initVuforia(HardwareMap hardwareMap, Telemetry telemetry) {
+        try {
+            webcam = hardwareMap.get(WebcamName.class, "webcam");
+
+            int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+            VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+            parameters.vuforiaLicenseKey = VUFORIA_KEY;
+            vuforia = ClassFactory.getInstance().createVuforia(parameters);
+
+            telemetry.addData("Status", "Vuforia Initialized");
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Servo: Vuforia not enabled");    //
+            telemetry.addData("err", err);
+            vuforia = null;
+        } catch (
+        VuforiaException err) {
+            telemetry.addData("Warning", "Servo: Vuforia Exception - not enabled");    //
+            vuforia = null;
+        }
+    }
+
+    private void initTFOD(Telemetry telemetry) {
+        /* Initialize Tensor Flow Object Detection */
+        if (vuforia != null) {
+            int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
+                    "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+            TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
+            tfodParameters.minResultConfidence = 0.7f;
+            tensorFlowEngine = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
+            tensorFlowEngine.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
+
+            telemetry.addData("Status", "Tensor Flow Object Detection Initialized");
+        } else {
+            telemetry.addData("Status", "Tensor Flow Object Detection not Initialized");
         }
     }
 }
