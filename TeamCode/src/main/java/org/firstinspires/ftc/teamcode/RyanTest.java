@@ -16,6 +16,7 @@ public class RyanTest extends LinearOpMode {
 
     double[] odometryInfo;
     double[] robotPosition = {0, 0, 0};
+    double oldMiddleTicks = 0;
 
     void queryOdometry() {
         odometryInfo = new double[]{robot.OLeft.getCurrentPosition(), robot.ORight.getCurrentPosition(),
@@ -50,13 +51,48 @@ public class RyanTest extends LinearOpMode {
         drive.stop();
     }
 
-    void getOffset() {
+    void getSeparation() {
+        rotateToPoint(2*Math.PI);
+        while (opModeIsActive()) {
+            telemetry.addLine("Change the wheel base separation");
+            telemetry.addLine("Use the left stick's y to change it");
+            telemetry.addLine("Press B to quit");
+            if (gamepad1.left_stick_y < -.3) {
+                odometry.robotEncoderWheelDistance += .01;
+                sleep(200);
+            } else if (gamepad1.left_stick_y > .3) {
+                odometry.robotEncoderWheelDistance -= .01;
+                sleep(200);
+            }
+            if (gamepad1.b) {
+                break;
+            }
+            telemetry.addData("wheel separation", odometry.robotEncoderWheelDistance);
+            queryOdometry();
+        }
+        for (int i = 0; i<=2; i++) {
+            robotPosition[i] = 0;
+        }
+    }
+
+    void getOffset(double horizontalTicks) {
         rotateToPoint(2*Math.PI);
         while (!gamepad1.b && opModeIsActive()) {
             telemetry.addLine("Press B to return");
-            telemetry.addData("horizontal ticks", robot.OMiddle.getCurrentPosition());
             telemetry.addData("ticks per inch", 306.3816404153158);
+            telemetry.addData("horizontal ticks", horizontalTicks);
+            telemetry.addData("horizontal ticks per degree", odometry.encoderCountsPerIn);
+            if (gamepad1.left_stick_y < -.3) {
+                odometry.encoderCountsPerIn += 5;
+                sleep(100);
+            } else if (gamepad1.left_stick_y > .3) {
+                odometry.encoderCountsPerIn -= 5;
+                sleep(100);
+            }
             queryOdometry();
+        }
+        for (int i = 0; i<=2; i++) {
+            robotPosition[i] = 0;
         }
     }
 
@@ -76,30 +112,11 @@ public class RyanTest extends LinearOpMode {
         while (opModeIsActive()) {
             telemetry.addLine("Press A for theta test and X for hor offset test");
             if (gamepad1.a) {
-                rotateToPoint(2*Math.PI);
-                while (opModeIsActive()) {
-                    telemetry.addLine("Change the wheel base separation");
-                    telemetry.addLine("Use the left stick's y to change it");
-                    telemetry.addLine("Press B to quit");
-                    if (gamepad1.left_stick_y < -.3) {
-                        odometry.robotEncoderWheelDistance += .01;
-                        sleep(200);
-                    } else if (gamepad1.left_stick_y > .3) {
-                        odometry.robotEncoderWheelDistance -= .01;
-                        sleep(200);
-                    }
-                    if (gamepad1.b) {
-                        break;
-                    }
-                    telemetry.addData("wheel separation", odometry.robotEncoderWheelDistance);
-                    queryOdometry();
-                }
-                for (int i = 0; i<=2; i++) {
-                    robotPosition[i] = 0;
-                }
+                getSeparation();
             }
             if (gamepad1.x) {
-                getOffset();
+                getOffset(robot.OMiddle.getCurrentPosition() - oldMiddleTicks);
+                oldMiddleTicks = robot.OMiddle.getCurrentPosition();
             }
             telemetry.addData("Left Odometer", robot.OLeft.getCurrentPosition());
             telemetry.addData("Right Odometer", robot.ORight.getCurrentPosition());
