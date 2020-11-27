@@ -16,8 +16,8 @@ public class Odometry {
     // The two "big" constants. The wheel distance is the distance between L and R encoders and
     // determines theta. The tick per degree offset is for the middle encoder
     // TODO add "final" to each of these when done testing
-    public double robotEncoderWheelDistance = 15.617;
-    public double horizontalEncoderTickPerDegreeOffset = 1680;
+    public double robotEncoderWheelDistance = 15.6176;
+    public double horizontalEncoderTickPerDegreeOffset = -2000;
 
     // TODO add a queryOdometry() method that uses the constructor below
 //    RobotHardware robot;
@@ -87,8 +87,8 @@ public class Odometry {
         double h = getHypOrDistance(deltaDistances[0], deltaDistances[1], deltaTheta);
 
         // do a classic hyp * cos / sin to get x / y. also account for horizontal change
-        double deltaX = (h * Math.cos(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.sin(oldTheta + (deltaTheta/2)));
-        double deltaY = (h * Math.sin(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.cos(oldTheta + (deltaTheta/2)));
+        double deltaX = (h * Math.cos(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.cos(oldTheta + (deltaTheta/2) - Math.PI/2));
+        double deltaY = (h * Math.sin(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.sin(oldTheta + (deltaTheta/2) - Math.PI/2));
 
         return new double[]{deltaX + oldX, deltaY + oldY, newTheta, deltaDistances[0], deltaDistances[1], deltaTheta, horizontalChange};
     }

@@ -75,18 +75,18 @@ public class RyanTest extends LinearOpMode {
         }
     }
 
-    void getOffset(double horizontalTicks) {
-        rotateToPoint(2*Math.PI);
+    void getOffset(double oldTicks) {
+        rotateToPoint(.5*Math.PI);
         while (!gamepad1.b && opModeIsActive()) {
             telemetry.addLine("Press B to return");
             telemetry.addData("ticks per inch", 306.3816404153158);
-            telemetry.addData("horizontal ticks", horizontalTicks);
-            telemetry.addData("horizontal ticks per degree", odometry.encoderCountsPerIn);
+            telemetry.addData("horizontal ticks", robot.OMiddle.getCurrentPosition() - oldTicks);
+            telemetry.addData("horizontal ticks per degree", odometry.horizontalEncoderTickPerDegreeOffset);
             if (gamepad1.left_stick_y < -.3) {
-                odometry.encoderCountsPerIn += 5;
+                odometry.horizontalEncoderTickPerDegreeOffset += 5;
                 sleep(100);
             } else if (gamepad1.left_stick_y > .3) {
-                odometry.encoderCountsPerIn -= 5;
+                odometry.horizontalEncoderTickPerDegreeOffset -= 5;
                 sleep(100);
             }
             queryOdometry();
@@ -115,7 +115,7 @@ public class RyanTest extends LinearOpMode {
                 getSeparation();
             }
             if (gamepad1.x) {
-                getOffset(robot.OMiddle.getCurrentPosition() - oldMiddleTicks);
+                getOffset(oldMiddleTicks);
                 oldMiddleTicks = robot.OMiddle.getCurrentPosition();
             }
             telemetry.addData("Left Odometer", robot.OLeft.getCurrentPosition());

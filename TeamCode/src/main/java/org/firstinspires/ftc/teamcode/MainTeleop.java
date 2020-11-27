@@ -35,50 +35,50 @@ public class MainTeleop extends LinearOpMode {
                     robot.BottomIntake.setPower(0);
                     intakeOnOrOff = false;
                 }
+            }
 
-                if (gamepad2.left_bumper) {
-                    robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-                } else if (robot.ShooterServo.getPosition() >= robot.SHOOTER_SERVO_MAX) {
-                    robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                }
+            if (gamepad2.left_bumper) {
+                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+            } else if (robot.ShooterServo.getPosition() >= robot.SHOOTER_SERVO_MAX) {
+                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+            }
 
-                if (gamepad2.right_trigger > .1) {
-                    robot.Shooter.setPower(1);
+            if (gamepad2.right_trigger > .1) {
+                robot.Shooter.setPower(1);
+            } else {
+                robot.Shooter.setPower(0);
+            }
+
+            if (gamepad2.dpad_up) {
+                robot.WobbleMotor.setPower(.8);
+            } else {
+                robot.WobbleMotor.setPower(0);
+            }
+
+            if (gamepad2.dpad_down) {
+                robot.WobbleMotor.setPower(-.8);
+            } else {
+                robot.WobbleMotor.setPower(0);
+            }
+
+            if (gamepad2.dpad_left) {
+                if (wobbleDown) {
+                    robot.WobbleServo.setPosition(1);
+                    wobbleDown = false;
                 } else {
-                    robot.Shooter.setPower(0);
+                    robot.WobbleServo.setPosition(0);
+                    wobbleDown = true;
                 }
+            }
 
-                if (gamepad2.dpad_up) {
-                    robot.WobbleMotor.setPower(.8);
+            if (gamepad2.dpad_right) {
+                if (!wobbleCaught) {
+                    robot.WobbleCatcher.setPosition(1);
+                    wobbleCaught = true;
+                    sleep(20);
                 } else {
-                    robot.WobbleMotor.setPower(0);
-                }
-
-                if (gamepad2.dpad_down) {
-                    robot.WobbleMotor.setPower(-.8);
-                } else {
-                    robot.WobbleMotor.setPower(0);
-                }
-
-                if (gamepad2.dpad_left) {
-                    if (wobbleDown) {
-                        robot.WobbleServo.setPosition(1);
-                        wobbleDown = false;
-                    } else {
-                        robot.WobbleServo.setPosition(0);
-                        wobbleDown = true;
-                    }
-                }
-
-                if (gamepad2.dpad_right) {
-                    if (!wobbleCaught) {
-                        robot.WobbleCatcher.setPosition(1);
-                        wobbleCaught = true;
-                        sleep(20);
-                    } else {
-                        robot.WobbleCatcher.setPosition(0);
-                        wobbleCaught = false;
-                    }
+                    robot.WobbleCatcher.setPosition(0);
+                    wobbleCaught = false;
                 }
             }
         }

@@ -136,8 +136,8 @@ public class OdometryTests extends LinearOpMode {
 
     private void odometryRoutineX() {
         queryOdometry();
-        goToStrafePoint(-12);
-        goToPoint(-48);
+        goToStrafePoint(12);
+        goToPoint(48);
         drive.stop();
         boolean middle = false;
         boolean top = false;
@@ -218,12 +218,12 @@ public class OdometryTests extends LinearOpMode {
         while ((-robotPosition[0] < (x-.1) || -robotPosition[0] > (x+.1)) && opModeIsActive()) {
             thetaSpeed = -robotPosition[2];
             if (-robotPosition[0] < (x-.2)) {
-                drive.circlepadMove(-moveSpeed, 0, thetaSpeed);
-                queryOdometry();
-            } else if (-robotPosition[0] > (x+.2)) {
                 drive.circlepadMove(moveSpeed, 0, thetaSpeed);
                 queryOdometry();
-            } else if (-robotPosition[0] < (x-.1) || -robotPosition[0] > (x+.1)) {
+            } else if (-robotPosition[0] > (x+.2)) {
+                drive.circlepadMove(-moveSpeed, 0, thetaSpeed);
+                queryOdometry();
+            } else if (robotPosition[0] < (x-.1) || robotPosition[0] > (x+.1)) {
                 drive.stop();
                 break;
             }
@@ -236,13 +236,13 @@ public class OdometryTests extends LinearOpMode {
     void goToStrafePoint(double y) {
         double moveSpeed = .55;
         double thetaSpeed = 0;
-        while (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1) && opModeIsActive()) {
+        while ((robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1)) && opModeIsActive()) {
             thetaSpeed = -robotPosition[2];
             if (robotPosition[1] < (y-.2)) {
-                drive.circlepadMove(0, moveSpeed, thetaSpeed);
+                drive.circlepadMove(0, -moveSpeed, thetaSpeed);
                 queryOdometry();
             } else if (robotPosition[1] > (y+.2)) {
-                drive.circlepadMove(0, -moveSpeed, thetaSpeed);
+                drive.circlepadMove(0, moveSpeed, thetaSpeed);
                 queryOdometry();
             } else if (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1)) {
                 drive.stop();
