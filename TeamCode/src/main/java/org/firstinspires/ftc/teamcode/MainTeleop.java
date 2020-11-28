@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class MainTeleop extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
-    GoBildaDrive gobilda = new GoBildaDrive(robot);
+    GoBildaDrive drive = new GoBildaDrive(robot);
 
     boolean wobbleDown = true;
     boolean wobbleCaught = false;
@@ -21,9 +21,9 @@ public class MainTeleop extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            gobilda.circlepadMove(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+            drive.circlepadMove(-gamepad1.left_stick_y, -gamepad1.left_stick_x, gamepad1.right_stick_x);
 
-            gobilda.dpadMove(gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.dpad_up, gamepad1.dpad_down);
+            drive.dpadMove(gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.dpad_up, gamepad1.dpad_down);
 
             if (gamepad2.a) {
                 if (intakeOnOrOff == false) {

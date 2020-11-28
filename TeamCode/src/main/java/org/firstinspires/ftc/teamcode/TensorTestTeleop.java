@@ -21,7 +21,7 @@ public class TensorTestTeleop extends LinearOpMode {
         String numberOfRings = "";
         List<Recognition> updatedRecognitions = robot.tensorFlowEngine.getUpdatedRecognitions();
         timer.reset();
-        while (numberOfRings.equals("") && timer.seconds() < seconds) {
+        while (numberOfRings.equals("") && timer.seconds() < seconds && opModeIsActive()) {
             telemetry.addData("# Object Detected", updatedRecognitions.size());
             // step through the list of recognitions and display boundary info.
             int i = 0;
@@ -51,8 +51,16 @@ public class TensorTestTeleop extends LinearOpMode {
 
         waitForStart();
         while (opModeIsActive()) {
-            String numberOfRings = checkForRings(5);
-            telemetry.addData("Number of rings", numberOfRings);
+            telemetry.addLine("Press A to test");
+            telemetry.update();
+            if (gamepad1.a) {
+                String numberOfRings = checkForRings(5);
+                telemetry.addData("Number of rings", numberOfRings);
+                telemetry.update();
+                timer.reset();
+                while (timer.seconds() < 10) {
+                }
+            }
         }
     }
 }
