@@ -37,7 +37,7 @@ public class MainTeleop extends LinearOpMode {
                 }
             }
 
-            if (gamepad2.left_bumper) {
+            if (gamepad2.left_trigger >.1) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
             } else if (robot.ShooterServo.getPosition() >= robot.SHOOTER_SERVO_MAX) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
@@ -80,6 +80,11 @@ public class MainTeleop extends LinearOpMode {
                     robot.WobbleCatcher.setPosition(0);
                     wobbleCaught = false;
                 }
+            }
+            if (gamepad2.right_bumper) {
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .01);
+            } else if (gamepad2.left_bumper) {
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .01);
             }
         }
     }
