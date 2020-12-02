@@ -10,9 +10,10 @@ public class MainTeleop extends LinearOpMode {
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
 
-    boolean wobbleDown = true;
+    double wobblePosition = 0.0;
     boolean wobbleCaught = false;
     boolean intakeOnOrOff = false;
+    boolean wobbleUp= true
 
     public void runOpMode() {
         robot.init(hardwareMap, telemetry);
@@ -62,13 +63,21 @@ public class MainTeleop extends LinearOpMode {
             }
 
             if (gamepad2.dpad_left) {
-                if (wobbleDown) {
-                    robot.WobbleServo.setPosition(1);
-                    wobbleDown = false;
-                } else {
-                    robot.WobbleServo.setPosition(0);
-                    wobbleDown = true;
-                }
+               wobblePosition = robot.WobbleServo.getPosition();
+               if (wobblePosition < .55 && wobbleUp){
+                   robot.WobbleServo.setPosition(wobblePosition + .01);
+                   if (wobblePosition + .01 >= .55){
+                       wobbleUp=false;
+                   }
+               } else{
+                   robot.WobbleServo.setPosition(wobblePosition - .01);
+                   if (wobblePosition - .01 <= .01){
+                       wobbleUp=true;
+                   }
+               }
+
+
+
             }
 
             if (gamepad2.dpad_right) {
