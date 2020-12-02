@@ -2,55 +2,37 @@ package org.firstinspires.ftc.teamcode.usercode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DigitalChannel;
-import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Connor Servo move", group = "Connor")
+import org.firstinspires.ftc.teamcode.GoBildaDrive;
+import org.firstinspires.ftc.teamcode.RobotHardware;
+
+
 public class Connor extends LinearOpMode {
-    Servo servo;
-    DigitalChannel sensor;
+    RobotHardware robot = new RobotHardware();
+    Boolean shooterActive = false;
 
-    double counter = 0.01;
-    double max_pos = 1.0;
-    double min_pos = 0.0;
-
-    boolean going_up = true;
 
     @Override
-    public void runOpMode() throws InterruptedException {
-        int foo = 0;
-        servo = hardwareMap.get(Servo.class, "servo");
+    public void runOpMode() {
+        robot.init(hardwareMap, telemetry);
 
-        sensor = hardwareMap.get(DigitalChannel.class, "sensor");
-        sensor.setMode(DigitalChannel.Mode.INPUT);
-
-        telemetry.addData(">", "Press Start to scan Servo.");
-        telemetry.update();
         waitForStart();
 
         while(opModeIsActive()){
-            if (sensor.getState() == true) {
 
-            } else {
-                
+            if (gamepad1.a) {
+
+               if (shooterActive) {
+                   robot.Shooter.setPower(0);
+                   shooterActive = false;
+               } else {
+                   robot.Shooter.setPower(1);
+                   shooterActive = true;
+               }
+
             }
 
 
-            if (gamepad1.left_trigger > 0){
-                counter += 0.01;
-                if (counter >= max_pos){
-                    counter = max_pos;
-                }
-            }else if (gamepad1.right_trigger > 0){
-                counter -= 0.01;
-                if (counter <= min_pos){
-                    counter = min_pos;
-                }
-            }
-            servo.setPosition(counter);
-
-            telemetry.addData("Running", counter);
-            telemetry.update();
 
         }
     }
