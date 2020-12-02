@@ -12,7 +12,7 @@ public class MainTeleop extends LinearOpMode {
 
     boolean wobbleDown = true;
     boolean wobbleCaught = false;
-    boolean intakeOnOrOff = false;
+    private float i = 0;
 
     public void runOpMode() {
         robot.init(hardwareMap, telemetry);
@@ -25,15 +25,14 @@ public class MainTeleop extends LinearOpMode {
 
             drive.dpadMove(gamepad1.dpad_up, gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.dpad_down);
 
-            if (gamepad2.a) {
-                if (intakeOnOrOff == false) {
-                    robot.TopIntake.setPower(.85);
-                    robot.BottomIntake.setPower(1);
-                    intakeOnOrOff = true;
-                } else if (intakeOnOrOff) {
-                    robot.TopIntake.setPower(0);
-                    robot.BottomIntake.setPower(0);
-                    intakeOnOrOff = false;
+            if (gamepad2.a && i == 0) {
+                robot.TopIntake.setPower(.85);
+                robot.BottomIntake.setPower(1);
+                i = 1;
+            } else if (gamepad2.a && i == 1) {
+                robot.TopIntake.setPower(0);
+                robot.BottomIntake.setPower(0);
+                i = 0;
                 }
             }
 
