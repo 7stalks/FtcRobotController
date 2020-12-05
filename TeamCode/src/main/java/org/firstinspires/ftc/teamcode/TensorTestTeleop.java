@@ -56,7 +56,17 @@ public class TensorTestTeleop extends LinearOpMode {
         robot.tensorFlowEngine.activate();
         telemetry.update();
 
-        waitForStart();
+        while (!isStarted()) {
+            List<Recognition> updatedRecognitions;
+            updatedRecognitions = robot.tensorFlowEngine.getUpdatedRecognitions();
+            if (updatedRecognitions != null) {
+                for (Recognition recognition : updatedRecognitions) {
+                    telemetry.addData("Recognition", recognition.getLabel());
+                }
+            }
+            telemetry.update();
+        }
+
         while (opModeIsActive()) {
             telemetry.addLine("Press A to test");
             telemetry.update();
