@@ -46,12 +46,12 @@ public class MainTeleop extends LinearOpMode {
             if (intakeTimer.seconds() > .2) {
                 if (!intakeOn) {
                     if (gamepad1.a) {
-                        robot.TopIntake.setPower(.85);
+                        robot.TopIntake.setPower(1);
                         robot.BottomIntake.setPower(1);
                         intakeOn = true;
                         intakeTimer.reset();
                     } else if (gamepad1.b) {
-                        robot.TopIntake.setPower(-.85);
+                        robot.TopIntake.setPower(-1);
                         robot.BottomIntake.setPower(-1);
                         intakeOn = true;
                         intakeTimer.reset();
@@ -64,8 +64,19 @@ public class MainTeleop extends LinearOpMode {
                 }
             }
 
+            // when the intake is on, you cannot change position of shooter; when it is off you can change position of shooter using bumpers
+            if (intakeOn) {
+                robot.ShooterElevator.setPosition(0);
+            } else {
+                if (gamepad2.right_bumper) {
+                    robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .003);
+                } else if (gamepad2.left_bumper) {
+                    robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .003);
+                }
+            }
+
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
-            if (gamepad2.left_trigger > .1) {
+            if (gamepad2.left_trigger > .1 && robot.Shooter.getPower() >= .90) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
             } else if (robot.ShooterServo.getPosition() >= robot.SHOOTER_SERVO_MAX) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
@@ -116,13 +127,6 @@ public class MainTeleop extends LinearOpMode {
                     robot.WobbleCatcher.setPosition(0);
                     wobbleCaught = false;
                 }
-            }
-
-            // gamepad 2 right bumper gets shooter elevator
-            if (gamepad2.right_bumper) {
-                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .003);
-            } else if (gamepad2.left_bumper) {
-                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .003);
             }
         }
     }
