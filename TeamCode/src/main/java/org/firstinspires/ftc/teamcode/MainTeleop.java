@@ -67,7 +67,7 @@ public class MainTeleop extends LinearOpMode {
             // when the intake is on, you cannot change position of shooter; when it is off you can change position of shooter using bumpers
             if (intakeOn) {
                 robot.ShooterElevator.setPosition(0);
-            } else if (!intakeOn) {
+            } else {
                 if (gamepad2.right_bumper) {
                     robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .003);
                 } else if (gamepad2.left_bumper) {
@@ -76,7 +76,7 @@ public class MainTeleop extends LinearOpMode {
             }
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
-            if (gamepad2.left_trigger > .1) {
+            if (gamepad2.left_trigger > .1 && robot.Shooter.getPower() >= .90) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
             } else if (robot.ShooterServo.getPosition() >= robot.SHOOTER_SERVO_MAX) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
