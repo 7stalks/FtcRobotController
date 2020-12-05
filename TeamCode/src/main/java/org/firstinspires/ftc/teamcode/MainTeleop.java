@@ -29,6 +29,8 @@ public class MainTeleop extends LinearOpMode {
     // dpad left/right manipulate the servo on top of the wobble stand
     ////
 
+    // there wasn't an override here before and i think it worked fine... oh well! we'll see
+    @Override
     public void runOpMode() {
         robot.init(hardwareMap, telemetry);
 
