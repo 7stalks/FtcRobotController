@@ -19,10 +19,15 @@ public class TensorTestTeleop extends LinearOpMode {
 
     public String checkForRings(int seconds) {
         String numberOfRings = "";
-        List<Recognition> updatedRecognitions = robot.tensorFlowEngine.getUpdatedRecognitions();
+        List<Recognition> updatedRecognitions;
         timer.reset();
         while (numberOfRings.equals("") && timer.seconds() < seconds && opModeIsActive()) {
-            telemetry.addData("# Object Detected", updatedRecognitions.size());
+            updatedRecognitions = robot.tensorFlowEngine.getUpdatedRecognitions();
+             try {telemetry.addData("# Object Detected", updatedRecognitions.size());}
+             catch (NullPointerException err) {
+                 telemetry.addData("# Object Detected", 0);
+                 continue;
+             }
             // step through the list of recognitions and display boundary info.
             int i = 0;
             for (Recognition recognition : updatedRecognitions) {
@@ -46,6 +51,8 @@ public class TensorTestTeleop extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         robot.init(hardwareMap, telemetry);
+        robot.initVuforia(hardwareMap, telemetry);
+        robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
         telemetry.update();
 
@@ -55,10 +62,10 @@ public class TensorTestTeleop extends LinearOpMode {
             telemetry.update();
             if (gamepad1.a) {
                 String numberOfRings = checkForRings(5);
-                telemetry.addData("Number of rings", numberOfRings);
-                telemetry.update();
                 timer.reset();
-                while (timer.seconds() < 10) {
+                while (timer.seconds() < 3) {
+                    telemetry.addData("Number of rings", numberOfRings);
+                    telemetry.update();
                 }
             }
         }
