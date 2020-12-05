@@ -46,12 +46,12 @@ public class MainTeleop extends LinearOpMode {
             if (intakeTimer.seconds() > .2) {
                 if (!intakeOn) {
                     if (gamepad1.a) {
-                        robot.TopIntake.setPower(.85);
+                        robot.TopIntake.setPower(1);
                         robot.BottomIntake.setPower(1);
                         intakeOn = true;
                         intakeTimer.reset();
                     } else if (gamepad1.b) {
-                        robot.TopIntake.setPower(-.85);
+                        robot.TopIntake.setPower(-1);
                         robot.BottomIntake.setPower(-1);
                         intakeOn = true;
                         intakeTimer.reset();
