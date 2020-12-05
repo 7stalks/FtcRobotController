@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.util.Range;
 
 
 @TeleOp(name="Connor", group="Test")
+@Disabled
 public class ConnorMotor extends LinearOpMode {
 
     // Declare OpMode members.
