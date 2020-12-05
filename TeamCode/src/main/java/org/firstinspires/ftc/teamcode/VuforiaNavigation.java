@@ -47,7 +47,7 @@ public class VuforiaNavigation {
 
         // Load the data sets for the trackable objects. These particular data
         // sets are stored in the 'assets' part of our application.
-        VuforiaTrackables targetsUltimateGoal = robot.vuforia.loadTrackablesFromAsset("UltimateGoal");
+        VuforiaTrackables targetsUltimateGoal = robot.backVuforia.loadTrackablesFromAsset("UltimateGoal");
         VuforiaTrackable blueTowerGoalTarget = targetsUltimateGoal.get(0);
         blueTowerGoalTarget.setName("Blue Tower Goal Target");
         VuforiaTrackable redTowerGoalTarget = targetsUltimateGoal.get(1);
