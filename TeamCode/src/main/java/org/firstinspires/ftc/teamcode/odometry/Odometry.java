@@ -17,7 +17,7 @@ public class Odometry {
     // determines theta. The tick per degree offset is for the middle encoder
     // TODO add "final" to each of these when done testing
     public double robotEncoderWheelDistance = 15.6176;
-    public double horizontalEncoderTickPerDegreeOffset = 2000;
+    public double horizontalEncoderTickPerDegreeOffset = -2050;
 
     // TODO add a queryOdometry() method that uses the constructor below
 //    RobotHardware robot;

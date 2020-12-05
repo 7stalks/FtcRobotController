@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.usercode;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -7,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "Cole Servo move", group = "Cole")
+@Disabled
 public class Cole extends LinearOpMode {
     Servo servo;
     DcMotor motor;
