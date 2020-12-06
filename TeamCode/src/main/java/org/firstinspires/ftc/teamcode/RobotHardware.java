@@ -3,30 +3,18 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.SwitchableCamera;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.internal.vuforia.VuforiaException;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import static java.lang.Thread.*;
-import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
-import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
 public class RobotHardware {
@@ -88,8 +76,8 @@ public class RobotHardware {
     private float phoneYRotate    = 0;
     private float phoneZRotate    = 0;
 
-    public VuforiaLocalizer frontVuforia;
-    public VuforiaLocalizer backVuforia;
+    public VuforiaLocalizer vuforia;
+    public SwitchableCamera switchableCamera;
 
     public TFObjectDetector tensorFlowEngine;
 
@@ -326,47 +314,34 @@ public class RobotHardware {
     public void initVuforia(HardwareMap hardwareMap, Telemetry telemetry) {
         try {
             frontWebcam = hardwareMap.get(WebcamName.class, "front_webcam");
-            VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
-            parameters.vuforiaLicenseKey = VUFORIA_KEY;
-            parameters.cameraName = frontWebcam;
-            frontVuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-            telemetry.addData("Status", "front Vuforia Initialized");
-        } catch (IllegalArgumentException err) {
-            telemetry.addData("Warning", "front Vuforia not enabled");
-            telemetry.addData("err", err);
-            frontVuforia = null;
-        } catch (VuforiaException err) {
-            telemetry.addData("Warning", "front Vuforia Exception - not enabled");
-            frontVuforia = null;
-        }
-
-        try {
             backWebcam = hardwareMap.get(WebcamName.class, "back_webcam");
             VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
             parameters.vuforiaLicenseKey = VUFORIA_KEY;
-            parameters.cameraName = backWebcam;
-            backVuforia = ClassFactory.getInstance().createVuforia(parameters);
+            parameters.cameraName = ClassFactory.getInstance().getCameraManager().nameForSwitchableCamera(frontWebcam, backWebcam);
+            vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
-            telemetry.addData("Status", "front Vuforia Initialized");
+            switchableCamera = (SwitchableCamera) vuforia.getCamera();
+            switchableCamera.setActiveCamera(frontWebcam);
+
+            telemetry.addData("Status", "Vuforia Initialized");
         } catch (IllegalArgumentException err) {
-            telemetry.addData("Warning", "back Vuforia not enabled");
+            telemetry.addData("Warning", "Vuforia not enabled");
             telemetry.addData("err", err);
-            backVuforia = null;
+            vuforia = null;
         } catch (VuforiaException err) {
-            telemetry.addData("Warning", "back Vuforia Exception - not enabled");
-            backVuforia = null;
+            telemetry.addData("Warning", "Vuforia Exception - not enabled");
+            vuforia = null;
         }
     }
 
     public void initTFOD(Telemetry telemetry) {
         /* Initialize Tensor Flow Object Detection */
-        if (frontVuforia != null) {
+        if (vuforia != null) {
             int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                     "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
             TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
             tfodParameters.minResultConfidence = 0.7f;
-            tensorFlowEngine = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, frontVuforia);
+            tensorFlowEngine = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
             tensorFlowEngine.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
 
             telemetry.addData("Status", "Tensor Flow Object Detection Initialized");

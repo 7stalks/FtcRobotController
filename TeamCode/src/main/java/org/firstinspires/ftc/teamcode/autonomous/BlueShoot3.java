@@ -23,6 +23,9 @@ public class BlueShoot3 extends LinearOpMode {
 
     double[] odometryInfo;
     double[] robotPosition = {0, 0, 0};
+    double firstOLeft = 0;
+    double firstORight = 0;
+    double firstOMiddle = 0;
 
     // yeah yeah, plucked straight from TensorTest... but it works!!! hypothetically
     public String checkForRings(int seconds) {
@@ -57,8 +60,11 @@ public class BlueShoot3 extends LinearOpMode {
 
     // kind of a central method. give it some time and it'll prolly be moved to Odometry.java
     private void queryOdometry() {
-        odometryInfo = new double[]{robot.OLeft.getCurrentPosition(), robot.ORight.getCurrentPosition(),
-                robot.OMiddle.getCurrentPosition()};
+        odometryInfo = new double[]{
+                robot.OLeft.getCurrentPosition() - firstOLeft,
+                robot.ORight.getCurrentPosition() - firstORight,
+                robot.OMiddle.getCurrentPosition() - firstOMiddle
+        };
         robotPosition = odometry.getPosition(robotPosition, odometryInfo, telemetry);
         telemetry.addData("X", robotPosition[0]);
         telemetry.addData("Y", robotPosition[1]);
@@ -88,6 +94,7 @@ public class BlueShoot3 extends LinearOpMode {
                 moveSpeed = .15 + (((.7-.15)/(15)) * (Math.abs(-robotPosition[0] - x)));
             }
         }
+        drive.stop();
     }
 
     // moves left right (y direction)
@@ -107,9 +114,10 @@ public class BlueShoot3 extends LinearOpMode {
                 break;
             }
             if (Math.abs(robotPosition[1] - y) < 7) {
-                moveSpeed = .3 + (((.55-.3)/(7)) * (Math.abs(robotPosition[1] - y)));
+                moveSpeed = .25 + (((.55-.25)/(7)) * (Math.abs(robotPosition[1] - y)));
             }
         }
+        drive.stop();
     }
 
 
@@ -121,7 +129,7 @@ public class BlueShoot3 extends LinearOpMode {
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
-        nav.navigationInit(robot);
+
         telemetry.update();
 
         List<Recognition> beginningUpdatedRecognitions;
@@ -138,12 +146,18 @@ public class BlueShoot3 extends LinearOpMode {
             telemetry.update();
         }
 
+        // the start ends right here
+        //
+        //
+
         // TODO: will there be any moving necessary to pick up the three rings? may need 2 opmodes for this
 
         // tensor section. gets the number of rings (we'll have to fine tune the number of seconds)
         // before turning it into an int because that makes me more comfortable
         // then it turns off tensor so it stops eating away our power
-        String stringNumberOfRings = checkForRings(2);
+
+        //TODO take this out and use the value from init
+        String stringNumberOfRings = checkForRings(1);
         int numberOfRings = 0;
         if (stringNumberOfRings.equals("Quad")) {
             numberOfRings = 4;
@@ -151,16 +165,27 @@ public class BlueShoot3 extends LinearOpMode {
             numberOfRings = 1;
         }
         robot.tensorFlowEngine.deactivate();
+        robot.switchableCamera.setActiveCamera(robot.backWebcam);
+        nav.navigationInit(robot);
 
         //vuforia time! gotta move over to the picture too. odometry time
         goToPoint(6);
         goToStrafePoint(26);
+        sleep(500);
         // unsure if this will work. we'll find out
         while (!nav.targetVisible) {
             nav.navigationNoTelemetry();
         }
         robotPosition = new double[] {nav.X, nav.Y, nav.Rotation};
+        firstOLeft = robot.OLeft.getCurrentPosition();
+        firstORight = robot.ORight.getCurrentPosition();
+        firstOMiddle = robot.OMiddle.getCurrentPosition();
+        telemetry.addData("nav x", nav.X);
+        telemetry.addData("nav y", nav.Y);
+        telemetry.addData("nav rotation", nav.Rotation);
+
+        // repalce queryOdometry with robotPosition to see
         queryOdometry();
-        sleep(7);
+        sleep(17000);
     }
 }
