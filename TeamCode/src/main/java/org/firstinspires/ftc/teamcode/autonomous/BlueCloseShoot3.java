@@ -12,14 +12,23 @@ import org.firstinspires.ftc.teamcode.odometry.Odometry;
 
 import java.util.List;
 
-@Autonomous(name = "Blue Shoot 3")
-public class BlueShoot3 extends LinearOpMode {
+@Autonomous(name = "Blue Close Shoot 3")
+public class BlueCloseShoot3 extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
     Odometry odometry = new Odometry();
     VuforiaNavigation nav = new VuforiaNavigation();
     ElapsedTime timer = new ElapsedTime();
+    Runnable switchCamera =
+            new Runnable(){
+                public void run(){
+                    robot.switchableCamera.setActiveCamera(robot.backWebcam);
+                    nav.navigationInit(robot);
+                }
+            };
+    Thread switchCameraThread = new Thread(switchCamera);
+
 
     double[] odometryInfo;
     double[] robotPosition = {0, 0, 0};
@@ -189,8 +198,7 @@ public class BlueShoot3 extends LinearOpMode {
             numberOfRings = 1;
         }
         robot.tensorFlowEngine.deactivate();
-        robot.switchableCamera.setActiveCamera(robot.backWebcam);
-        nav.navigationInit(robot);
+        switchCameraThread.start();
 
         //vuforia time! gotta move over to the picture too. odometry time
         goToPoint(6);
@@ -207,7 +215,6 @@ public class BlueShoot3 extends LinearOpMode {
         firstOMiddle = robot.OMiddle.getCurrentPosition();
         odometry.lastIterationOdometryInfo = new double[] {0, 0, 0};
         queryOdometry();
-        sleep(3000);
 
         goToPoint(-3.5);
         goToStrafePoint(-22);
@@ -218,6 +225,21 @@ public class BlueShoot3 extends LinearOpMode {
         robot.ShooterElevator.setPosition(0.33);
         sleep(300);
         shoot();
+        sleep(100);
 
+        int wobbleX, wobbleY;
+        if (numberOfRings == 0) {
+            wobbleX = -8;
+            wobbleY = -48;
+        } else if (numberOfRings == 1) {
+            wobbleX = -32;
+            wobbleY = -24;
+        } else {
+            wobbleX = -56;
+            wobbleY = -48;
+        }
+        goToPoint(wobbleX);
+        goToStrafePoint(wobbleY);
+        sleep(10000);
     }
 }
