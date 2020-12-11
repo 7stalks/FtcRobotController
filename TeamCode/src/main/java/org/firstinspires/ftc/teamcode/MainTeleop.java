@@ -74,6 +74,8 @@ public class MainTeleop extends LinearOpMode {
                     robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .003);
                 }
             }
+            telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
+            telemetry.update();
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
             if (gamepad2.left_trigger > .1 && robot.Shooter.getPower() >= .90) {

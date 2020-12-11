@@ -9,7 +9,7 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 
 public class Odometry {
 
-    double[] lastIterationOdometryInfo = {0, 0, 0};
+    public double[] lastIterationOdometryInfo = {0, 0, 0};
 
     public double encoderCountsPerIn = 306.3816404153158;
 
@@ -67,10 +67,17 @@ public class Odometry {
         double oldX = oldPosition[0];
         double oldY = oldPosition[1];
         double oldTheta = oldPosition[2];
+        telemetry.addData("Odometry info L", odometryInfo[0]);
+        telemetry.addData("Odometry info R", odometryInfo[1]);
+        telemetry.addData("Odometry info M", odometryInfo[2]);
+
 
         // get the changes (deltas) in distances/theta
         // deltaDistances has all 3 odometers (L, R, M)
         double[] deltaDistances = odometryInfoToDeltaInches(odometryInfo);
+        telemetry.addData("deltaLeft", deltaDistances[0]);
+        telemetry.addData("deltaRight", deltaDistances[1]);
+        telemetry.addData("deltaMiddle", deltaDistances[2]);
         double deltaTheta = getDeltaTheta(deltaDistances[0], deltaDistances[1]);
 
         // Get the new theta and make it look pretty too (doesn't hurt calculations to make look pretty)

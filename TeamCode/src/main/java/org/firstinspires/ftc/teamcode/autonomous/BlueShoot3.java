@@ -26,6 +26,7 @@ public class BlueShoot3 extends LinearOpMode {
     double firstOLeft = 0;
     double firstORight = 0;
     double firstOMiddle = 0;
+    double rotation = 0;
 
     // yeah yeah, plucked straight from TensorTest... but it works!!! hypothetically
     public String checkForRings(int seconds) {
@@ -75,23 +76,22 @@ public class BlueShoot3 extends LinearOpMode {
 
     // moves forwards backwards (x direction)
     void goToPoint(double x) {
-        x = -x;
         double moveSpeed = .7;
         double thetaSpeed = 0;
-        while ((-robotPosition[0] < (x-.1) || -robotPosition[0] > (x+.1)) && opModeIsActive()) {
-            thetaSpeed = -robotPosition[2];
-            if (-robotPosition[0] < (x-.2)) {
-                drive.circlepadMove(-moveSpeed, 0, thetaSpeed);
-                queryOdometry();
-            } else if (-robotPosition[0] > (x+.2)) {
+        while ((robotPosition[0] < (x-.1) || robotPosition[1] > (x+.1)) && opModeIsActive()) {
+            thetaSpeed = -(robotPosition[2]+(rotation));
+            if (robotPosition[0] < (x-.2)) {
                 drive.circlepadMove(moveSpeed, 0, thetaSpeed);
                 queryOdometry();
-            } else if (robotPosition[0] < (x-.1) || robotPosition[0] > (x+.1)) {
+            } else if (robotPosition[0] > (x+.2)) {
+                drive.circlepadMove(-moveSpeed, 0, thetaSpeed);
+                queryOdometry();
+            } else if (robotPosition[0] < (x-.1) || robotPosition[1] > (x+.1)) {
                 drive.stop();
                 break;
             }
-            if (Math.abs(-robotPosition[0] - x) < 15) {
-                moveSpeed = .15 + (((.7-.15)/(15)) * (Math.abs(-robotPosition[0] - x)));
+            if (Math.abs(robotPosition[0] - x) < 15) {
+                moveSpeed = .15 + (((.7-.15)/(15)) * (Math.abs(robotPosition[0] - x)));
             }
         }
         drive.stop();
@@ -102,7 +102,7 @@ public class BlueShoot3 extends LinearOpMode {
         double moveSpeed = .55;
         double thetaSpeed = 0;
         while ((robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1)) && opModeIsActive()) {
-            thetaSpeed = -robotPosition[2];
+            thetaSpeed = -(robotPosition[2]+(rotation));
             if (robotPosition[1] < (y-.2)) {
                 drive.circlepadMove(0, -moveSpeed, thetaSpeed);
                 queryOdometry();
@@ -113,14 +113,38 @@ public class BlueShoot3 extends LinearOpMode {
                 drive.stop();
                 break;
             }
-            if (Math.abs(robotPosition[1] - y) < 7) {
-                moveSpeed = .25 + (((.55-.25)/(7)) * (Math.abs(robotPosition[1] - y)));
+            if (Math.abs(robotPosition[1] - y) < 9) {
+                moveSpeed = .2 + (((.55-.2)/(9)) * (Math.abs(robotPosition[1] - y)));
             }
         }
         drive.stop();
     }
 
-
+    void shoot() {
+        robot.Shooter.setPower(1);
+        sleep(1000);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.Shooter.setPower(0);
+    }
 
     @Override
     public void runOpMode() {
@@ -173,19 +197,27 @@ public class BlueShoot3 extends LinearOpMode {
         goToStrafePoint(26);
         sleep(500);
         // unsure if this will work. we'll find out
-        while (!nav.targetVisible) {
+        while (!nav.targetVisible && !isStopRequested()) {
             nav.navigationNoTelemetry();
         }
-        robotPosition = new double[] {nav.X, nav.Y, nav.Rotation};
+
+        robotPosition = new double[] {nav.X+8, nav.Y, nav.Rotation + Math.PI/2};
         firstOLeft = robot.OLeft.getCurrentPosition();
         firstORight = robot.ORight.getCurrentPosition();
         firstOMiddle = robot.OMiddle.getCurrentPosition();
-        telemetry.addData("nav x", nav.X);
-        telemetry.addData("nav y", nav.Y);
-        telemetry.addData("nav rotation", nav.Rotation);
-
-        // repalce queryOdometry with robotPosition to see
+        odometry.lastIterationOdometryInfo = new double[] {0, 0, 0};
         queryOdometry();
-        sleep(17000);
+        sleep(3000);
+
+        goToPoint(-3.5);
+        goToStrafePoint(-22);
+//        drive.circlepadMove(0, 0, -.4);
+//        sleep(100);
+        drive.stop();
+
+        robot.ShooterElevator.setPosition(0.33);
+        sleep(300);
+        shoot();
+
     }
 }

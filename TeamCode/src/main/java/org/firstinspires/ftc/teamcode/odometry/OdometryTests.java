@@ -188,27 +188,27 @@ public class OdometryTests extends LinearOpMode {
 
     void shoot() {
         robot.Shooter.setPower(1);
-        sleep(750);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         sleep(1000);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        sleep(500);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        sleep(500);
         robot.Shooter.setPower(0);
     }
 
