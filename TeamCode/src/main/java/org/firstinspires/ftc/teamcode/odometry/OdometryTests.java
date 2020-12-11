@@ -263,8 +263,47 @@ public class OdometryTests extends LinearOpMode {
         drive.stop();
     }
 
-    private void odometryAndVuforia() {
+    void rotateTo0() {
+        double wantedAngle = (Math.round(robotPosition[2]/(2*Math.PI))) * 2 * Math.PI;
+        double driveSpeed = .55;
+        while (robotPosition[2] < wantedAngle - .01 || robotPosition[2] > wantedAngle + .01 && opModeIsActive()) {
+            if (robotPosition[2] < wantedAngle - .01) {
+                drive.circlepadMove(0, 0, driveSpeed);
+            } else if (robotPosition[2] > wantedAngle + .01) {
+                drive.circlepadMove(0, 0, -driveSpeed);
+            }
+            // once there's a radian to go, start proportionally reducing drivespeed to .3
+            if (Math.abs(robotPosition[2] - wantedAngle) < 1) {
+                driveSpeed = .2 + (.2 * Math.abs(robotPosition[2] - wantedAngle));
+            }
+            queryOdometry();
+        }
+        drive.stop();
+    }
 
+    void diagonalToPoint(double x, double y) {
+        rotateTo0();
+        double hyp = Math.sqrt(x * x + y * y);
+        double first_drive_x = x / hyp;
+        double first_drive_y = y / hyp;
+        double drive_x = first_drive_x;
+        double drive_y = first_drive_y;
+        while (robotPosition[0] < x-.2 || robotPosition[0] > x+.2) {
+            drive.circlepadMove(drive_x, drive_y, 0);
+            if (Math.abs(robotPosition[0] - x) < 7) {
+                drive_x = first_drive_x/(Math.abs(robotPosition[0] - x));
+                drive_y = first_drive_y/(Math.abs(robotPosition[0] - x));
+            } else {
+                drive_x = first_drive_x;
+                drive_y = first_drive_y;
+            }
+            queryOdometry();
+        }
+        drive.stop();
+    }
+
+    void odometryRoutineY() {
+        diagonalToPoint(24, 12);
     }
 
     @Override
@@ -287,6 +326,8 @@ public class OdometryTests extends LinearOpMode {
                 odometryRoutineB();
             } else if (gamepad1.x) {
                 odometryRoutineX();
+            } else if (gamepad1.y) {
+                odometryRoutineY();
             }
             drive.circlepadMove(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
             telemetry.addData("Left Odometer", robot.OLeft.getCurrentPosition());
