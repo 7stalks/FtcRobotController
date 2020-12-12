@@ -159,6 +159,8 @@ public class BlueFarShoot3 extends LinearOpMode {
     public void runOpMode() {
         // initialization things. we'll have to see if it's too heavy for the robot to handle
         robot.init(hardwareMap, telemetry);
+        robot.WobbleServo.setPosition(.55);
+        robot.WobbleCatcher.setPosition(1);
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();

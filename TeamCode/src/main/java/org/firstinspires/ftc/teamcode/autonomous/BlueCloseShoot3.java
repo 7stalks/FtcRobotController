@@ -87,7 +87,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
     void goToPoint(double x) {
         double moveSpeed = .7;
         double thetaSpeed = 0;
-        while ((robotPosition[0] < (x-.1) || robotPosition[1] > (x+.1)) && opModeIsActive()) {
+        while ((robotPosition[0] < (x-.1) || robotPosition[0] > (x+.1)) && opModeIsActive()) {
             thetaSpeed = -(robotPosition[2]+(rotation));
             if (robotPosition[0] < (x-.2)) {
                 drive.circlepadMove(moveSpeed, 0, thetaSpeed);
@@ -95,7 +95,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
             } else if (robotPosition[0] > (x+.2)) {
                 drive.circlepadMove(-moveSpeed, 0, thetaSpeed);
                 queryOdometry();
-            } else if (robotPosition[0] < (x-.1) || robotPosition[1] > (x+.1)) {
+            } else if (robotPosition[0] < (x-.1) || robotPosition[0] > (x+.1)) {
                 drive.stop();
                 break;
             }
@@ -103,6 +103,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
                 moveSpeed = .15 + (((.7-.15)/(15)) * (Math.abs(robotPosition[0] - x)));
             }
         }
+        queryOdometry();
         drive.stop();
     }
 
@@ -156,9 +157,11 @@ public class BlueCloseShoot3 extends LinearOpMode {
     }
 
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
         // initialization things. we'll have to see if it's too heavy for the robot to handle
         robot.init(hardwareMap, telemetry);
+        robot.WobbleServo.setPosition(.55);
+        robot.WobbleCatcher.setPosition(1);
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
@@ -183,13 +186,9 @@ public class BlueCloseShoot3 extends LinearOpMode {
         //
         //
 
-        // TODO: will there be any moving necessary to pick up the three rings? may need 2 opmodes for this
-
         // tensor section. gets the number of rings (we'll have to fine tune the number of seconds)
         // before turning it into an int because that makes me more comfortable
         // then it turns off tensor so it stops eating away our power
-
-        //TODO take this out and use the value from init
         String stringNumberOfRings = checkForRings(1);
         int numberOfRings = 0;
         if (stringNumberOfRings.equals("Quad")) {
@@ -208,6 +207,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
         while (!nav.targetVisible && !isStopRequested()) {
             nav.navigationNoTelemetry();
         }
+        switchCameraThread.join();
 
         robotPosition = new double[] {nav.X+8, nav.Y, nav.Rotation + Math.PI/2};
         firstOLeft = robot.OLeft.getCurrentPosition();
@@ -217,7 +217,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
         queryOdometry();
 
         goToPoint(-3.5);
-        goToStrafePoint(-22);
+        goToStrafePoint(-24.5);
 //        drive.circlepadMove(0, 0, -.4);
 //        sleep(100);
         drive.stop();
@@ -229,17 +229,19 @@ public class BlueCloseShoot3 extends LinearOpMode {
 
         int wobbleX, wobbleY;
         if (numberOfRings == 0) {
-            wobbleX = -8;
+            wobbleX = 8;
             wobbleY = -48;
         } else if (numberOfRings == 1) {
-            wobbleX = -32;
+            wobbleX = 32;
             wobbleY = -24;
         } else {
-            wobbleX = -56;
+            wobbleX = 56;
             wobbleY = -48;
         }
         goToPoint(wobbleX);
         goToStrafePoint(wobbleY);
-        sleep(10000);
+        robot.WobbleCatcher.setPosition(0);
+        sleep(1500);
+        goToPoint(10);
     }
 }

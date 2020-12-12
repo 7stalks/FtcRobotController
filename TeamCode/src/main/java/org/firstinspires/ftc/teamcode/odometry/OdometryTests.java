@@ -283,16 +283,16 @@ public class OdometryTests extends LinearOpMode {
 
     void diagonalToPoint(double x, double y) {
         rotateTo0();
-        double hyp = Math.sqrt(x * x + y * y);
-        double first_drive_x = x / hyp;
-        double first_drive_y = y / hyp;
+        double hyp = Math.sqrt((x - robotPosition[0])*(x - robotPosition[0]) + (y - robotPosition[1])*(y - robotPosition[1]));
+        double first_drive_x = (x - robotPosition[0]) / hyp;
+        double first_drive_y = (y - robotPosition[1]) / hyp;
         double drive_x = first_drive_x;
         double drive_y = first_drive_y;
-        while (robotPosition[0] < x-.2 || robotPosition[0] > x+.2) {
+        while ((robotPosition[0] < x-.2 || robotPosition[0] > x+.2) && opModeIsActive()) {
             drive.circlepadMove(drive_x, drive_y, 0);
-            if (Math.abs(robotPosition[0] - x) < 7) {
-                drive_x = first_drive_x/(Math.abs(robotPosition[0] - x));
-                drive_y = first_drive_y/(Math.abs(robotPosition[0] - x));
+            if (Math.abs(robotPosition[0] - x) < 6) {
+                drive_x = first_drive_x * .5;
+                drive_y = first_drive_y * .5;
             } else {
                 drive_x = first_drive_x;
                 drive_y = first_drive_y;
@@ -300,10 +300,33 @@ public class OdometryTests extends LinearOpMode {
             queryOdometry();
         }
         drive.stop();
+        telemetry.addData("hyp", hyp);
+        telemetry.addData("first x", first_drive_x);
+        telemetry.addData("first y", first_drive_y);
+        queryOdometry();
+        sleep(20000);
+    }
+
+    void doubleStrafeToPoint(double x, double y) {
+        rotateTo0();
+        double hyp, driveX, driveY;
+        while (((robotPosition[0] < x-.2 || robotPosition[0] > x+.2) || (robotPosition[1] < y-.2 || robotPosition[1] > y+.2)) && opModeIsActive()) {
+            hyp = Math.sqrt((x - robotPosition[0])*(x - robotPosition[0]) + (y - robotPosition[1])*(y - robotPosition[1]));
+            driveX = .85 * (x - robotPosition[0]) / hyp;
+            driveY = .85 * (y - robotPosition[1]) / hyp;
+            if (Math.abs(robotPosition[0] - x) < 6) {
+                driveX = driveX * .62;
+                driveY = driveY * .62;
+            }
+            drive.circlepadMove(driveX, -driveY, 0);
+            queryOdometry();
+        }
+        drive.stop();
+        rotateTo0();
     }
 
     void odometryRoutineY() {
-        diagonalToPoint(24, 12);
+        doubleStrafeToPoint(24, 12);
     }
 
     @Override

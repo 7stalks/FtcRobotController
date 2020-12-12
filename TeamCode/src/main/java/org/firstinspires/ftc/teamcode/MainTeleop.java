@@ -11,6 +11,7 @@ public class MainTeleop extends LinearOpMode {
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
     ElapsedTime intakeTimer = new ElapsedTime();
+    ElapsedTime wobbleTimer = new ElapsedTime();
 
     double wobblePosition = 0.0;
     boolean wobbleCaught = false;
@@ -75,7 +76,6 @@ public class MainTeleop extends LinearOpMode {
                 }
             }
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
-            telemetry.update();
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
             if (gamepad2.left_trigger > .1 && robot.Shooter.getPower() >= .90) {
@@ -107,27 +107,32 @@ public class MainTeleop extends LinearOpMode {
             // gamepad 2 dpad left and right manipulate the servo that's at the top of the wobble stand
             if (gamepad2.dpad_left) {
                 wobblePosition = robot.WobbleServo.getPosition();
+                telemetry.addData("dpad2 left", wobblePosition);
                 if (wobblePosition < .55 && wobbleUp) {
-                    robot.WobbleServo.setPosition(wobblePosition + .01);
+                    robot.WobbleServo.setPosition(wobblePosition + .003);
                     if (wobblePosition + .01 >= .55) {
                         wobbleUp = false;
                     }
                 } else {
-                    robot.WobbleServo.setPosition(wobblePosition - .01);
+                    robot.WobbleServo.setPosition(wobblePosition - .003);
                     if (wobblePosition - .01 <= .01) {
                         wobbleUp = true;
                     }
                 }
             }
 
-            if (gamepad2.dpad_right) {
-                if (!wobbleCaught) {
-                    robot.WobbleCatcher.setPosition(1);
-                    wobbleCaught = true;
-                    sleep(20);
-                } else {
-                    robot.WobbleCatcher.setPosition(0);
-                    wobbleCaught = false;
+            telemetry.update();
+
+            if (wobbleTimer.seconds() > .2) {
+                if (gamepad2.dpad_right) {
+                    if (!wobbleCaught) {
+                        robot.WobbleCatcher.setPosition(1);
+                        wobbleCaught = true;
+                    } else {
+                        robot.WobbleCatcher.setPosition(0);
+                        wobbleCaught = false;
+                    }
+                    wobbleTimer.reset();
                 }
             }
         }
