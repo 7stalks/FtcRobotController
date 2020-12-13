@@ -1,25 +1,35 @@
 package org.firstinspires.ftc.teamcode.odometry;
 
-import android.sax.StartElementListener;
-
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
-public class Odometry {
+public class OdometryRunnable extends Thread {
+
+    RobotHardware robot;
+    Telemetry telemetry;
+
+    double firstOLeft;
+    double firstORight;
+    double firstOMiddle;
+    public double[] odometryInfo = {0, 0, 0};
+    public double[] robotPosition = {0, 0, 0};
+
+
+    public OdometryRunnable(RobotHardware myRobot, Telemetry myTelemetry) {
+        robot = myRobot;
+        telemetry = myTelemetry;
+    }
 
     public double[] lastIterationOdometryInfo = {0, 0, 0};
 
     public double encoderCountsPerIn = 306.3816404153158;
 
-    // ADD A MULTIPLIER TO THE ENCODERS
-
     // The two "big" constants. The wheel distance is the distance between L and R encoders and
     // determines theta. The tick per degree offset is for the middle encoder
     // TODO add "final" to each of these when done testing
     public double robotEncoderWheelDistance = 15.6176;
-    public double horizontalEncoderTickPerDegreeOffset = -2100;
+    public double horizontalEncoderTickPerDegreeOffset = -2120;
 
     // TODO add a queryOdometry() method that uses the constructor below
 //    RobotHardware robot;
@@ -69,17 +79,14 @@ public class Odometry {
         double oldX = oldPosition[0];
         double oldY = oldPosition[1];
         double oldTheta = oldPosition[2];
-        telemetry.addData("Odometry info L", odometryInfo[0]);
-        telemetry.addData("Odometry info R", odometryInfo[1]);
-        telemetry.addData("Odometry info M", odometryInfo[2]);
 
 
         // get the changes (deltas) in distances/theta
         // deltaDistances has all 3 odometers (L, R, M)
         double[] deltaDistances = odometryInfoToDeltaInches(odometryInfo);
-        telemetry.addData("deltaLeft", deltaDistances[0]);
-        telemetry.addData("deltaRight", deltaDistances[1]);
-        telemetry.addData("deltaMiddle", deltaDistances[2]);
+//        telemetry.addData("deltaLeft", deltaDistances[0]);
+//        telemetry.addData("deltaRight", deltaDistances[1]);
+//        telemetry.addData("deltaMiddle", deltaDistances[2]);
         double deltaTheta = getDeltaTheta(deltaDistances[0], deltaDistances[1]);
 
         // Get the new theta and make it look pretty too (doesn't hurt calculations to make look pretty)
@@ -126,5 +133,28 @@ public class Odometry {
         double[] currentPosition = initialPosition;
 //        while (currentPosition[2] < )
         drive.circlepadMove(0, 0, pivotSpeed);
+    }
+
+    public void inputVuforia(double x, double y, double rotation) {
+        firstOLeft = robot.OLeft.getCurrentPosition();
+        firstORight = robot.ORight.getCurrentPosition();
+        firstOMiddle = robot.OMiddle.getCurrentPosition();
+    }
+
+    private void queryOdometry() {
+        odometryInfo = new double[]{
+                robot.OLeft.getCurrentPosition() - firstOLeft,
+                robot.ORight.getCurrentPosition() - firstORight,
+                robot.OMiddle.getCurrentPosition() - firstOMiddle
+        };
+        robotPosition = getPosition(robotPosition, odometryInfo, telemetry);
+
+//        telemetry.update();
+    }
+
+    public void run() {
+        while(!OdometryRunnable.currentThread().isInterrupted()) {
+            queryOdometry();
+        }
     }
 }

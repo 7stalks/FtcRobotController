@@ -76,6 +76,7 @@ public class MainTeleop extends LinearOpMode {
                 }
             }
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
+            telemetry.addData("Ryan is AWESOME", robot.ShooterElevator.getPosition());
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
             if (gamepad2.left_trigger > .1) {
@@ -129,6 +130,7 @@ public class MainTeleop extends LinearOpMode {
                 }
             }
             telemetry.addData("wpbb;e servo", robot.WobbleServo.getPosition());
+            telemetry.addData("Ryan is so AWESOME",  robot.WobbleServo.getPosition());
             telemetry.update();
 
             if (wobbleTimer.seconds() > .2) {

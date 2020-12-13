@@ -8,6 +8,7 @@ import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
+import org.firstinspires.ftc.teamcode.odometry.OdometryRunnable;
 
 @TeleOp(name = "Main test", group = "Robot")
 public class MainTest extends LinearOpMode {
@@ -18,6 +19,7 @@ public class MainTest extends LinearOpMode {
     ElapsedTime wobbleTimer = new ElapsedTime();
     VuforiaNavigation nav = new VuforiaNavigation();
     Odometry odometry = new Odometry();
+    OdometryRunnable odometryRun = new OdometryRunnable(robot, telemetry);
 
     double wobblePosition = 0.0;
     boolean wobbleCaught = false;
@@ -25,7 +27,6 @@ public class MainTest extends LinearOpMode {
     boolean wobbleUp = true;
 
     double[] odometryInfo;
-    double[] robotPosition = {0, 0, 0};
     double firstOLeft = 0;
     double firstORight = 0;
     double firstOMiddle = 0;
@@ -45,34 +46,33 @@ public class MainTest extends LinearOpMode {
     ////
 
     // kind of a central method. give it some time and it'll prolly be moved to Odometry.java
-    private void queryOdometry() {
-        odometryInfo = new double[]{
-                robot.OLeft.getCurrentPosition() - firstOLeft,
-                robot.ORight.getCurrentPosition() - firstORight,
-                robot.OMiddle.getCurrentPosition() - firstOMiddle
-        };
-        robotPosition = odometry.getPosition(robotPosition, odometryInfo, telemetry);
-        telemetry.addData("X", robotPosition[0]);
-        telemetry.addData("Y", robotPosition[1]);
-        telemetry.addData("Theta", robotPosition[2]);
-
-        telemetry.update();
-    }
+//    private void queryOdometry() {
+//        odometryInfo = new double[]{
+//                robot.OLeft.getCurrentPosition() - firstOLeft,
+//                robot.ORight.getCurrentPosition() - firstORight,
+//                robot.OMiddle.getCurrentPosition() - firstOMiddle
+//        };
+//        robotPosition = odometry.getPosition(robotPosition, odometryInfo, telemetry);
+//        telemetry.addData("X", robotPosition[0]);
+//        telemetry.addData("Y", robotPosition[1]);
+//        telemetry.addData("Theta", robotPosition[2]);
+//
+////        telemetry.update();
+//    }
 
     void rotateTo0() {
-        double wantedAngle = (Math.round(robotPosition[2]/(2*Math.PI))) * 2 * Math.PI;
+        double wantedAngle = (Math.round(odometryRun.robotPosition[2]/(2*Math.PI))) * 2 * Math.PI;
         double driveSpeed = .55;
-        while (robotPosition[2] < wantedAngle - .01 || robotPosition[2] > wantedAngle + .01 && opModeIsActive()) {
-            if (robotPosition[2] < wantedAngle - .01) {
+        while (odometryRun.robotPosition[2] < wantedAngle - .01 || odometryRun.robotPosition[2] > wantedAngle + .01 && opModeIsActive()) {
+            if (odometryRun.robotPosition[2] < wantedAngle - .01) {
                 drive.circlepadMove(0, 0, driveSpeed);
-            } else if (robotPosition[2] > wantedAngle + .01) {
+            } else if (odometryRun.robotPosition[2] > wantedAngle + .01) {
                 drive.circlepadMove(0, 0, -driveSpeed);
             }
             // once there's a radian to go, start proportionally reducing drivespeed to .3
-            if (Math.abs(robotPosition[2] - wantedAngle) < 1) {
-                driveSpeed = .2 + (.2 * Math.abs(robotPosition[2] - wantedAngle));
+            if (Math.abs(odometryRun.robotPosition[2] - wantedAngle) < 1) {
+                driveSpeed = .2 + (.2 * Math.abs(odometryRun.robotPosition[2] - wantedAngle));
             }
-            queryOdometry();
         }
         drive.stop();
     }
@@ -80,43 +80,43 @@ public class MainTest extends LinearOpMode {
     void doubleStrafeToPoint(double x, double y) {
         rotateTo0();
         double hyp, driveX, driveY;
-        while (((robotPosition[0] < x-.4 || robotPosition[0] > x+.4) || (robotPosition[1] < y-.4 || robotPosition[1] > y+.4)) && opModeIsActive()) {
-            hyp = Math.sqrt((x - robotPosition[0])*(x - robotPosition[0]) + (y - robotPosition[1])*(y - robotPosition[1]));
-            driveX = .85 * (x - robotPosition[0]) / hyp;
-            driveY = .85 * (y - robotPosition[1]) / hyp;
-            if (Math.abs(robotPosition[0] - x) < 6) {
+        while (((odometryRun.robotPosition[0] < x-.4 || odometryRun.robotPosition[0] > x+.4) || (odometryRun.robotPosition[1] < y-.4 || odometryRun.robotPosition[1] > y+.4)) && opModeIsActive()) {
+            hyp = Math.sqrt((x - odometryRun.robotPosition[0])*(x - odometryRun.robotPosition[0]) + (y - odometryRun.robotPosition[1])*(y - odometryRun.robotPosition[1]));
+            driveX = .85 * (x - odometryRun.robotPosition[0]) / hyp;
+            driveY = .85 * (y - odometryRun.robotPosition[1]) / hyp;
+            if (Math.abs(odometryRun.robotPosition[0] - x) < 6) {
                 driveX = driveX * .62;
                 driveY = driveY * .62;
             }
             drive.circlepadMove(driveX, -driveY, 0);
-            queryOdometry();
         }
+        telemetry.addLine("I just broke out of the while");
+        telemetry.update();
+        sleep(2000);
         drive.stop();
         rotateTo0();
     }
 
     // there wasn't an override here before and i think it worked fine... oh well! we'll see
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, telemetry);
         robot.initVuforia(hardwareMap, telemetry);
         nav.navigationInit(robot);
+        robot.switchableCamera.setActiveCamera(robot.backWebcam);
+        odometryRun.start();
+        telemetry.setMsTransmissionInterval(5);
 
         waitForStart();
 
         while (opModeIsActive()) {
 
             nav.navigationNoTelemetry();
-            if (nav.targetVisible) {
-                robotPosition = new double[] {nav.X+8, nav.Y, nav.Rotation + Math.PI/2};
-                firstOLeft = robot.OLeft.getCurrentPosition();
-                firstORight = robot.ORight.getCurrentPosition();
-                firstOMiddle = robot.OMiddle.getCurrentPosition();
-                odometry.lastIterationOdometryInfo = new double[] {0, 0, 0};
+            if (nav.targetVisible && gamepad1.b) {
+                odometryRun.inputVuforia(nav.X + 8, nav.Y, nav.Rotation + Math.PI/2);
             }
-            queryOdometry();
 
-            if (gamepad1.start) {
+            if (gamepad1.a) {
                 doubleStrafeToPoint(-3.5, -24.5);
             }
 
@@ -210,6 +210,14 @@ public class MainTest extends LinearOpMode {
                 }
             }
             telemetry.addData("wpbb;e servo", robot.WobbleServo.getPosition());
+            telemetry.addData("X", odometryRun.robotPosition[0]);
+            telemetry.addData("Y", odometryRun.robotPosition[1]);
+            telemetry.addData("Theta", odometryRun.robotPosition[2]);
+            telemetry.addData("Odometry info L", odometryRun.odometryInfo[0]);
+            telemetry.addData("Odometry info R", odometryRun.odometryInfo[1]);
+            telemetry.addData("Odometry info M", odometryRun.odometryInfo[2]);
+
+
             telemetry.update();
 
             if (wobbleTimer.seconds() > .2) {
@@ -225,5 +233,6 @@ public class MainTest extends LinearOpMode {
                 }
             }
         }
+        odometryRun.join();
     }
 }
