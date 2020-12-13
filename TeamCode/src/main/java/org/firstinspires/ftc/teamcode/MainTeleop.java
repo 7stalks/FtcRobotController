@@ -78,8 +78,12 @@ public class MainTeleop extends LinearOpMode {
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
-            if (gamepad2.left_trigger > .1 && robot.Shooter.getPower() >= .90) {
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+            if (gamepad2.left_trigger > .1) {
+                if (robot.Shooter.getPower() >= .90) {
+                    robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+                } else {
+                    robot.ShooterServo.setPosition(.6);
+                }
             } else if (robot.ShooterServo.getPosition() >= robot.SHOOTER_SERVO_MAX) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
             }
@@ -87,6 +91,10 @@ public class MainTeleop extends LinearOpMode {
             // gamepad 2 right trigger (analog) gets the shooter motor itself. has to hold down for it to work
             if (gamepad2.right_trigger > .1) {
                 robot.Shooter.setPower(1);
+                robot.ShooterElevator.setPosition(.36);
+                robot.BottomIntake.setPower(0);
+                robot.TopIntake.setPower(0);
+                intakeOn = false;
             } else {
                 robot.Shooter.setPower(0);
             }
@@ -108,28 +116,28 @@ public class MainTeleop extends LinearOpMode {
             if (gamepad2.dpad_left) {
                 wobblePosition = robot.WobbleServo.getPosition();
                 telemetry.addData("dpad2 left", wobblePosition);
-                if (wobblePosition < .55 && wobbleUp) {
-                    robot.WobbleServo.setPosition(wobblePosition + .003);
-                    if (wobblePosition + .01 >= .55) {
+                if (wobblePosition < .44 && wobbleUp) {
+                    robot.WobbleServo.setPosition(wobblePosition + .0008);
+                    if (wobblePosition + .01 >= .44) {
                         wobbleUp = false;
                     }
                 } else {
-                    robot.WobbleServo.setPosition(wobblePosition - .003);
+                    robot.WobbleServo.setPosition(wobblePosition - .0008);
                     if (wobblePosition - .01 <= .01) {
                         wobbleUp = true;
                     }
                 }
             }
-
+            telemetry.addData("wpbb;e servo", robot.WobbleServo.getPosition());
             telemetry.update();
 
             if (wobbleTimer.seconds() > .2) {
                 if (gamepad2.dpad_right) {
                     if (!wobbleCaught) {
-                        robot.WobbleCatcher.setPosition(1);
+                        robot.WobbleCatcher.setPosition(.85);
                         wobbleCaught = true;
                     } else {
-                        robot.WobbleCatcher.setPosition(0);
+                        robot.WobbleCatcher.setPosition(.4);
                         wobbleCaught = false;
                     }
                     wobbleTimer.reset();

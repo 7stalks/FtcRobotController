@@ -310,7 +310,7 @@ public class OdometryTests extends LinearOpMode {
     void doubleStrafeToPoint(double x, double y) {
         rotateTo0();
         double hyp, driveX, driveY;
-        while (((robotPosition[0] < x-.2 || robotPosition[0] > x+.2) || (robotPosition[1] < y-.2 || robotPosition[1] > y+.2)) && opModeIsActive()) {
+        while (((robotPosition[0] < x-.4 || robotPosition[0] > x+.4) || (robotPosition[1] < y-.4 || robotPosition[1] > y+.4)) && opModeIsActive()) {
             hyp = Math.sqrt((x - robotPosition[0])*(x - robotPosition[0]) + (y - robotPosition[1])*(y - robotPosition[1]));
             driveX = .85 * (x - robotPosition[0]) / hyp;
             driveY = .85 * (y - robotPosition[1]) / hyp;

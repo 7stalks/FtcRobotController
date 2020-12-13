@@ -124,7 +124,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
                 break;
             }
             if (Math.abs(robotPosition[1] - y) < 9) {
-                moveSpeed = .2 + (((.55-.2)/(9)) * (Math.abs(robotPosition[1] - y)));
+                moveSpeed = .24 + (((.55-.24)/(9)) * (Math.abs(robotPosition[1] - y)));
             }
         }
         drive.stop();
@@ -136,32 +136,43 @@ public class BlueCloseShoot3 extends LinearOpMode {
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
         sleep(500);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
+        sleep(800);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
         sleep(500);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
+        sleep(800);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
         sleep(500);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
+        sleep(800);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
         sleep(500);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
+        sleep(800);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
+        sleep(300);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
+        sleep(300);
         robot.Shooter.setPower(0);
     }
 
     @Override
     public void runOpMode() throws InterruptedException {
+        try {
+            runMyOpMode();
+        } catch (InterruptedException err) {
+            if (switchCameraThread.isAlive()) {
+                switchCameraThread.join();
+            }
+        }
+    }
+
+
+    public void runMyOpMode() throws InterruptedException {
         // initialization things. we'll have to see if it's too heavy for the robot to handle
         robot.init(hardwareMap, telemetry);
-        robot.WobbleServo.setPosition(.55);
-        robot.WobbleCatcher.setPosition(1);
+        robot.WobbleServo.setPosition(0);
+        robot.WobbleCatcher.setPosition(.85);
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
@@ -177,6 +188,9 @@ public class BlueCloseShoot3 extends LinearOpMode {
                 }
                 if (beginningUpdatedRecognitions.size() == 0) {
                     telemetry.addData("Recognition", "None");
+                }
+                if (isStopRequested()) {
+                    break;
                 }
             }
             telemetry.update();
@@ -201,7 +215,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
 
         //vuforia time! gotta move over to the picture too. odometry time
         goToPoint(6);
-        goToStrafePoint(26);
+        goToStrafePoint(24);
         sleep(500);
         // unsure if this will work. we'll find out
         while (!nav.targetVisible && !isStopRequested()) {
@@ -222,7 +236,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
 //        sleep(100);
         drive.stop();
 
-        robot.ShooterElevator.setPosition(0.33);
+        robot.ShooterElevator.setPosition(0.362);
         sleep(300);
         shoot();
         sleep(100);
@@ -240,8 +254,13 @@ public class BlueCloseShoot3 extends LinearOpMode {
         }
         goToPoint(wobbleX);
         goToStrafePoint(wobbleY);
-        robot.WobbleCatcher.setPosition(0);
+        robot.WobbleCatcher.setPosition(.4);
         sleep(1500);
+        timer.reset();
+        while (timer.milliseconds() < 500) {
+            drive.circlepadMove(0, -.6, 0);
+        }
+        drive.stop();
         goToPoint(10);
     }
 }
