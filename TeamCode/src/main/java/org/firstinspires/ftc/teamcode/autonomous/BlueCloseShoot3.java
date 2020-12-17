@@ -20,6 +20,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
     Odometry odometry = new Odometry();
     VuforiaNavigation nav = new VuforiaNavigation();
     ElapsedTime timer = new ElapsedTime();
+    ElapsedTime sleepTimer = new ElapsedTime();
     Runnable switchCamera =
             new Runnable(){
                 public void run(){
@@ -130,29 +131,34 @@ public class BlueCloseShoot3 extends LinearOpMode {
         drive.stop();
     }
 
+    void timer_sleep(int milliseconds) {
+        sleepTimer.reset();
+        while (sleepTimer.milliseconds() < milliseconds && opModeIsActive()) {}
+    }
+
     void shoot() {
         robot.Shooter.setPower(1);
-        sleep(1000);
+        timer_sleep(1000);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
+        timer_sleep(500);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(800);
+        timer_sleep(800);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
+        timer_sleep(500);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(800);
+        timer_sleep(800);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
+        timer_sleep(500);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(800);
+        timer_sleep(800);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
+        timer_sleep(500);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(800);
+        timer_sleep(800);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(300);
+        timer_sleep(300);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(300);
+        timer_sleep(300);
         robot.Shooter.setPower(0);
     }
 
@@ -216,8 +222,9 @@ public class BlueCloseShoot3 extends LinearOpMode {
         //vuforia time! gotta move over to the picture too. odometry time
         goToPoint(6);
         goToStrafePoint(24);
-        sleep(500);
+        timer_sleep(500);
         // unsure if this will work. we'll find out
+        while (nav == null && opModeIsActive()) {}
         while (!nav.targetVisible && !isStopRequested()) {
             nav.navigationNoTelemetry();
         }
@@ -231,15 +238,15 @@ public class BlueCloseShoot3 extends LinearOpMode {
         queryOdometry();
 
         goToPoint(-3.5);
-        goToStrafePoint(-24.5);
+        goToStrafePoint(-22);
 //        drive.circlepadMove(0, 0, -.4);
 //        sleep(100);
         drive.stop();
 
         robot.ShooterElevator.setPosition(0.362);
-        sleep(300);
+        timer_sleep(300);
         shoot();
-        sleep(100);
+        timer_sleep(100);
 
         int wobbleX, wobbleY;
         if (numberOfRings == 0) {
@@ -255,7 +262,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
         goToPoint(wobbleX);
         goToStrafePoint(wobbleY);
         robot.WobbleCatcher.setPosition(.4);
-        sleep(1500);
+        timer_sleep(1500);
         timer.reset();
         while (timer.milliseconds() < 500) {
             drive.circlepadMove(0, -.6, 0);

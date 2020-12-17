@@ -20,6 +20,7 @@ public class MainTest extends LinearOpMode {
     VuforiaNavigation nav = new VuforiaNavigation();
     Odometry odometry = new Odometry();
     OdometryRunnable odometryRun = new OdometryRunnable(robot, telemetry);
+    ElapsedTime sleepTimer = new ElapsedTime();
 
     double wobblePosition = 0.0;
     boolean wobbleCaught = false;
@@ -90,11 +91,13 @@ public class MainTest extends LinearOpMode {
             }
             drive.circlepadMove(driveX, -driveY, 0);
         }
-        telemetry.addLine("I just broke out of the while");
-        telemetry.update();
-        sleep(2000);
         drive.stop();
         rotateTo0();
+    }
+
+    void timer_sleep(int milliseconds) {
+        sleepTimer.reset();
+        while (sleepTimer.milliseconds() < milliseconds && opModeIsActive()) {}
     }
 
     // there wasn't an override here before and i think it worked fine... oh well! we'll see
@@ -112,12 +115,21 @@ public class MainTest extends LinearOpMode {
         while (opModeIsActive()) {
 
             nav.navigationNoTelemetry();
-            if (nav.targetVisible && gamepad1.b) {
-                odometryRun.inputVuforia(nav.X + 8, nav.Y, nav.Rotation + Math.PI/2);
+            if (nav.targetVisible && gamepad1.back) {
+                double avgX = 0, avgY = 0, avgRot = 0, i;
+                for (i=0; i<50; i++) {
+                    avgX += (nav.X + 8);
+                    avgY += nav.Y;
+                    avgRot += (nav.Rotation + Math.PI/2);
+                }
+                avgX = avgX/i;
+                avgY = avgY/i;
+                avgRot = avgRot/i;
+                odometryRun.inputVuforia(avgX, avgY, avgRot);
             }
 
-            if (gamepad1.a) {
-                doubleStrafeToPoint(-3.5, -24.5);
+            if (gamepad1.start) {
+                doubleStrafeToPoint(-3.5, -22);
             }
 
             // drive goes to gamepad 1. the left and right sticks control circlepad, dpad is for the fast move

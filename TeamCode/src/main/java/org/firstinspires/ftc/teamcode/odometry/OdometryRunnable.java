@@ -139,6 +139,7 @@ public class OdometryRunnable extends Thread {
         firstOLeft = robot.OLeft.getCurrentPosition();
         firstORight = robot.ORight.getCurrentPosition();
         firstOMiddle = robot.OMiddle.getCurrentPosition();
+        robotPosition = new double[] {x, y, rotation};
     }
 
     private void queryOdometry() {
