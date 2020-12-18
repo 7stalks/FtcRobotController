@@ -5,6 +5,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -85,7 +86,7 @@ public class RobotHardware {
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
 
-
+    ElapsedTime timer = new ElapsedTime();
 
 
 
@@ -348,5 +349,10 @@ public class RobotHardware {
         } else {
             telemetry.addData("Status", "Tensor Flow Object Detection not Initialized");
         }
+    }
+
+    public void sleepTimer(int milliseconds) {
+        timer.reset();
+        while (timer.milliseconds() <= milliseconds) {}
     }
 }

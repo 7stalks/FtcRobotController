@@ -10,7 +10,9 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
 
+import java.lang.reflect.Array;
 import java.util.List;
+import java.util.Arrays;
 
 @Autonomous(name = "Blue Close Shoot 3")
 public class BlueCloseShoot3 extends LinearOpMode {
@@ -86,7 +88,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
 
     // moves forwards backwards (x direction)
     void goToPoint(double x) {
-        double moveSpeed = .7;
+        double moveSpeed = .6;
         double thetaSpeed = 0;
         while ((robotPosition[0] < (x-.1) || robotPosition[0] > (x+.1)) && opModeIsActive()) {
             thetaSpeed = -(robotPosition[2]+(rotation));
@@ -101,7 +103,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
                 break;
             }
             if (Math.abs(robotPosition[0] - x) < 15) {
-                moveSpeed = .15 + (((.7-.15)/(15)) * (Math.abs(robotPosition[0] - x)));
+                moveSpeed = .15 + (((.6-.15)/(15)) * (Math.abs(robotPosition[0] - x)));
             }
         }
         queryOdometry();
@@ -138,21 +140,21 @@ public class BlueCloseShoot3 extends LinearOpMode {
 
     void shoot() {
         robot.Shooter.setPower(1);
-        timer_sleep(1000);
+        timer_sleep(1100);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        timer_sleep(500);
+        timer_sleep(700);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        timer_sleep(800);
+        timer_sleep(900);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        timer_sleep(500);
+        timer_sleep(700);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        timer_sleep(800);
+        timer_sleep(900);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        timer_sleep(500);
+        timer_sleep(700);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        timer_sleep(800);
+        timer_sleep(900);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        timer_sleep(500);
+        timer_sleep(700);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         timer_sleep(800);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
@@ -221,16 +223,48 @@ public class BlueCloseShoot3 extends LinearOpMode {
 
         //vuforia time! gotta move over to the picture too. odometry time
         goToPoint(6);
-        goToStrafePoint(24);
+        goToStrafePoint(22);
         timer_sleep(500);
         // unsure if this will work. we'll find out
-        while (nav == null && opModeIsActive()) {}
+        int _count = 0;
+        while (nav == null && opModeIsActive()) {
+            telemetry.addData("Waiting for nav", _count);
+            telemetry.update();
+            _count += 1;
+        }
+        double avgX = 0, avgY = 0, avgRot = 0;
+        double[] medxList = new double[50];
+        double[] medyList = new double[50];
+        double[] medrotList = new double[50];
+        double medX = 0, medY = 0, medRot = 0;
+
+        _count = 0;
         while (!nav.targetVisible && !isStopRequested()) {
             nav.navigationNoTelemetry();
+            telemetry.addData("Nav not visible", _count);
+            telemetry.update();
         }
+
+        telemetry.addData("Nav visible", _count);
+        telemetry.update();
+
+        int sample_size = 50;
+        for (int i=0; i<sample_size; i++) {
+            avgX += nav.X + 8;
+            avgY += nav.Y;
+            avgRot += nav.Rotation + Math.PI/2;
+        }
+        avgX = avgX/sample_size;
+        avgY = avgY/sample_size;
+        avgRot = avgRot/sample_size;
         switchCameraThread.join();
 
-        robotPosition = new double[] {nav.X+8, nav.Y, nav.Rotation + Math.PI/2};
+        telemetry.addData("avg x, y, z", Arrays.toString(new double[] {avgX, avgY, avgRot}));
+//        telemetry.addData("med x, y, z", Arrays.toString(new double[] {medX, medY, medRot}));
+        telemetry.update();
+
+
+        robotPosition = new double[] {avgX, avgY, avgRot};
         firstOLeft = robot.OLeft.getCurrentPosition();
         firstORight = robot.ORight.getCurrentPosition();
         firstOMiddle = robot.OMiddle.getCurrentPosition();
@@ -238,7 +272,8 @@ public class BlueCloseShoot3 extends LinearOpMode {
         queryOdometry();
 
         goToPoint(-3.5);
-        goToStrafePoint(-22);
+        timer_sleep(423);
+        goToStrafePoint(-23);
 //        drive.circlepadMove(0, 0, -.4);
 //        sleep(100);
         drive.stop();
@@ -264,7 +299,7 @@ public class BlueCloseShoot3 extends LinearOpMode {
         robot.WobbleCatcher.setPosition(.4);
         timer_sleep(1500);
         timer.reset();
-        while (timer.milliseconds() < 500) {
+        while (timer.milliseconds() < 500 && opModeIsActive()) {
             drive.circlepadMove(0, -.6, 0);
         }
         drive.stop();

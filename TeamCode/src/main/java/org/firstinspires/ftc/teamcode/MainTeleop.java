@@ -41,7 +41,7 @@ public class MainTeleop extends LinearOpMode {
 
             // drive goes to gamepad 1. the left and right sticks control circlepad, dpad is for the fast move
             drive.circlepadMove(-gamepad1.left_stick_y, -gamepad1.left_stick_x, gamepad1.right_stick_x);
-            drive.dpadMove(gamepad1.dpad_right, gamepad1.dpad_left, gamepad1.dpad_up, gamepad1.dpad_down);
+            drive.dpadMove(gamepad1.dpad_left, gamepad1.dpad_up, gamepad1.dpad_right, gamepad1.dpad_down);
 
             // gamepad 1 a can turn on and off the intake, b can reverse it and turn on/off
             if (intakeTimer.seconds() > .2) {
@@ -66,14 +66,10 @@ public class MainTeleop extends LinearOpMode {
             }
 
             // when the intake is on, you cannot change position of shooter; when it is off you can change position of shooter using bumpers
-            if (intakeOn) {
-                robot.ShooterElevator.setPosition(0);
-            } else {
-                if (gamepad2.right_bumper) {
-                    robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .003);
-                } else if (gamepad2.left_bumper) {
-                    robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .003);
-                }
+            if (gamepad2.right_bumper) {
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .003);
+            } else if (gamepad2.left_bumper) {
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .003);
             }
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
             telemetry.addData("Ryan is AWESOME", robot.ShooterElevator.getPosition());
@@ -92,12 +88,17 @@ public class MainTeleop extends LinearOpMode {
             // gamepad 2 right trigger (analog) gets the shooter motor itself. has to hold down for it to work
             if (gamepad2.right_trigger > .1) {
                 robot.Shooter.setPower(1);
-                robot.ShooterElevator.setPosition(.36);
                 robot.BottomIntake.setPower(0);
                 robot.TopIntake.setPower(0);
                 intakeOn = false;
             } else {
                 robot.Shooter.setPower(0);
+            }
+            if (gamepad2.a) {
+                robot.ShooterElevator.setPosition(.36);
+            }
+            if (gamepad2.b) {
+                robot.ShooterElevator.setPosition(.3);
             }
 
             // gamepad 2 dpad up makes the wobble stand go up, dpad down makes it go down
