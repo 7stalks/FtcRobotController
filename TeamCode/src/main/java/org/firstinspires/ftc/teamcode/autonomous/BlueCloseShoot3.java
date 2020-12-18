@@ -10,7 +10,6 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
 
-import java.lang.reflect.Array;
 import java.util.List;
 import java.util.Arrays;
 
@@ -31,7 +30,6 @@ public class BlueCloseShoot3 extends LinearOpMode {
                 }
             };
     Thread switchCameraThread = new Thread(switchCamera);
-
 
     double[] odometryInfo;
     double[] robotPosition = {0, 0, 0};

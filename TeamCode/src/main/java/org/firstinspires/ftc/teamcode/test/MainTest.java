@@ -19,7 +19,7 @@ public class MainTest extends LinearOpMode {
     ElapsedTime wobbleTimer = new ElapsedTime();
     VuforiaNavigation nav = new VuforiaNavigation();
     Odometry odometry = new Odometry();
-    OdometryRunnable odometryRun = new OdometryRunnable(robot, telemetry);
+    OdometryRunnable odometryRun = new OdometryRunnable(robot);
     ElapsedTime sleepTimer = new ElapsedTime();
 
     double wobblePosition = 0.0;

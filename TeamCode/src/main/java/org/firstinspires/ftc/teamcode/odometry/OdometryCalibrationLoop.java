@@ -15,7 +15,7 @@ import java.io.File;
 
 @TeleOp(name = "loop de loop")
 @Disabled
-public class odometryCalibrationLoop extends LinearOpMode {
+public class OdometryCalibrationLoop extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
