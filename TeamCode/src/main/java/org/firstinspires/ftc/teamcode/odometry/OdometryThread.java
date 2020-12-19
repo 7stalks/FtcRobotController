@@ -1,9 +1,8 @@
 package org.firstinspires.ftc.teamcode.odometry;
 
-import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
-public class OdometryRunnable extends Thread {
+public class OdometryThread extends Thread {
 
     RobotHardware robot;
 
@@ -12,21 +11,19 @@ public class OdometryRunnable extends Thread {
     double firstOMiddle;
     public double[] odometryInfo = {0, 0, 0};
     public double[] robotPosition = {0, 0, 0};
-
-
-    public OdometryRunnable(RobotHardware myRobot) {
-        robot = myRobot;
-    }
-
     public double[] lastIterationOdometryInfo = {0, 0, 0};
 
     public double encoderCountsPerIn = 306.3816404153158;
-
     // The two "big" constants. The wheel distance is the distance between L and R encoders and
     // determines theta. The tick per degree offset is for the middle encoder
     // TODO add "final" to each of these when done testing
     public double robotEncoderWheelDistance = 15.6176;
     public double horizontalEncoderTickPerDegreeOffset = -2120;
+
+    // constructor
+    public OdometryThread(RobotHardware myRobot) {
+        robot = myRobot;
+    }
 
     // Gets the h used in the odometry calculation
     // (AKA get the hypotenuse of the mini triangle made when driving)
@@ -105,7 +102,7 @@ public class OdometryRunnable extends Thread {
     }
 
     public void run() {
-        while(!OdometryRunnable.currentThread().isInterrupted()) {
+        while(!OdometryThread.currentThread().isInterrupted()) {
             queryOdometry();
         }
     }

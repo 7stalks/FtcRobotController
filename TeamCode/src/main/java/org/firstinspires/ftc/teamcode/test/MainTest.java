@@ -7,8 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
-import org.firstinspires.ftc.teamcode.odometry.Odometry;
-import org.firstinspires.ftc.teamcode.odometry.OdometryRunnable;
+import org.firstinspires.ftc.teamcode.odometry.OdometryThread;
 
 @TeleOp(name = "Main test", group = "Robot")
 public class MainTest extends LinearOpMode {
@@ -18,8 +17,7 @@ public class MainTest extends LinearOpMode {
     ElapsedTime intakeTimer = new ElapsedTime();
     ElapsedTime wobbleTimer = new ElapsedTime();
     VuforiaNavigation nav = new VuforiaNavigation();
-    Odometry odometry = new Odometry();
-    OdometryRunnable odometryRun = new OdometryRunnable(robot);
+    OdometryThread odometryRun = new OdometryThread(robot);
     ElapsedTime sleepTimer = new ElapsedTime();
 
     double wobblePosition = 0.0;
