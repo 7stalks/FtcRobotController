@@ -65,9 +65,8 @@ public class BlueShoot3Test extends LinearOpMode {
 
     void shoot() {
         robot.ShooterElevator.setPosition(0.36);
-        robot.sleepTimer(100);
         robot.Shooter.setPower(1);
-        robot.sleepTimer(1100);
+        robot.sleepTimer(1000);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
         robot.sleepTimer(600);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
@@ -149,6 +148,7 @@ public class BlueShoot3Test extends LinearOpMode {
         //vuforia time! gotta move over to the picture too. odometry time
         odometryMove.goToPoint(6, 0);
         odometryMove.goToStrafePoint(23, 0);
+//        odometryMove.doubleStrafeToPoint(6, 23);
         robot.sleepTimer(100);
 
         // waits for the camera to switch. as soon as it's done it joins the thread
@@ -177,8 +177,9 @@ public class BlueShoot3Test extends LinearOpMode {
 
         // heads to shooting position
         odometryMove.goToPoint(-4, 0);
-        robot.sleepTimer(250);
+        robot.sleepTimer(200);
         odometryMove.goToStrafePoint(-23, 0);
+//        odometryMove.doubleStrafeToPoint(-4, -23);
 
         // shoots the rings. pop pop pop pop pop (5 times)
         shoot();
@@ -198,12 +199,13 @@ public class BlueShoot3Test extends LinearOpMode {
         // proceeds to go to that point and drop the wobble goal
         odometryMove.goToPoint(wobbleX, 0);
         odometryMove.goToStrafePoint(wobbleY, 0);
+//        odometryMove.doubleStrafeToPoint(wobbleX, wobbleY);
         robot.WobbleCatcher.setPosition(.4);
-        robot.sleepTimer(1500);
+        robot.sleepTimer(500);
 
         // moves a little to the right and then back to the line
         timer.reset();
-        while (timer.milliseconds() < 800 && opModeIsActive()) {
+        while (timer.milliseconds() < 500 && opModeIsActive()) {
             drive.circlepadMove(0, -.6, 0);
         }
         drive.stop();

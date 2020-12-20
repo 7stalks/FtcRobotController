@@ -66,4 +66,42 @@ public class OdometryMove {
         odometry.queryOdometry();
         drive.stop();
     }
+
+    void rotateTo0() {
+        double wantedAngle = (Math.round(odometry.robotPosition[2]/(2*Math.PI))) * 2 * Math.PI;
+        double driveSpeed = .55;
+        while (odometry.robotPosition[2] < wantedAngle - .01 || odometry.robotPosition[2] > wantedAngle + .01 && opMode.opModeIsActive()) {
+            if (odometry.robotPosition[2] < wantedAngle - .01) {
+                drive.circlepadMove(0, 0, driveSpeed);
+                odometry.queryOdometry();
+            } else if (odometry.robotPosition[2] > wantedAngle + .01) {
+                drive.circlepadMove(0, 0, -driveSpeed);
+                odometry.queryOdometry();
+            }
+            // once there's a radian to go, start proportionally reducing drivespeed to .3
+            if (Math.abs(odometry.robotPosition[2] - wantedAngle) < 1) {
+                driveSpeed = .2 + (.2 * Math.abs(odometry.robotPosition[2] - wantedAngle));
+            }
+            odometry.queryOdometry();
+        }
+        drive.stop();
+    }
+
+    public void doubleStrafeToPoint(double x, double y) {
+        rotateTo0();
+        double hyp, driveX, driveY;
+        while (((odometry.robotPosition[0] < x-.4 || odometry.robotPosition[0] > x+.4) || (odometry.robotPosition[1] < y-.4 || odometry.robotPosition[1] > y+.4)) && opMode.opModeIsActive()) {
+            hyp = Math.sqrt((x - odometry.robotPosition[0])*(x - odometry.robotPosition[0]) + (y - odometry.robotPosition[1])*(y - odometry.robotPosition[1]));
+            driveX = .85 * (x - odometry.robotPosition[0]) / hyp;
+            driveY = .85 * (y - odometry.robotPosition[1]) / hyp;
+            if (Math.abs(odometry.robotPosition[0] - x) < 6) {
+                driveX = driveX * .62;
+                driveY = driveY * .62;
+            }
+            drive.circlepadMove(driveX, -driveY, 0);
+            odometry.queryOdometry();
+        }
+        drive.stop();
+        rotateTo0();
+    }
 }
