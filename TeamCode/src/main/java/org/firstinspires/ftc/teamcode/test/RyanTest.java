@@ -15,7 +15,7 @@ public class RyanTest extends LinearOpMode {
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
     OdometryThread odometryThread = new OdometryThread(robot);
-    Odometry odometry = new Odometry();
+    Odometry odometry = new Odometry(robot, telemetry);
     ElapsedTime timer = new ElapsedTime();
 
     double oldMiddleTicks = 0;

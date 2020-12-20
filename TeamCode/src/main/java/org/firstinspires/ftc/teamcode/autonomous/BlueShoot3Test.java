@@ -8,8 +8,8 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
+import org.firstinspires.ftc.teamcode.odometry.Odometry;
 import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
-import org.firstinspires.ftc.teamcode.odometry.OdometryThread;
 
 import java.util.List;
 import java.util.Arrays;
@@ -19,8 +19,8 @@ public class BlueShoot3Test extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
-    OdometryThread odometryThread = new OdometryThread(robot);
-    OdometryMove odometryMove = new OdometryMove(this, robot, odometryThread);
+    Odometry odometry = new Odometry(robot, telemetry);
+    OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
     VuforiaNavigation nav = new VuforiaNavigation();
     ElapsedTime timer = new ElapsedTime();
     Runnable switchCamera =
@@ -112,7 +112,6 @@ public class BlueShoot3Test extends LinearOpMode {
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
-        odometryThread.start();
         telemetry.update();
 
         // loop through tensor during init to see if we have anything
@@ -149,7 +148,7 @@ public class BlueShoot3Test extends LinearOpMode {
 
         //vuforia time! gotta move over to the picture too. odometry time
         odometryMove.goToPoint(6, 0);
-        odometryMove.goToStrafePoint(22, 0);
+        odometryMove.goToStrafePoint(23, 0);
         robot.sleepTimer(100);
 
         // waits for the camera to switch. as soon as it's done it joins the thread
@@ -174,10 +173,10 @@ public class BlueShoot3Test extends LinearOpMode {
         avgRot = avgRot/sampleSize;
         telemetry.addData("avg x, y, z", Arrays.toString(new double[] {avgX, avgY, avgRot}));
         telemetry.update();
-        odometryThread.inputVuforia(avgX, avgY, avgRot);
+        odometry.inputVuforia(avgX, avgY, avgRot);
 
         // heads to shooting position
-        odometryMove.goToPoint(-3.5, 0);
+        odometryMove.goToPoint(-4, 0);
         robot.sleepTimer(250);
         odometryMove.goToStrafePoint(-23, 0);
 
@@ -209,6 +208,5 @@ public class BlueShoot3Test extends LinearOpMode {
         }
         drive.stop();
         odometryMove.goToPoint(10, 0);
-        odometryThread.join();
     }
 }

@@ -9,34 +9,37 @@ public class OdometryMove {
 
     RobotHardware robot;
     GoBildaDrive drive;
-    OdometryThread odometryThread;
+    Odometry odometry;
     LinearOpMode opMode;
 
-    public OdometryMove(LinearOpMode opMode, RobotHardware robot, OdometryThread odometryThread) {
+    public OdometryMove(LinearOpMode opMode, RobotHardware robot, Odometry odometry) {
         this.opMode = opMode;
         this.robot = robot;
         drive = new GoBildaDrive(robot);
-        this.odometryThread = odometryThread;
+        this.odometry = odometry;
     }
 
     // moves forwards backwards (x direction)
     public void goToPoint(double x, double rotation) {
         double moveSpeed = .6;
         double thetaSpeed = 0;
-        while ((odometryThread.robotPosition[0] < (x-.1) || odometryThread.robotPosition[0] > (x+.1)) && opMode.opModeIsActive()) {
-            thetaSpeed = -(odometryThread.robotPosition[2]+(rotation));
-            if (odometryThread.robotPosition[0] < (x-.2)) {
+        while ((odometry.robotPosition[0] < (x-.1) || odometry.robotPosition[0] > (x+.1)) && opMode.opModeIsActive()) {
+            thetaSpeed = -(odometry.robotPosition[2]+(rotation));
+            if (odometry.robotPosition[0] < (x-.2)) {
                 drive.circlepadMove(moveSpeed, 0, thetaSpeed);
-            } else if (odometryThread.robotPosition[0] > (x+.2)) {
+                odometry.queryOdometry();
+            } else if (odometry.robotPosition[0] > (x+.2)) {
                 drive.circlepadMove(-moveSpeed, 0, thetaSpeed);
-            } else if (odometryThread.robotPosition[0] < (x-.1) || odometryThread.robotPosition[0] > (x+.1)) {
+                odometry.queryOdometry();
+            } else if (odometry.robotPosition[0] < (x-.1) || odometry.robotPosition[0] > (x+.1)) {
                 drive.stop();
                 break;
             }
-            if (Math.abs(odometryThread.robotPosition[0] - x) < 16) {
-                moveSpeed = .15 + (((.6-.15)/(16)) * (Math.abs(odometryThread.robotPosition[0] - x)));
+            if (Math.abs(odometry.robotPosition[0] - x) < 15) {
+                moveSpeed = .15 + (((.6-.15)/(15)) * (Math.abs(odometry.robotPosition[0] - x)));
             }
         }
+        odometry.queryOdometry();
         drive.stop();
     }
 
@@ -44,20 +47,23 @@ public class OdometryMove {
     public void goToStrafePoint(double y, double rotation) {
         double moveSpeed = .55;
         double thetaSpeed = 0;
-        while ((odometryThread.robotPosition[1] < (y-.1) || odometryThread.robotPosition[1] > (y+.1)) && opMode.opModeIsActive()) {
-            thetaSpeed = -(odometryThread.robotPosition[2]+(rotation));
-            if (odometryThread.robotPosition[1] < (y-.2)) {
+        while ((odometry.robotPosition[1] < (y-.1) || odometry.robotPosition[1] > (y+.1)) && opMode.opModeIsActive()) {
+            thetaSpeed = -(odometry.robotPosition[2]+(rotation));
+            if (odometry.robotPosition[1] < (y-.2)) {
                 drive.circlepadMove(0, -moveSpeed, thetaSpeed);
-            } else if (odometryThread.robotPosition[1] > (y+.2)) {
+                odometry.queryOdometry();
+            } else if (odometry.robotPosition[1] > (y+.2)) {
                 drive.circlepadMove(0, moveSpeed, thetaSpeed);
-            } else if (odometryThread.robotPosition[1] < (y-.1) || odometryThread.robotPosition[1] > (y+.1)) {
+                odometry.queryOdometry();
+            } else if (odometry.robotPosition[1] < (y-.1) || odometry.robotPosition[1] > (y+.1)) {
                 drive.stop();
                 break;
             }
-            if (Math.abs(odometryThread.robotPosition[1] - y) < 9) {
-                moveSpeed = .24 + (((.55-.24)/(9)) * (Math.abs(odometryThread.robotPosition[1] - y)));
+            if (Math.abs(odometry.robotPosition[1] - y) < 9) {
+                moveSpeed = .24 + (((.55-.24)/(9)) * (Math.abs(odometry.robotPosition[1] - y)));
             }
         }
+        odometry.queryOdometry();
         drive.stop();
     }
 }

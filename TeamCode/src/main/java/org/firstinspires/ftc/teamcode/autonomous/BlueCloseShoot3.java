@@ -18,10 +18,8 @@ public class BlueCloseShoot3 extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
-    Odometry odometry = new Odometry();
+    Odometry odometry = new Odometry(robot, telemetry);
     VuforiaNavigation nav = new VuforiaNavigation();
-    ElapsedTime timer = new ElapsedTime();
-    ElapsedTime sleepTimer = new ElapsedTime();
     Runnable switchCamera =
             new Runnable(){
                 public void run(){
@@ -30,6 +28,8 @@ public class BlueCloseShoot3 extends LinearOpMode {
                 }
             };
     Thread switchCameraThread = new Thread(switchCamera);
+    ElapsedTime timer = new ElapsedTime();
+    ElapsedTime sleepTimer = new ElapsedTime();
 
     double[] odometryInfo;
     double[] robotPosition = {0, 0, 0};

@@ -12,7 +12,7 @@ public class OdometryTests extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
-    Odometry odometry = new Odometry();
+    Odometry odometry = new Odometry(robot, telemetry);
     ElapsedTime timer = new ElapsedTime();
 
     double[] odometryInfo;

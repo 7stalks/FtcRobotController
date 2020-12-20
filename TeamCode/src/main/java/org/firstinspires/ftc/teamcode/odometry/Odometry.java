@@ -5,31 +5,32 @@ import android.sax.StartElementListener;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
+import org.firstinspires.ftc.teamcode.R;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
 public class Odometry {
 
+    RobotHardware robot = new RobotHardware();
+    Telemetry telemetry;
+
+    public Odometry(RobotHardware robot, Telemetry telemetry) {
+        this.robot = robot;
+        this.telemetry = telemetry;
+    }
+
     public double[] lastIterationOdometryInfo = {0, 0, 0};
-
+    double[] robotPosition = {0, 0, 0};
+    double[] odometryInfo;
+    double firstOLeft = 0;
+    double firstORight = 0;
+    double firstOMiddle = 0;
     public double encoderCountsPerIn = 306.3816404153158;
-
-    // ADD A MULTIPLIER TO THE ENCODERS
 
     // The two "big" constants. The wheel distance is the distance between L and R encoders and
     // determines theta. The tick per degree offset is for the middle encoder
     // TODO add "final" to each of these when done testing
     public double robotEncoderWheelDistance = 15.6176;
     public double horizontalEncoderTickPerDegreeOffset = -2100;
-
-    // TODO add a queryOdometry() method that uses the constructor below
-//    RobotHardware robot;
-//    Telemetry telemetry;
-//
-//    public Odometry(RobotHardware someRobot, Telemetry someTelemetry) {
-//        robot = someRobot;
-//        telemetry = someTelemetry;
-//    }
-
 
     // Gets the h used in the odometry calculation
     // (AKA get the hypotenuse of the mini triangle made when driving)
@@ -77,18 +78,10 @@ public class Odometry {
         // get the changes (deltas) in distances/theta
         // deltaDistances has all 3 odometers (L, R, M)
         double[] deltaDistances = odometryInfoToDeltaInches(odometryInfo);
-        telemetry.addData("deltaLeft", deltaDistances[0]);
-        telemetry.addData("deltaRight", deltaDistances[1]);
-        telemetry.addData("deltaMiddle", deltaDistances[2]);
         double deltaTheta = getDeltaTheta(deltaDistances[0], deltaDistances[1]);
 
         // Get the new theta and make it look pretty too (doesn't hurt calculations to make look pretty)
         double newTheta = deltaTheta + oldTheta;
-//        if (newTheta > (2*Math.PI)) {
-//            newTheta = newTheta - (2*Math.PI);
-//        } else if (newTheta < -(2*Math.PI)) {
-//            newTheta = newTheta + (2*Math.PI);
-//        }
 
         // calculate horizontal change using the tick per degree offset and then proceed to get the
         // hypotenuse of the triangle made when moving
@@ -102,29 +95,24 @@ public class Odometry {
         return new double[]{deltaX + oldX, deltaY + oldY, newTheta, deltaDistances[0], deltaDistances[1], deltaTheta, horizontalChange};
     }
 
-    // This is a future moveToPoint method. IN PROGRESS!
-    //  Needs to be iterative if we want to do other processes. Thread???
-    public void moveToPoint(double[] initialPosition, double[] finalPosition, double[] odometryInfo, GoBildaDrive drive, Telemetry telemetry) {
-        double initialAngle;
-        double pivotSpeed = .4;
-        double rawAngleToPosition = Math.atan2(finalPosition[1] - initialPosition[1], finalPosition[0] - initialPosition[0]);
+    public void inputVuforia(double x, double y, double theta) {
+        robotPosition = new double[] {x, y, theta};
+        firstOLeft = robot.OLeft.getCurrentPosition();
+        firstORight = robot.ORight.getCurrentPosition();
+        firstOMiddle = robot.OMiddle.getCurrentPosition();
+        lastIterationOdometryInfo = new double[] {0, 0, 0};
+    }
 
-        // make initial angle positive
-        if (initialPosition[2] < 0) {
-            initialAngle = initialPosition[2] + 2 * Math.PI;
-        } else {
-            initialAngle = initialPosition[2];
-        }
-
-        // will have to negate in case odometry theta is negative
-        double angleToPosition = initialAngle - rawAngleToPosition;
-
-        if (angleToPosition < 0) {
-            pivotSpeed = -pivotSpeed;
-        }
-
-        double[] currentPosition = initialPosition;
-//        while (currentPosition[2] < )
-        drive.circlepadMove(0, 0, pivotSpeed);
+    public void queryOdometry() {
+        odometryInfo = new double[]{
+                robot.OLeft.getCurrentPosition() - firstOLeft,
+                robot.ORight.getCurrentPosition() - firstORight,
+                robot.OMiddle.getCurrentPosition() - firstOMiddle
+        };
+        robotPosition = getPosition(robotPosition, odometryInfo, telemetry);
+        telemetry.addData("X", robotPosition[0]);
+        telemetry.addData("Y", robotPosition[1]);
+        telemetry.addData("Theta", robotPosition[2]);
+        telemetry.update();
     }
 }
