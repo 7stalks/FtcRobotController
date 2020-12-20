@@ -33,8 +33,8 @@ public class OdometryMove {
                 drive.stop();
                 break;
             }
-            if (Math.abs(odometryThread.robotPosition[0] - x) < 15) {
-                moveSpeed = .15 + (((.6-.15)/(15)) * (Math.abs(odometryThread.robotPosition[0] - x)));
+            if (Math.abs(odometryThread.robotPosition[0] - x) < 16) {
+                moveSpeed = .15 + (((.6-.15)/(16)) * (Math.abs(odometryThread.robotPosition[0] - x)));
             }
         }
         drive.stop();

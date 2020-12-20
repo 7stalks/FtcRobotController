@@ -8,7 +8,6 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
-import org.firstinspires.ftc.teamcode.odometry.Odometry;
 import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 import org.firstinspires.ftc.teamcode.odometry.OdometryThread;
 
@@ -118,7 +117,7 @@ public class BlueShoot3Test extends LinearOpMode {
 
         // loop through tensor during init to see if we have anything
         List<Recognition> beginningUpdatedRecognitions;
-        while (!isStarted() && !isStopRequested() && opModeIsActive()) {
+        while (!isStarted() && !isStopRequested()) {
             beginningUpdatedRecognitions = robot.tensorFlowEngine.getUpdatedRecognitions();
             if (beginningUpdatedRecognitions != null) {
                 for (Recognition recognition : beginningUpdatedRecognitions) {
