@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -351,8 +353,8 @@ public class RobotHardware {
         }
     }
 
-    public void sleepTimer(int milliseconds) {
+    public void sleepTimer(int milliseconds, LinearOpMode opMode) {
         timer.reset();
-        while (timer.milliseconds() <= milliseconds) {}
+        while (timer.milliseconds() <= milliseconds && opMode.opModeIsActive()) {opMode.idle();}
     }
 }

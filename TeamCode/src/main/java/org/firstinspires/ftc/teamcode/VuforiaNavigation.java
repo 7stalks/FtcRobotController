@@ -42,12 +42,14 @@ public class VuforiaNavigation {
 
     public List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
 
+    public VuforiaTrackables targetsUltimateGoal;
+
     // Omitted the "this." from robot.vuforia.loadTrackablesFromAsset("Skystone");
     public void navigationInit(RobotHardware robot) {
 
         // Load the data sets for the trackable objects. These particular data
         // sets are stored in the 'assets' part of our application.
-        VuforiaTrackables targetsUltimateGoal = robot.vuforia.loadTrackablesFromAsset("UltimateGoal");
+        targetsUltimateGoal = robot.vuforia.loadTrackablesFromAsset("UltimateGoal");
         VuforiaTrackable blueTowerGoalTarget = targetsUltimateGoal.get(0);
         blueTowerGoalTarget.setName("Blue Tower Goal Target");
         VuforiaTrackable redTowerGoalTarget = targetsUltimateGoal.get(1);

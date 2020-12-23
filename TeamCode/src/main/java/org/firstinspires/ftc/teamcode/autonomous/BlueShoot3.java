@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.teamcode.EncoderThread;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
@@ -14,8 +15,8 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 import java.util.List;
 import java.util.Arrays;
 
-@Autonomous(name = "Blue Close Shoot 3 Test")
-public class BlueShoot3Test extends LinearOpMode {
+@Autonomous(name = "Blue Close Shoot 3")
+public class BlueShoot3 extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
@@ -33,7 +34,7 @@ public class BlueShoot3Test extends LinearOpMode {
     Thread switchCameraThread = new Thread(switchCamera);
 
     // yeah yeah, plucked straight from TensorTest... but it works!!!
-    public String checkForRings(int seconds) {
+    public String checkForRings(double seconds) {
         String numberOfRings = "";
         List<Recognition> updatedRecognitions;
         timer.reset();
@@ -63,32 +64,59 @@ public class BlueShoot3Test extends LinearOpMode {
         return numberOfRings;
     }
 
-    void shoot() {
-        robot.ShooterElevator.setPosition(0.36);
+    void shootHighGoal() {
+        odometryMove.doubleStrafeToPoint(-4, -21.5, 0);
+        robot.ShooterElevator.setPosition(0.345);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
-        robot.sleepTimer(1000);
+        robot.sleepTimer(1000, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        robot.sleepTimer(600);
+        robot.sleepTimer(500, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        robot.sleepTimer(900);
+        robot.sleepTimer(450, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        robot.sleepTimer(600);
+        robot.sleepTimer(500, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        robot.sleepTimer(900);
+        robot.sleepTimer(450, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        robot.sleepTimer(600);
+        robot.sleepTimer(500, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        robot.sleepTimer(900);
+        robot.sleepTimer(450, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        robot.sleepTimer(600);
+        robot.sleepTimer(500, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        robot.sleepTimer(800);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        robot.sleepTimer(300);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        robot.sleepTimer(300);
+//        robot.sleepTimer(700, this);
+//        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+//        robot.sleepTimer(400, this);
+//        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(0);
-        robot.sleepTimer(100);
+    }
+
+    void shootPowerShots() {
+        odometryMove.doubleStrafeToPoint(-4, -8, 0);
+        robot.ShooterElevator.setPosition(0.3);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        robot.Shooter.setPower(1);
+
+        robot.sleepTimer(1000, this);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        robot.sleepTimer(250, this);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        robot.sleepTimer(450, this);
+
+        odometryMove.rotate(0.1);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        robot.sleepTimer(250, this);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        robot.sleepTimer(450, this);
+
+        odometryMove.rotate(0.2);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        robot.sleepTimer(250, this);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        robot.sleepTimer(450, this);
+        robot.Shooter.setPower(0);
+        odometryMove.rotateTo0();
     }
 
     @Override
@@ -135,7 +163,7 @@ public class BlueShoot3Test extends LinearOpMode {
         // tensor section. gets the number of rings (we'll have to fine tune the number of seconds)
         // before turning it into an int because that makes me more comfortable
         // then it turns off tensor so it stops eating away our power
-        String stringNumberOfRings = checkForRings(1);
+        String stringNumberOfRings = checkForRings(.5);
         int numberOfRings = 0;
         if (stringNumberOfRings.equals("Quad")) {
             numberOfRings = 4;
@@ -146,10 +174,10 @@ public class BlueShoot3Test extends LinearOpMode {
         switchCameraThread.start();
 
         //vuforia time! gotta move over to the picture too. odometry time
-        odometryMove.goToPoint(6, 0);
-        odometryMove.goToStrafePoint(23, 0);
-//        odometryMove.doubleStrafeToPoint(6, 23);
-        robot.sleepTimer(100);
+        odometryMove.goToPoint(3, 0);
+//        odometryMove.goToStrafePoint(23, 0);
+        odometryMove.doubleStrafeToPoint(12, 24, 0);
+        robot.sleepTimer(100, this);
 
         // waits for the camera to switch. as soon as it's done it joins the thread
         while (nav == null && opModeIsActive()) {
@@ -162,7 +190,7 @@ public class BlueShoot3Test extends LinearOpMode {
         while (!nav.targetVisible && opModeIsActive()) {
             nav.navigationNoTelemetry();
         }
-        int sampleSize = 50;
+        int sampleSize = 100;
         for (int i=0; i<sampleSize; i++) {
             avgX += nav.X + 8;
             avgY += nav.Y;
@@ -176,13 +204,12 @@ public class BlueShoot3Test extends LinearOpMode {
         odometry.inputVuforia(avgX, avgY, avgRot);
 
         // heads to shooting position
-        odometryMove.goToPoint(-4, 0);
-        robot.sleepTimer(200);
-        odometryMove.goToStrafePoint(-23, 0);
-//        odometryMove.doubleStrafeToPoint(-4, -23);
+//        odometryMove.goToPoint(-4, 0);
+//        robot.sleepTimer(200, this);
+//        odometryMove.goToStrafePoint(-21.5, 0);
 
         // shoots the rings. pop pop pop pop pop (5 times)
-        shoot();
+        shootPowerShots();
 
         // calculates where it needs to go to drop wobble using numberOfRings from earlier
         int wobbleX, wobbleY;
@@ -197,11 +224,11 @@ public class BlueShoot3Test extends LinearOpMode {
             wobbleY = -48;
         }
         // proceeds to go to that point and drop the wobble goal
-        odometryMove.goToPoint(wobbleX, 0);
-        odometryMove.goToStrafePoint(wobbleY, 0);
-//        odometryMove.doubleStrafeToPoint(wobbleX, wobbleY);
+//        odometryMove.goToPoint(wobbleX, 0);
+//        odometryMove.goToStrafePoint(wobbleY, 0);
+        odometryMove.doubleStrafeToPoint(wobbleX, wobbleY, 0);
         robot.WobbleCatcher.setPosition(.4);
-        robot.sleepTimer(500);
+        robot.sleepTimer(300, this);
 
         // moves a little to the right and then back to the line
         timer.reset();
