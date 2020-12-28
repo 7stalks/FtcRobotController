@@ -132,7 +132,8 @@ public class MainTest extends LinearOpMode {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
                 shooterTimer.reset();
                 telemetry.addData("Shooter status", "shooting");
-            } else if (shooterTimer.milliseconds() > 325) {
+            }
+            if (shooterTimer.milliseconds() > 325) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
                 telemetry.addData("Shooter status", "not shooting");
             }
