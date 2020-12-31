@@ -18,7 +18,6 @@ public class MainTest extends LinearOpMode {
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
     ElapsedTime intakeTimer = new ElapsedTime();
-    ElapsedTime wobbleTimer = new ElapsedTime();
     VuforiaNavigation nav = new VuforiaNavigation();
     ElapsedTime sleepTimer = new ElapsedTime();
     Odometry odometry = new Odometry(robot, telemetry);
@@ -26,17 +25,7 @@ public class MainTest extends LinearOpMode {
     EncoderThread encoderThread = new EncoderThread(robot, this);
     ElapsedTime shooterTimer = new ElapsedTime();
 
-    double wobblePosition = 0.0;
-    boolean wobbleCaught = false;
     boolean intakeOn = false;
-    boolean wobbleUp = true;
-
-    double[] odometryInfo;
-    double firstOLeft = 0;
-    double firstORight = 0;
-    double firstOMiddle = 0;
-    double rotation = 0;
-
 
     ////
     // gamepad 1:
@@ -49,11 +38,6 @@ public class MainTest extends LinearOpMode {
     // dpad up/down makes the wobble stand go up/down
     // dpad left/right manipulate the servo on top of the wobble stand
     ////
-
-    void timer_sleep(int milliseconds) {
-        sleepTimer.reset();
-        while (sleepTimer.milliseconds() < milliseconds && opModeIsActive()) {}
-    }
 
     // there wasn't an override here before and i think it worked fine... oh well! we'll see
     @Override
@@ -132,8 +116,7 @@ public class MainTest extends LinearOpMode {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
                 shooterTimer.reset();
                 telemetry.addData("Shooter status", "shooting");
-            }
-            if (shooterTimer.milliseconds() > 325) {
+            } else if (shooterTimer.milliseconds() > 325) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
                 telemetry.addData("Shooter status", "not shooting");
             }
@@ -154,56 +137,49 @@ public class MainTest extends LinearOpMode {
                 robot.ShooterElevator.setPosition(.29);
             }
 
-            // gamepad 2 dpad up makes the wobble stand go up, dpad down makes it go down
             if (gamepad2.dpad_up) {
-                robot.WobbleMotor.setPower(.8);
-            } else {
-                robot.WobbleMotor.setPower(0);
+                robot.WobbleRotator.setPosition(robot.WobbleRotator.getPosition() + .0015);
             }
-
             if (gamepad2.dpad_down) {
-                robot.WobbleMotor.setPower(-.8);
-            } else {
-                robot.WobbleMotor.setPower(0);
+                robot.WobbleRotator.setPosition(robot.WobbleRotator.getPosition() - .0015);
             }
 
-            // gamepad 2 dpad left and right manipulate the servo that's at the top of the wobble stand
+            // the back servo goes from min to max
+            // the front servo goes from max to min
+            // dpad left closees it
             if (gamepad2.dpad_left) {
-                wobblePosition = robot.WobbleServo.getPosition();
-                telemetry.addData("dpad2 left", wobblePosition);
-                if (wobblePosition < .44 && wobbleUp) {
-                    robot.WobbleServo.setPosition(wobblePosition + .0008);
-                    if (wobblePosition + .01 >= .44) {
-                        wobbleUp = false;
-                    }
-                } else {
-                    robot.WobbleServo.setPosition(wobblePosition - .0008);
-                    if (wobblePosition - .01 <= .01) {
-                        wobbleUp = true;
-                    }
+                double backPosition = robot.WobbleCatcherBack.getPosition();
+                double frontPosition = robot.WobbleCatcherFront.getPosition();
+                if (!(backPosition > robot.wobbleCatcherBackMax)) {
+                    robot.WobbleCatcherBack.setPosition(backPosition + robot.wobbleCatcherBackSpeed);
+                    robot.WobbleCatcherFront.setPosition(frontPosition - robot.wobbleCatcherFrontSpeed);
                 }
             }
 
-            if (wobbleTimer.seconds() > .2) {
-                if (gamepad2.dpad_right) {
-                    if (!wobbleCaught) {
-                        robot.WobbleCatcher.setPosition(.85);
-                        wobbleCaught = true;
-                    } else {
-                        robot.WobbleCatcher.setPosition(.4);
-                        wobbleCaught = false;
-                    }
-                    wobbleTimer.reset();
+            // dpad right opens it
+            if (gamepad2.dpad_right) {
+                double backPosition = robot.WobbleCatcherBack.getPosition();
+                double frontPosition = robot.WobbleCatcherFront.getPosition();
+                if (!(backPosition < robot.wobbleCatcherBackMin)) {
+                    robot.WobbleCatcherBack.setPosition(backPosition - robot.wobbleCatcherBackSpeed);
+                    robot.WobbleCatcherFront.setPosition(frontPosition + robot.wobbleCatcherFrontSpeed);
                 }
             }
-            telemetry.addData("wpbb;e servo", robot.WobbleServo.getPosition());
+
+            if (gamepad2.x) {
+                robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup);
+            }
+            if (gamepad2.y) {
+                robot.WobbleRotator.setPosition(robot.wobbleRotatorTop);
+            }
+
             if (encoderThread.revolutionsPerMinute > 4400) {
                 telemetry.addLine("Can shoot");
             } else {
                 telemetry.addLine("Can NOT shoot");
             }
-            telemetry.addData("shooter servo position", robot.ShooterServo.getPosition());
             telemetry.addData("revs per minute", encoderThread.revolutionsPerMinute);
+            telemetry.addData("shooter servo position", robot.ShooterServo.getPosition());
             odometry.queryOdometry();
         }
         if (encoderThread.isAlive()) {

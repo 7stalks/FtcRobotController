@@ -134,8 +134,7 @@ public class BlueShoot3 extends LinearOpMode {
     public void runMyOpMode() throws InterruptedException {
         // initialization things
         robot.init(hardwareMap, telemetry);
-        robot.WobbleServo.setPosition(0);
-        robot.WobbleCatcher.setPosition(.85);
+        robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup+.07);
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
@@ -227,7 +226,9 @@ public class BlueShoot3 extends LinearOpMode {
 //        odometryMove.goToPoint(wobbleX, 0);
 //        odometryMove.goToStrafePoint(wobbleY, 0);
         odometryMove.doubleStrafeToPoint(wobbleX, wobbleY, 0);
-        robot.WobbleCatcher.setPosition(.4);
+        robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup-.05);
+        robot.WobbleCatcherFront.setPosition(robot.wobbleCatcherFrontMax);
+        robot.WobbleCatcherBack.setPosition(robot.wobbleCatcherBackMin);
         robot.sleepTimer(300, this);
 
         // moves a little to the right and then back to the line

@@ -47,6 +47,10 @@ public class RobotHardware {
     public Servo WobbleServo;
     public Servo WobbleCatcher;
 
+    public Servo WobbleRotator;
+    public Servo WobbleCatcherFront;
+    public Servo WobbleCatcherBack;
+
     // Gyro (and temp sensor haha)
     public BNO055IMU bottom_imu;
     public BNO055IMU top_imu;
@@ -58,6 +62,17 @@ public class RobotHardware {
     final public double PIVOT_SPEED = -0.5;
     final public double SHOOTER_SERVO_START = 0.9;
     final public double SHOOTER_SERVO_MAX = 0.3;
+
+    final public double wobbleRotatorMin = 0;
+    final public double wobbleRotatorMax = 1.0;
+    final public double wobbleRotatorPickup = 0.24;
+    final public double wobbleRotatorTop = 0.6;
+    final public double wobbleCatcherFrontMin = 0.29;
+    final public double wobbleCatcherFrontMax = 0.57;
+    final public double wobbleCatcherBackMin = 0.27;
+    final public double wobbleCatcherBackMax = 0.64;
+    final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMax-wobbleCatcherFrontMin)*0.0135135135;
+    final public double wobbleCatcherBackSpeed = (wobbleCatcherBackMax-wobbleCatcherBackMin)*0.0135135135;
 
     private static final float mmPerInch        = 25.4f;
     private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
@@ -193,29 +208,27 @@ public class RobotHardware {
             ShooterElevator = null;
         }
         try {
-            WobbleMotor = hardwareMap.get(DcMotor.class, "wobble_motor");
-            WobbleMotor.setDirection(DcMotor.Direction.FORWARD);
-            WobbleMotor.setPower(0);
-            WobbleMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            WobbleMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            telemetry.addData("Status", "Motor: wobble motor identified");    //
+            WobbleRotator = hardwareMap.get(Servo.class, "wobble_rotator");
+            telemetry.addData("Status", "Servo: wobble rotator identified");    //
         } catch (IllegalArgumentException err) {
-            telemetry.addData("Warning", "Motor: wobble motor not plugged in");    //
-            WobbleMotor = null;
+            telemetry.addData("Warning", "Servo: wobble rotator not plugged in");    //
+            WobbleRotator = null;
         }
         try {
-            WobbleServo = hardwareMap.get(Servo.class, "wobble_servo");
-            telemetry.addData("Status", "Servo: wobble servo identified");    //
+            WobbleCatcherBack = hardwareMap.get(Servo.class, "wobble_catcher_back");
+            telemetry.addData("Status", "Servo: wobble catcher back identified");    //
+            WobbleCatcherBack.setPosition(wobbleCatcherBackMax);
         } catch (IllegalArgumentException err) {
-            telemetry.addData("Warning", "Servo: wobble serbo not plugged in");    //
-            WobbleServo = null;
+            telemetry.addData("Warning", "Servo: wobble catcher back not plugged in");    //
+            WobbleCatcherBack = null;
         }
         try {
-            WobbleCatcher = hardwareMap.get(Servo.class, "wobble_catcher");
-            telemetry.addData("Status", "Servo: wobble catcher identified");    //
+            WobbleCatcherFront = hardwareMap.get(Servo.class, "wobble_catcher_front");
+            telemetry.addData("Status", "Servo: wobble catcher front back identified");    //
+            WobbleCatcherFront.setPosition(wobbleCatcherFrontMin);
         } catch (IllegalArgumentException err) {
-            telemetry.addData("Warning", "Servo: wobble catcher not plugged in");    //
-            WobbleCatcher = null;
+            telemetry.addData("Warning", "Servo: wobble catcher front not plugged in");    //
+            WobbleCatcherFront = null;
         }
         OLeft = RightFront;
         ORight = RightBack;
