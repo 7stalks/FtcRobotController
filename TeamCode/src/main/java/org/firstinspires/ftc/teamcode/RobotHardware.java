@@ -34,7 +34,6 @@ public class RobotHardware {
     public DcMotor TopIntake;
     public DcMotor BottomIntake;
     public DcMotor Shooter;
-    public DcMotor WobbleMotor;
 
     // Odometers
     public DcMotor OLeft;
