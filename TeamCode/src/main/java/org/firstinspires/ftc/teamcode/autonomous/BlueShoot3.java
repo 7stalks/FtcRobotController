@@ -174,7 +174,6 @@ public class BlueShoot3 extends LinearOpMode {
 
         //vuforia time! gotta move over to the picture too. odometry time
         odometryMove.goToPoint(3, 0);
-//        odometryMove.goToStrafePoint(23, 0);
         odometryMove.doubleStrafeToPoint(12, 24, 0);
         robot.sleepTimer(100, this);
 
@@ -202,11 +201,6 @@ public class BlueShoot3 extends LinearOpMode {
         telemetry.update();
         odometry.inputVuforia(avgX, avgY, avgRot);
 
-        // heads to shooting position
-//        odometryMove.goToPoint(-4, 0);
-//        robot.sleepTimer(200, this);
-//        odometryMove.goToStrafePoint(-21.5, 0);
-
         // shoots the rings. pop pop pop pop pop (5 times)
         shootPowerShots();
 
@@ -223,8 +217,6 @@ public class BlueShoot3 extends LinearOpMode {
             wobbleY = -48;
         }
         // proceeds to go to that point and drop the wobble goal
-//        odometryMove.goToPoint(wobbleX, 0);
-//        odometryMove.goToStrafePoint(wobbleY, 0);
         odometryMove.doubleStrafeToPoint(wobbleX, wobbleY, 0);
         robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup-.05);
         robot.WobbleCatcherFront.setPosition(robot.wobbleCatcherFrontMax);

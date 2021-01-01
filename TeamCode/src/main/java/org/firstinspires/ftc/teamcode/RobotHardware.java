@@ -74,25 +74,13 @@ public class RobotHardware {
     final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMax-wobbleCatcherFrontMin)*0.0135135135;
     final public double wobbleCatcherBackSpeed = (wobbleCatcherBackMax-wobbleCatcherBackMin)*0.0135135135;
 
-    private static final float mmPerInch        = 25.4f;
-    private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
-
-    // Constants for perimeter targets
-    public static final float halfField = 72 * mmPerInch;
-    public static final float quadField  = 36 * mmPerInch;
+    ElapsedTime timer = new ElapsedTime();
 
     private static final String VUFORIA_KEY = "AXl4o5z/////AAABmQyBF0iAaUTcguyLoBFeK1A7RHUVrQdTS" +
             "sPDqn4DelLm7BtbLuahVuZvBzuq5tPGrvi7D25P3xRzVgT1d+cADoNAMxuRVZs24o87S6gH0mM+Q/OrrQr5" +
             "7pTiumNffyuzBI728d+XgQJImM0rBxGcpwej8Ok0ZSCNIzzxVNf06dRwLEwu6jf0mCiA9yyffMFzreeL8UR" +
             "wm/xxuDsYxY7NrVtjlmslMTiu3nAUboaDP8jkhKvl8623x57MhYt4hof+iegRYjJzt+Knb5m5SfY5urWFGF" +
             "sLjZ4dqAhzXNiJmmKbKojUfjgvUld91gWm0UOXHkoezBuBVnLFasNmChD2uxpGGGeNdW1MvGitjFEvckKJ";
-
-    private static final VuforiaLocalizer.CameraDirection CAMERA_CHOICE = BACK;
-    private static final boolean PHONE_IS_PORTRAIT = false;
-    private boolean targetVisible = false;
-    private float phoneXRotate    = 0;
-    private float phoneYRotate    = 0;
-    private float phoneZRotate    = 0;
 
     public VuforiaLocalizer vuforia;
     public SwitchableCamera switchableCamera;
@@ -102,9 +90,6 @@ public class RobotHardware {
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
-
-    ElapsedTime timer = new ElapsedTime();
-
 
 
     // This will be used on robotTeleop. Inits everything
@@ -160,6 +145,8 @@ public class RobotHardware {
             telemetry.addData("Warning", "Motor: right_back not plugged in");    //
             RightBack = null;
         }
+
+        // intake and shooter motors
         try {
             TopIntake = hardwareMap.get(DcMotor.class, "top_intake");
             TopIntake.setDirection(DcMotor.Direction.FORWARD);
@@ -193,6 +180,8 @@ public class RobotHardware {
             telemetry.addData("Warning", "Motor: shooter not plugged in");    //
             Shooter = null;
         }
+
+        // shooter and wobble servos
         try {
             ShooterServo = hardwareMap.get(Servo.class, "shooter_servo");
             telemetry.addData("Status", "Servo: Shooter servo identified");    //
@@ -230,11 +219,12 @@ public class RobotHardware {
             telemetry.addData("Warning", "Servo: wobble catcher front not plugged in");    //
             WobbleCatcherFront = null;
         }
+        // naming for the odometers (they use the encoders on the controlhub)
         OLeft = RightFront;
         ORight = RightBack;
         OMiddle = LeftBack;
 
-        // Init the IMU/Gyro
+        // Init the IMUs/Gyros
         try {
             bottom_imu = hardwareMap.get(BNO055IMU.class, "imu");
 
@@ -261,7 +251,6 @@ public class RobotHardware {
         } catch (IllegalArgumentException | InterruptedException err) {
             telemetry.addData("Warning", "Bottom Imu not initialized");
         }
-
         try {
             top_imu = hardwareMap.get(BNO055IMU.class, "imu 1");
 
@@ -277,9 +266,7 @@ public class RobotHardware {
         } catch (IllegalArgumentException err) {
             telemetry.addData("Warning", "Top Imu not initialized");
         }
-
-//        initVuforia(hardwareMap, telemetry);
-//        initTFOD(telemetry);
+        //end of robot init
     }
 
     // Inits just the mecanum drive (nothing else)
