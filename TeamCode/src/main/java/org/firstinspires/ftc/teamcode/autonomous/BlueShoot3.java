@@ -194,10 +194,10 @@ public class BlueShoot3 extends LinearOpMode {
             avgY += nav.Y;
             avgRot += nav.Rotation + Math.PI/2;
         }
-        avgX = avgX/sampleSize;
-        avgY = avgY/sampleSize;
-        avgRot = avgRot/sampleSize;
-        telemetry.addData("avg x, y, z", Arrays.toString(new double[] {avgX, avgY, avgRot}));
+        avgX = avgX / sampleSize;
+        avgY = avgY / sampleSize;
+        avgRot = avgRot / sampleSize;
+        telemetry.addData("avg x, y, z", Arrays.toString(new double[]{avgX, avgY, avgRot}));
         telemetry.update();
         odometry.inputVuforia(avgX, avgY, avgRot);
 
@@ -218,7 +218,7 @@ public class BlueShoot3 extends LinearOpMode {
         }
         // proceeds to go to that point and drop the wobble goal
         odometryMove.doubleStrafeToPoint(wobbleX, wobbleY, 0);
-        robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup-.05);
+        robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup - .05);
         robot.WobbleCatcherFront.setPosition(robot.wobbleCatcherFrontMax);
         robot.WobbleCatcherBack.setPosition(robot.wobbleCatcherBackMin);
         robot.sleepTimer(300, this);

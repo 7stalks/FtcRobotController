@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.test;
+ package org.firstinspires.ftc.teamcode.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -24,6 +24,7 @@ public class MainTest extends LinearOpMode {
     OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
     EncoderThread encoderThread = new EncoderThread(robot, this);
     ElapsedTime shooterTimer = new ElapsedTime();
+    ElapsedTime myShooterTimer = new ElapsedTime();
 
     boolean intakeOn = false;
 
@@ -38,6 +39,33 @@ public class MainTest extends LinearOpMode {
     // dpad up/down makes the wobble stand go up/down
     // dpad left/right manipulate the servo on top of the wobble stand
     ////
+
+    void shoot(int numberOfRings) {
+        int i = 0;
+        int numberOfFailedShots = 0;
+        boolean attemptedShot = false;
+        while (i<numberOfRings && numberOfFailedShots < 4 && opModeIsActive() && !gamepad2.back) {
+            if (encoderThread.revolutionsPerMinute < 4000 && attemptedShot) {
+                i++;
+                attemptedShot = false;
+                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+                sleep(250);
+            }
+            if (encoderThread.revolutionsPerMinute > 4000 && !attemptedShot) {
+                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+                attemptedShot = true;
+                myShooterTimer.reset();
+            }
+            if (encoderThread.revolutionsPerMinute > 4000 && attemptedShot && myShooterTimer.milliseconds() > 250) {
+                attemptedShot = false;
+                numberOfFailedShots++;
+                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+                sleep(250);
+            }
+            telemetry.addLine("I'm inside of a while loop, hit BACK on GAMEPAD 2 to get out of it");
+            telemetry.update();
+        }
+    }
 
     // there wasn't an override here before and i think it worked fine... oh well! we'll see
     @Override
@@ -71,8 +99,11 @@ public class MainTest extends LinearOpMode {
                 odometryMove.doubleStrafeToPoint(-4, -8, 0);
             }
 
-            if (gamepad1.x) {
+            if (gamepad1.y) {
                 odometryMove.deltaRotate(.095);
+            }
+            if (gamepad1.x) {
+                odometryMove.deltaRotate(-.095);
             }
 
             // drive goes to gamepad 1. the left and right sticks control circlepad, dpad is for the fast move
@@ -112,13 +143,10 @@ public class MainTest extends LinearOpMode {
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
-            if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 4400)) {
+            if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 4500)) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-                shooterTimer.reset();
-                telemetry.addData("Shooter status", "shooting");
-            } else if (shooterTimer.milliseconds() > 325) {
+            } else if (robot.ShooterServo.getPosition() < robot.SHOOTER_SERVO_START){
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                telemetry.addData("Shooter status", "not shooting");
             }
 
             // gamepad 2 right trigger (analog) gets the shooter motor itself. has to hold down for it to work
@@ -137,6 +165,8 @@ public class MainTest extends LinearOpMode {
                 robot.ShooterElevator.setPosition(.29);
             }
 
+            // gamepad 2's dpad controls wobble stuff
+            // up raises the entire apparatus, down lowers it
             if (gamepad2.dpad_up) {
                 robot.WobbleRotator.setPosition(robot.WobbleRotator.getPosition() + .0015);
             }
@@ -146,7 +176,7 @@ public class MainTest extends LinearOpMode {
 
             // the back servo goes from min to max
             // the front servo goes from max to min
-            // dpad left closees it
+            // dpad left closes clamp
             if (gamepad2.dpad_left) {
                 double backPosition = robot.WobbleCatcherBack.getPosition();
                 double frontPosition = robot.WobbleCatcherFront.getPosition();
@@ -155,7 +185,6 @@ public class MainTest extends LinearOpMode {
                     robot.WobbleCatcherFront.setPosition(frontPosition - robot.wobbleCatcherFrontSpeed);
                 }
             }
-
             // dpad right opens it
             if (gamepad2.dpad_right) {
                 double backPosition = robot.WobbleCatcherBack.getPosition();
@@ -166,6 +195,9 @@ public class MainTest extends LinearOpMode {
                 }
             }
 
+            // quick shortcuts:
+            // gamepad 2 x raises the wobble to pickup position
+            // gamepad 2 y raises the wobble to lifting position
             if (gamepad2.x) {
                 robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup);
             }
@@ -181,6 +213,11 @@ public class MainTest extends LinearOpMode {
             telemetry.addData("revs per minute", encoderThread.revolutionsPerMinute);
             telemetry.addData("shooter servo position", robot.ShooterServo.getPosition());
             odometry.queryOdometry();
+
+            if (gamepad2.start) {
+                shoot(1);
+            }
+
         }
         if (encoderThread.isAlive()) {
             encoderThread.join();

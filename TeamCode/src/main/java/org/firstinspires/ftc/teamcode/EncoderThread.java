@@ -22,6 +22,8 @@ public class EncoderThread extends Thread {
     double lastTime = 0;
     public boolean quitThread = false;
 
+    public String output = "";
+
     // constructor to get the robotHardware
     public EncoderThread(RobotHardware robot, LinearOpMode opMode) {
         this.robot = robot;
@@ -32,7 +34,7 @@ public class EncoderThread extends Thread {
         while(!EncoderThread.currentThread().isInterrupted() && opMode.opModeIsActive()) {
 
             // gives encoder ticks per ms using the precise time before sleeping for 5 ms
-            encoderDifferencePerMillisecond = (Math.abs(robot.Shooter.getCurrentPosition()) - lastPosition)/(System.currentTimeMillis() - lastTime);
+            encoderDifferencePerMillisecond = (Math.abs(robot.Shooter.getCurrentPosition()) - lastPosition) / (System.currentTimeMillis() - lastTime);
 
             // get some values for us (the last position/time and a conversion to seconds)
             lastPosition = Math.abs(robot.Shooter.getCurrentPosition());
@@ -44,12 +46,13 @@ public class EncoderThread extends Thread {
             // sleep for 5 ms
             try {
                 Thread.sleep(15);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) { }
 
             if (quitThread) {
                 break;
             }
         }
+            output = "not running";
         if (quitThread) {
             try {
                 EncoderThread.currentThread().join();
