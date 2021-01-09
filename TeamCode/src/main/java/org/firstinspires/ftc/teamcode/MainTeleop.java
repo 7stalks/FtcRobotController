@@ -101,10 +101,10 @@ public class MainTeleop extends LinearOpMode {
             // gamepad 2 a is for the high goal
             // gamepad 2 b is for the powershots
             if (gamepad2.a) {
-                robot.ShooterElevator.setPosition(.36);
+                robot.ShooterElevator.setPosition(.285);
             }
             if (gamepad2.b) {
-                robot.ShooterElevator.setPosition(.3);
+                robot.ShooterElevator.setPosition(.235);
             }
 
             // gamepad 2's dpad controls wobble stuff

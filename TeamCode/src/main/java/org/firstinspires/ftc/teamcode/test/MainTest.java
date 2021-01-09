@@ -19,44 +19,47 @@ public class MainTest extends LinearOpMode {
     GoBildaDrive drive = new GoBildaDrive(robot);
     ElapsedTime intakeTimer = new ElapsedTime();
     VuforiaNavigation nav = new VuforiaNavigation();
-    ElapsedTime sleepTimer = new ElapsedTime();
     Odometry odometry = new Odometry(robot, telemetry);
     OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
     EncoderThread encoderThread = new EncoderThread(robot, this);
-    ElapsedTime shooterTimer = new ElapsedTime();
     ElapsedTime myShooterTimer = new ElapsedTime();
 
     boolean intakeOn = false;
 
-    ////
-    // gamepad 1:
-    // left and right sticks and dpad control the drive
-    // gamepad 2:
-    // A turns on and off the intake
-    // B reverses and turns on/off the intake
-    // left bumper makes the shooter servo go
-    // right trigger makes the shooter motor go
-    // dpad up/down makes the wobble stand go up/down
-    // dpad left/right manipulate the servo on top of the wobble stand
-    ////
+    //// As of 31 December 2020:
+    // gamepad 1 sticks: control drive
+    // gamepad 1 A: turns on/off the intake
+    // gamepad 1 B: reverses on/off the intake
+    //
+    // gamepad 2 right bumper: raises the shooter
+    // gamepad 2 left bumper: lowers the shooter
+    // gamepad 2 left trigger: turns on the shooter motor
+    // gamepad 2 right trigger: moves the shooter servo when the motor is up and running
+    // gamepad 2 dpad up/down: raises up/down the wobble rotator
+    // gamepad 2 dpad left/right: closes/opens the wobble clamp
+    // convenience buttons:
+    // gamepad 2 A: aims the shooter at the high goal
+    // gamepad 2 B: aims the shooter at the power shots
+    // gamepad 2 X: raises wobble rotator to pickup position
+    // gamepad 2 Y: raises the wobble rotator to lifting position
 
     void shoot(int numberOfRings) {
         int i = 0;
         int numberOfFailedShots = 0;
         boolean attemptedShot = false;
         while (i<numberOfRings && numberOfFailedShots < 4 && opModeIsActive() && !gamepad2.back) {
-            if (encoderThread.revolutionsPerMinute < 4000 && attemptedShot) {
+            if (encoderThread.revolutionsPerMinute < 4750 && attemptedShot) {
                 i++;
                 attemptedShot = false;
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
                 sleep(250);
             }
-            if (encoderThread.revolutionsPerMinute > 4000 && !attemptedShot) {
+            if (encoderThread.revolutionsPerMinute > 5000 && !attemptedShot) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
                 attemptedShot = true;
                 myShooterTimer.reset();
             }
-            if (encoderThread.revolutionsPerMinute > 4000 && attemptedShot && myShooterTimer.milliseconds() > 250) {
+            if (encoderThread.revolutionsPerMinute > 5000 && attemptedShot && myShooterTimer.milliseconds() > 250) {
                 attemptedShot = false;
                 numberOfFailedShots++;
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
@@ -116,13 +119,11 @@ public class MainTest extends LinearOpMode {
                     if (gamepad1.a) {
                         robot.TopIntake.setPower(1);
                         robot.BottomIntake.setPower(1);
-                        robot.ShooterElevator.setPosition(0);
                         intakeOn = true;
                         intakeTimer.reset();
                     } else if (gamepad1.b) {
                         robot.TopIntake.setPower(-1);
                         robot.BottomIntake.setPower(-1);
-                        robot.ShooterElevator.setPosition(0);
                         intakeOn = true;
                         intakeTimer.reset();
                     }
@@ -158,12 +159,16 @@ public class MainTest extends LinearOpMode {
             } else {
                 robot.Shooter.setPower(0);
             }
+            // quick shortcuts:
+            // gamepad 2 a is for the high goal
+            // gamepad 2 b is for the powershots
             if (gamepad2.a) {
-                robot.ShooterElevator.setPosition(.36);
+                robot.ShooterElevator.setPosition(.285);
             }
             if (gamepad2.b) {
-                robot.ShooterElevator.setPosition(.29);
+                robot.ShooterElevator.setPosition(.235);
             }
+
 
             // gamepad 2's dpad controls wobble stuff
             // up raises the entire apparatus, down lowers it
@@ -215,7 +220,7 @@ public class MainTest extends LinearOpMode {
             odometry.queryOdometry();
 
             if (gamepad2.start) {
-                shoot(1);
+                shoot(3);
             }
 
         }

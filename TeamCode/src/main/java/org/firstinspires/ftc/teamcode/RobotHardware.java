@@ -5,6 +5,7 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -170,7 +171,7 @@ public class RobotHardware {
         }
         try {
             Shooter = hardwareMap.get(DcMotor.class, "shooter");
-            Shooter.setDirection(DcMotor.Direction.FORWARD);
+            Shooter.setDirection(DcMotor.Direction.REVERSE);
             Shooter.setPower(0);
             Shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             Shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -355,5 +356,15 @@ public class RobotHardware {
     public void sleepTimer(int milliseconds, LinearOpMode opMode) {
         timer.reset();
         while (timer.milliseconds() <= milliseconds && opMode.opModeIsActive()) {opMode.idle();}
+    }
+
+    public void openWobble() {
+        WobbleCatcherBack.setPosition(wobbleCatcherBackMin);
+        WobbleCatcherFront.setPosition(wobbleCatcherFrontMax);
+    }
+
+    public void closWobble() {
+        WobbleCatcherBack.setPosition(wobbleCatcherBackMax);
+        WobbleCatcherFront.setPosition(wobbleCatcherFrontMin);
     }
 }

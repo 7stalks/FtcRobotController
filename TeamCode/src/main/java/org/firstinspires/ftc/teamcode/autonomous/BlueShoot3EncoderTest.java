@@ -27,6 +27,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
     ElapsedTime shooterTimer = new ElapsedTime();
     ElapsedTime startTimer = new ElapsedTime();
     ElapsedTime maxTimer = new ElapsedTime();
+    ElapsedTime myShooterTimer = new ElapsedTime();
     Runnable switchCamera =
             new Runnable() {
                 public void run() {
@@ -97,54 +98,81 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         robot.Shooter.setPower(0);
     }
 
-    void shoot(int numberOfShots) {
+//    void shoot(int numberOfShots) {
+//        int i = 0;
+//        boolean shot = false;
+//        boolean start = false;
+//        boolean resetTheTimer = false;
+//        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+//        sleep(75);
+//        maxTimer.reset();
+//        while (opModeIsActive() && i < numberOfShots) {
+//            if (encoderThread.revolutionsPerMinute > 4600 && start) {
+//                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+//                shot = true;
+//                start = false;
+//                maxTimer.reset();
+//            }
+//
+//            if (maxTimer.milliseconds() > 300)  {
+//                shot = false;
+//            }
+//
+//            if (shot && encoderThread.revolutionsPerMinute < 4000 && maxTimer.milliseconds() < 300) {
+//                i++;
+//                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+//                shooterTimer.reset();
+//                sleep(100);
+//            }
+//
+//            if (maxTimer.milliseconds() > 300 || encoderThread.revolutionsPerMinute < 4200) {
+//                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+//                if (!start && !resetTheTimer) {
+//                    shooterTimer.reset();
+//                    resetTheTimer = true;
+//                }
+//            }
+//            if (shooterTimer.milliseconds() > 200) {
+//                start = true;
+//            }
+//
+//            if (encoderThread.revolutionsPerMinute > 4400) {
+//                telemetry.addLine("can shoot");
+//            } else {
+//                telemetry.addLine("can not shoot");
+//            }
+//            telemetry.addData("rpm", encoderThread.revolutionsPerMinute);
+//            telemetry.addData("start", start);
+//            telemetry.addData("shpoter timer", shooterTimer.milliseconds());
+//            telemetry.addData("i", i);
+//            telemetry.addLine(encoderThread.output);
+//            telemetry.update();
+//        }
+//    }
+
+    void shoot(int numberOfRings) {
         int i = 0;
-        boolean shot = false;
-        boolean start = false;
-        boolean resetTheTimer = false;
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(75);
-        maxTimer.reset();
-        while (opModeIsActive() && i < numberOfShots) {
-            if (encoderThread.revolutionsPerMinute > 4600 && start) {
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-                shot = true;
-                start = false;
-                maxTimer.reset();
-            }
-
-            if (maxTimer.milliseconds() > 300)  {
-                shot = false;
-            }
-
-            if (shot && encoderThread.revolutionsPerMinute < 4000 && maxTimer.milliseconds() < 300) {
+        int numberOfFailedShots = 0;
+        boolean attemptedShot = false;
+        while (i<numberOfRings && numberOfFailedShots < 4 && opModeIsActive() && !gamepad2.back) {
+            if (encoderThread.revolutionsPerMinute < 4000 && attemptedShot) {
                 i++;
+                attemptedShot = false;
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                shooterTimer.reset();
-                sleep(100);
+                sleep(250);
             }
-
-            if (maxTimer.milliseconds() > 300 || encoderThread.revolutionsPerMinute < 4200) {
+            if (encoderThread.revolutionsPerMinute > 4000 && !attemptedShot) {
+                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+                attemptedShot = true;
+                myShooterTimer.reset();
+            }
+            if (encoderThread.revolutionsPerMinute > 4000 && attemptedShot && myShooterTimer.milliseconds() > 250) {
+                attemptedShot = false;
+                numberOfFailedShots++;
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                if (!start && !resetTheTimer) {
-                    shooterTimer.reset();
-                    resetTheTimer = true;
-                }
+                sleep(250);
             }
-            if (shooterTimer.milliseconds() > 200) {
-                start = true;
-            }
-
-            if (encoderThread.revolutionsPerMinute > 4400) {
-                telemetry.addLine("can shoot");
-            } else {
-                telemetry.addLine("can not shoot");
-            }
-            telemetry.addData("rpm", encoderThread.revolutionsPerMinute);
-            telemetry.addData("start", start);
-            telemetry.addData("shpoter timer", shooterTimer.milliseconds());
-            telemetry.addData("i", i);
-            telemetry.addLine(encoderThread.output);
+            telemetry.addLine("I'm inside of a while loop, hit BACK on GAMEPAD 2 to get out of it");
             telemetry.update();
         }
     }
@@ -179,22 +207,20 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
     }
 
 
-
-    // if its going fast and we haven't actually shot a ring, go to max position
-    // if we haven't shot a ring and we're extended, go to start position
-    // if we shot a ring, i++
-
     void shootPowerShots() {
         odometryMove.doubleStrafeToPoint(-4, -8, 0);
         robot.ShooterElevator.setPosition(0.3);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
 
-        shootForReals();
+        shoot(1);
+        robot.sleepTimer(50, this);
         odometryMove.rotate(0.1);
-        shootForReals();
+        shoot(1);
+        robot.sleepTimer(50, this);
         odometryMove.rotate(0.2);
-        shootForReals();
+        shoot(1);
+        robot.sleepTimer(50, this);
         robot.Shooter.setPower(0);
 
         odometryMove.rotateTo0();
@@ -218,7 +244,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
     public void runMyOpMode() throws InterruptedException {
         // initialization things
         robot.init(hardwareMap, telemetry);
-        robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup + .07);
+        robot.WobbleRotator.setPosition(1);
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
@@ -271,7 +297,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         switchCameraThread.join();
         encoderThread.start();
 
-        // waits until it sees a target and then averages 50 snapshots
+        // waits until it sees a target and then averages 100 snapshots
         double avgX = 0, avgY = 0, avgRot = 0;
         while (!nav.targetVisible && opModeIsActive()) {
             nav.navigationNoTelemetry();
@@ -289,7 +315,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         telemetry.update();
         odometry.inputVuforia(avgX, avgY, avgRot);
 
-        // shoots the rings. pop pop pop pop pop (5 times)
+        // shoots the rings
         shootPowerShots();
         encoderThread.quitThread = true;
 
@@ -306,10 +332,11 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
             wobbleY = -48;
         }
         // proceeds to go to that point and drop the wobble goal
-        odometryMove.doubleStrafeToPoint(wobbleX, wobbleY, 0);
-        robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup - .05);
-        robot.WobbleCatcherFront.setPosition(robot.wobbleCatcherFrontMax);
-        robot.WobbleCatcherBack.setPosition(robot.wobbleCatcherBackMin);
+        odometryMove.doubleStrafeToPoint(wobbleX, wobbleY - 4, 0);
+        while (robot.WobbleRotator.getPosition() > robot.wobbleRotatorPickup - .05) {
+            robot.WobbleRotator.setPosition(robot.WobbleRotator.getPosition() + 0.001);
+        }
+        robot.openWobble();
         robot.sleepTimer(300, this);
 
         // moves a little to the right and then back to the line
@@ -318,6 +345,17 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
             drive.circlepadMove(0, -.6, 0);
         }
         drive.stop();
+        odometryMove.doubleStrafeToPoint(-28, -50, 0);
+        odometryMove.testDoubleStrafeToPoint(-19, -50, Math.PI/2);
+        robot.closWobble();
+        robot.sleepTimer(300, this);
+        odometryMove.doubleStrafeToPoint(-28, -50, 0);
+        odometryMove.doubleStrafeToPoint(wobbleX, wobbleY + 2, 0);
+        robot.openWobble();
+        robot.sleepTimer(300, this);
+        while (timer.milliseconds() < 500 && opModeIsActive()) {
+            drive.circlepadMove(0, -.6, 0);
+        }
         odometryMove.goToPoint(10, 0);
         while (opModeIsActive()) {
             odometry.queryOdometry();

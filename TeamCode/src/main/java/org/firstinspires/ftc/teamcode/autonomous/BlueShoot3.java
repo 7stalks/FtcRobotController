@@ -66,7 +66,7 @@ public class BlueShoot3 extends LinearOpMode {
 
     void shootHighGoal() {
         odometryMove.doubleStrafeToPoint(-4, -21.5, 0);
-        robot.ShooterElevator.setPosition(0.345);
+        robot.ShooterElevator.setPosition(0.245);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
         robot.sleepTimer(1000, this);
@@ -94,7 +94,7 @@ public class BlueShoot3 extends LinearOpMode {
 
     void shootPowerShots() {
         odometryMove.doubleStrafeToPoint(-4, -8, 0);
-        robot.ShooterElevator.setPosition(0.3);
+        robot.ShooterElevator.setPosition(0.235);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
 
@@ -229,6 +229,6 @@ public class BlueShoot3 extends LinearOpMode {
             drive.circlepadMove(0, -.6, 0);
         }
         drive.stop();
-        odometryMove.goToPoint(10, 0);
+//        odometryMove.doubleStrafeToPoint();
     }
 }
