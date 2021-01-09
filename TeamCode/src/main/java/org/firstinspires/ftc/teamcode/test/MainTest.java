@@ -10,9 +10,8 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
 import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
-import org.firstinspires.ftc.teamcode.odometry.OdometryThread;
 
-@TeleOp(name = "Main test", group = "Robot")
+ @TeleOp(name = "Main test", group = "Robot")
 public class MainTest extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
@@ -173,10 +172,10 @@ public class MainTest extends LinearOpMode {
             // gamepad 2's dpad controls wobble stuff
             // up raises the entire apparatus, down lowers it
             if (gamepad2.dpad_up) {
-                robot.WobbleRotator.setPosition(robot.WobbleRotator.getPosition() + .0015);
+                robot.WobbleRotatorServo.setPosition(robot.WobbleRotatorServo.getPosition() + .0015);
             }
             if (gamepad2.dpad_down) {
-                robot.WobbleRotator.setPosition(robot.WobbleRotator.getPosition() - .0015);
+                robot.WobbleRotatorServo.setPosition(robot.WobbleRotatorServo.getPosition() - .0015);
             }
 
             // the back servo goes from min to max
@@ -204,10 +203,10 @@ public class MainTest extends LinearOpMode {
             // gamepad 2 x raises the wobble to pickup position
             // gamepad 2 y raises the wobble to lifting position
             if (gamepad2.x) {
-                robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup);
+                robot.WobbleRotatorServo.setPosition(robot.wobbleRotatorPickup);
             }
             if (gamepad2.y) {
-                robot.WobbleRotator.setPosition(robot.wobbleRotatorTop);
+                robot.WobbleRotatorServo.setPosition(robot.wobbleRotatorTop);
             }
 
             if (encoderThread.revolutionsPerMinute > 4400) {

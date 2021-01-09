@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -19,7 +18,6 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.internal.vuforia.VuforiaException;
 
 import static java.lang.Thread.*;
-import static org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection.BACK;
 
 public class RobotHardware {
 
@@ -35,6 +33,7 @@ public class RobotHardware {
     public DcMotor TopIntake;
     public DcMotor BottomIntake;
     public DcMotor Shooter;
+    public DcMotor WobbleRotator;
 
     // Odometers
     public DcMotor OLeft;
@@ -45,9 +44,8 @@ public class RobotHardware {
     public Servo ShooterServo;
     public Servo ShooterElevator;
     public Servo WobbleServo;
-    public Servo WobbleCatcher;
 
-    public Servo WobbleRotator;
+    public Servo WobbleRotatorServo;
     public Servo WobbleCatcherFront;
     public Servo WobbleCatcherBack;
 
@@ -180,6 +178,18 @@ public class RobotHardware {
             telemetry.addData("Warning", "Motor: shooter not plugged in");    //
             Shooter = null;
         }
+        try {
+            WobbleRotator = hardwareMap.get(DcMotor.class, "wobble_rotator");
+            WobbleRotator.setDirection(DcMotor.Direction.FORWARD);
+            WobbleRotator.setPower(0);
+            WobbleRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            Shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            WobbleRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            telemetry.addData("Status", "Motor: shooter identified");    //
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Motor: shooter not plugged in");    //
+            WobbleRotator = null;
+        }
 
         // shooter and wobble servos
         try {
@@ -197,11 +207,11 @@ public class RobotHardware {
             ShooterElevator = null;
         }
         try {
-            WobbleRotator = hardwareMap.get(Servo.class, "wobble_rotator");
+            WobbleRotatorServo = hardwareMap.get(Servo.class, "wobble_rotator");
             telemetry.addData("Status", "Servo: wobble rotator identified");    //
         } catch (IllegalArgumentException err) {
             telemetry.addData("Warning", "Servo: wobble rotator not plugged in");    //
-            WobbleRotator = null;
+            WobbleRotatorServo = null;
         }
         try {
             WobbleCatcherBack = hardwareMap.get(Servo.class, "wobble_catcher_back");

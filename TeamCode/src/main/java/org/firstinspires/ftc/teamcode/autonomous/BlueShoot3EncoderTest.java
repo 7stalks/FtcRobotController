@@ -244,7 +244,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
     public void runMyOpMode() throws InterruptedException {
         // initialization things
         robot.init(hardwareMap, telemetry);
-        robot.WobbleRotator.setPosition(1);
+        robot.WobbleRotatorServo.setPosition(1);
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
@@ -333,8 +333,8 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         }
         // proceeds to go to that point and drop the wobble goal
         odometryMove.doubleStrafeToPoint(wobbleX, wobbleY - 4, 0);
-        while (robot.WobbleRotator.getPosition() > robot.wobbleRotatorPickup - .05) {
-            robot.WobbleRotator.setPosition(robot.WobbleRotator.getPosition() + 0.001);
+        while (robot.WobbleRotatorServo.getPosition() > robot.wobbleRotatorPickup - .05) {
+            robot.WobbleRotatorServo.setPosition(robot.WobbleRotatorServo.getPosition() + 0.001);
         }
         robot.openWobble();
         robot.sleepTimer(300, this);

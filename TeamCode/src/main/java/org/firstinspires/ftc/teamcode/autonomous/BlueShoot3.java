@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.teamcode.EncoderThread;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
@@ -134,7 +133,7 @@ public class BlueShoot3 extends LinearOpMode {
     public void runMyOpMode() throws InterruptedException {
         // initialization things
         robot.init(hardwareMap, telemetry);
-        robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup+.07);
+        robot.WobbleRotatorServo.setPosition(robot.wobbleRotatorPickup+.07);
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
@@ -218,7 +217,7 @@ public class BlueShoot3 extends LinearOpMode {
         }
         // proceeds to go to that point and drop the wobble goal
         odometryMove.doubleStrafeToPoint(wobbleX, wobbleY, 0);
-        robot.WobbleRotator.setPosition(robot.wobbleRotatorPickup - .05);
+        robot.WobbleRotatorServo.setPosition(robot.wobbleRotatorPickup - .05);
         robot.WobbleCatcherFront.setPosition(robot.wobbleCatcherFrontMax);
         robot.WobbleCatcherBack.setPosition(robot.wobbleCatcherBackMin);
         robot.sleepTimer(300, this);
