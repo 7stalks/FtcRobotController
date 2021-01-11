@@ -13,6 +13,8 @@ public class MainTeleop extends LinearOpMode {
     ElapsedTime intakeTimer = new ElapsedTime();
 
     boolean intakeOn = false;
+    int wobblePosition = 0;
+    boolean wobbleRotatorOn = false;
 
     //// As of 31 December 2020:
     // gamepad 1 sticks: control drive
@@ -110,11 +112,18 @@ public class MainTeleop extends LinearOpMode {
             // gamepad 2's dpad controls wobble stuff
             // up raises the entire apparatus, down lowers it
             if (gamepad2.dpad_up) {
-                robot.WobbleRotatorServo.setPosition(robot.WobbleRotatorServo.getPosition() + .0015);
+                wobblePosition++;
             }
             if (gamepad2.dpad_down) {
-                robot.WobbleRotatorServo.setPosition(robot.WobbleRotatorServo.getPosition() - .0015);
+                wobblePosition--;
             }
+            if (gamepad2.left_stick_button) {
+                wobbleRotatorOn = !wobbleRotatorOn;
+            }
+            if (wobbleRotatorOn) {
+                robot.wobbleToPosition(wobblePosition, telemetry);
+            }
+            telemetry.addData("wobble position from dpad", wobblePosition);
 
             // the back servo goes from min to max
             // the front servo goes from max to min

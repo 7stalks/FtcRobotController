@@ -155,21 +155,18 @@ public class OdometryMove {
         double hyp, initialX, initialY, thetaOfPoint, driveX, driveY, distance;
         double thetaSpeed = 0;
         while (((odometry.robotPosition[0] < x-.5 || odometry.robotPosition[0] > x+.5) || (odometry.robotPosition[1] < y-.5 || odometry.robotPosition[1] > y+.5)) && opMode.opModeIsActive()) {
-            thetaSpeed = -(odometry.robotPosition[2]+(rotation));
+            thetaSpeed = -(odometry.robotPosition[2]-(rotation));
             hyp = Math.sqrt((x - odometry.robotPosition[0])*(x - odometry.robotPosition[0]) + (y - odometry.robotPosition[1])*(y - odometry.robotPosition[1]));
             initialX = (x - odometry.robotPosition[0]) / hyp;
             initialY = (y - odometry.robotPosition[1]) / hyp;
-            thetaOfPoint = Math.atan(initialY/initialX) - rotation;
+            thetaOfPoint = Math.atan(initialY/initialX) + rotation;
             driveX = Math.cos(thetaOfPoint);
             driveY = Math.sin(thetaOfPoint);
-            drive.stop();
             opMode.telemetry.addData("initialX", initialX);
             opMode.telemetry.addData("initialY", initialY);
             opMode.telemetry.addData("theta", thetaOfPoint);
             opMode.telemetry.addData("driveX", driveX);
             opMode.telemetry.addData("driveY", driveY);
-            opMode.telemetry.update();
-            odometry.queryOdometry();
             distance = Math.sqrt(Math.pow(Math.abs(odometry.robotPosition[0] - x), 2) + Math.pow(Math.abs(odometry.robotPosition[1] - y), 2));
             if (distance < 12) {
                 driveX = driveX * (.325 + (.95-.325)*(distance/12));
