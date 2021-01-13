@@ -21,6 +21,7 @@ public class WobbleThread extends Thread {
                 robot.wobbleToPosition(position, opMode.telemetry);
             }
             if (quitThread) {
+                robot.WobbleRotator.setPower(0);
                 break;
             }
         }

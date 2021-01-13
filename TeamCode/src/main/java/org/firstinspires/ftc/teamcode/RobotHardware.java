@@ -60,8 +60,8 @@ public class RobotHardware {
 
     final public double stickThres = 0.05;
     final public double PIVOT_SPEED = -0.5;
-    final public double SHOOTER_SERVO_START = 0.9;
-    final public double SHOOTER_SERVO_MAX = 0.3;
+    final public double SHOOTER_SERVO_START = 0.88;
+    final public double SHOOTER_SERVO_MAX = 0.32;
 
     final public double wobbleRotatorMin = 0;
     final public double wobbleRotatorMax = 1.0;
