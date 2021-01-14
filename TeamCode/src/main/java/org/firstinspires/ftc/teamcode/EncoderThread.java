@@ -17,10 +17,10 @@ public class EncoderThread extends Thread {
     public double encoderDifferencePerMillisecond;
     public double encoderDifferencePerSecond;
     public double revolutionsPerSecond;
-    public double revolutionsPerMinute;
+    public volatile double revolutionsPerMinute;
     double lastPosition = 0;
     double lastTime = 0;
-    public boolean quitThread = false;
+    public volatile boolean quitThread = false;
 
     public String output = "";
 
@@ -31,7 +31,7 @@ public class EncoderThread extends Thread {
     }
 
     public void run() {
-        while(!EncoderThread.currentThread().isInterrupted() && opMode.opModeIsActive()) {
+        while(!EncoderThread.currentThread().isInterrupted() && opMode.opModeIsActive() && !quitThread) {
 
             // gives encoder ticks per ms using the precise time before sleeping for 5 ms
             encoderDifferencePerMillisecond = (Math.abs(robot.Shooter.getCurrentPosition()) - lastPosition) / (System.currentTimeMillis() - lastTime);
@@ -47,18 +47,6 @@ public class EncoderThread extends Thread {
             try {
                 Thread.sleep(15);
             } catch (InterruptedException ignored) { }
-
-            if (quitThread) {
-                break;
-            }
-        }
-            output = "not running";
-        if (quitThread) {
-            try {
-                EncoderThread.currentThread().join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
     }
 }
