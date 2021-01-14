@@ -25,7 +25,6 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
     OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
     VuforiaNavigation nav = new VuforiaNavigation();
     ElapsedTime timer = new ElapsedTime();
-    ElapsedTime shooterTimer = new ElapsedTime();
     ElapsedTime myShooterTimer = new ElapsedTime();
     Runnable switchCamera =
             new Runnable() {
@@ -179,6 +178,10 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
                 sleep(200);
             }
+            telemetry.addData("i", i);
+            telemetry.addData("number of failed shots", numberOfFailedShots);
+            telemetry.addData("attempted shot", attemptedShot);
+            telemetry.addData("encoder", encoderThread.revolutionsPerMinute);
             telemetry.addLine("I'm inside of a while loop, hit BACK on GAMEPAD 2 to get out of it");
             telemetry.update();
         }
@@ -216,18 +219,20 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
 
 
     void shootPowerShots() {
-        odometryMove.doubleStrafeToPoint(-4, -7.5, 0);
+        odometryMove.doubleStrafeToPoint(-4, -9, 0);
         odometryMove.rotateTo0();
         robot.ShooterElevator.setPosition(.245);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
 
         shoot(1);
+        robot.sleepTimer(25, this);
+        odometryMove.rotate(0.1003);
         robot.sleepTimer(125, this);
-        odometryMove.rotate(0.1065);
         shoot(1);
+        robot.sleepTimer(25, this);
+        odometryMove.rotate(0.2006);
         robot.sleepTimer(125, this);
-        odometryMove.rotate(0.213);
         shoot(1);
         robot.sleepTimer(50, this);
         robot.Shooter.setPower(0);
@@ -261,7 +266,6 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
-        shooterTimer.reset();
         telemetry.update();
         sleep(1000);
         telemetry.setMsTransmissionInterval(5);
@@ -301,7 +305,6 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         //vuforia time! gotta move over to the picture too. odometry time
         odometryMove.goToPoint(3, 0);
         odometryMove.doubleStrafeToPoint(12, 24, 0);
-        robot.sleepTimer(100, this);
 
         // waits for the camera to switch. as soon as it's done it joins the thread
         while (nav == null && opModeIsActive()) {
@@ -321,6 +324,8 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
             avgY += nav.Y;
             avgRot += nav.Rotation + Math.PI/2;
         }
+        nav.targetsUltimateGoal.deactivate();
+        robot.vuforia.close();
         avgX = avgX / sampleSize;
         avgY = avgY / sampleSize;
         avgRot = avgRot / sampleSize;
@@ -345,7 +350,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
             wobbleY = -48;
         }
         // proceeds to go to that point and drop the wobble goal
-        odometryMove.doubleStrafeToPoint(wobbleX+2, wobbleY+4, 0);
+        odometryMove.doubleStrafeToPoint(wobbleX+2, wobbleY+2, 0);
         while (robot.WobbleRotator.getCurrentPosition() > -65) {
             robot.WobbleRotator.setPower(-1);
         }
@@ -354,11 +359,11 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         }
         robot.WobbleRotator.setPower(0);
         robot.openWobble();
-        robot.sleepTimer(300, this);
+        robot.sleepTimer(600, this);
 
         // moves a little to the right and then back to the line
         timer.reset();
-        while (timer.milliseconds() < 750 && opModeIsActive()) {
+        while (timer.milliseconds() < 600 && opModeIsActive()) {
             drive.circlepadMove(0, -.9, 0);
         }
         drive.stop();
@@ -383,7 +388,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         // get back to the drop zone and drop the wobble
 //        odometryMove.testDoubleStrafeToPoint(-30, -43, -Math.PI/2);
 //        odometryMove.rotate(0);
-        odometryMove.doubleStrafeToPoint(wobbleX, wobbleY + 18.5, 0);
+        odometryMove.doubleStrafeToPoint(wobbleX+1, wobbleY + 15, 0);
         drive.stop();
 //        wobbleThread.join();
         wobbleThread.quitThread = true;
@@ -397,8 +402,8 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
 
         // move onto the line and then finish
         timer.reset();
-        while (timer.milliseconds() < 500 && opModeIsActive()) {
-            drive.circlepadMove(0, -.7, 0);
+        while (timer.milliseconds() < 400 && opModeIsActive()) {
+            drive.circlepadMove(0, -1, 0);
         }
         odometryMove.goToPoint(10, 0);
 //        while (opModeIsActive()) {

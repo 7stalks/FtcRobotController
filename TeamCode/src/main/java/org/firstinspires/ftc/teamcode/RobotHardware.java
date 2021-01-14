@@ -82,7 +82,7 @@ public class RobotHardware {
             "wm/xxuDsYxY7NrVtjlmslMTiu3nAUboaDP8jkhKvl8623x57MhYt4hof+iegRYjJzt+Knb5m5SfY5urWFGF" +
             "sLjZ4dqAhzXNiJmmKbKojUfjgvUld91gWm0UOXHkoezBuBVnLFasNmChD2uxpGGGeNdW1MvGitjFEvckKJ";
 
-    public VuforiaLocalizer vuforia;
+    public BetterVuforia vuforia;
     public SwitchableCamera switchableCamera;
 
     public TFObjectDetector tensorFlowEngine;
@@ -333,7 +333,7 @@ public class RobotHardware {
             VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
             parameters.vuforiaLicenseKey = VUFORIA_KEY;
             parameters.cameraName = ClassFactory.getInstance().getCameraManager().nameForSwitchableCamera(frontWebcam, backWebcam);
-            vuforia = ClassFactory.getInstance().createVuforia(parameters);
+            vuforia = new BetterVuforia(parameters);
 
             switchableCamera = (SwitchableCamera) vuforia.getCamera();
             switchableCamera.setActiveCamera(frontWebcam);

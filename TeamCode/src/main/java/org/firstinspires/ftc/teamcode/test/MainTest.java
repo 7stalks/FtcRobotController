@@ -22,8 +22,11 @@ public class MainTest extends LinearOpMode {
     OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
     EncoderThread encoderThread = new EncoderThread(robot, this);
     ElapsedTime myShooterTimer = new ElapsedTime();
+    ElapsedTime manualShooterTimer = new ElapsedTime();
 
     boolean intakeOn = false;
+    int wobblePosition = 0;
+    boolean wobbleRotatorOn = false;
 
     //// As of 31 December 2020:
     // gamepad 1 sticks: control drive
@@ -145,7 +148,8 @@ public class MainTest extends LinearOpMode {
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
             if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 4500)) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-            } else if (robot.ShooterServo.getPosition() < robot.SHOOTER_SERVO_START){
+                manualShooterTimer.reset();
+            } else if (robot.ShooterServo.getPosition() < robot.SHOOTER_SERVO_START && manualShooterTimer.milliseconds() > 200){
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
             }
 
@@ -172,11 +176,18 @@ public class MainTest extends LinearOpMode {
             // gamepad 2's dpad controls wobble stuff
             // up raises the entire apparatus, down lowers it
             if (gamepad2.dpad_up) {
-                robot.WobbleRotatorServo.setPosition(robot.WobbleRotatorServo.getPosition() + .0015);
+                wobblePosition++;
             }
             if (gamepad2.dpad_down) {
-                robot.WobbleRotatorServo.setPosition(robot.WobbleRotatorServo.getPosition() - .0015);
+                wobblePosition--;
             }
+            if (gamepad2.left_stick_button) {
+                wobbleRotatorOn = !wobbleRotatorOn;
+            }
+            if (wobbleRotatorOn) {
+                robot.wobbleToPosition(wobblePosition, telemetry);
+            }
+            telemetry.addData("wobble position from dpad", wobblePosition);
 
             // the back servo goes from min to max
             // the front servo goes from max to min
@@ -227,5 +238,6 @@ public class MainTest extends LinearOpMode {
             encoderThread.join();
             encoderThread.quitThread = true;
         }
+        nav.targetsUltimateGoal.deactivate();
     }
 }
