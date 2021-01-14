@@ -15,8 +15,9 @@ public class WobbleThread extends Thread {
         this.opMode = opMode;
     }
 
+    @Override
     public void run() {
-        while (!WobbleThread.currentThread().isInterrupted() && opMode.opModeIsActive()) {
+        while (!isInterrupted() && opMode.opModeIsActive()) {
             if (moveWobble) {
                 robot.wobbleToPosition(position, opMode.telemetry);
             }
@@ -28,7 +29,7 @@ public class WobbleThread extends Thread {
 
         if (quitThread) {
             try {
-                EncoderThread.currentThread().join();
+                join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
