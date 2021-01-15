@@ -17,10 +17,11 @@ public class WobbleThread extends Thread {
 
     @Override
     public void run() {
-        while (!isInterrupted() && opMode.opModeIsActive() && !quitThread) {
+        while (!isInterrupted() && !quitThread) {
             if (moveWobble) {
                 robot.wobbleToPosition(position, opMode.telemetry);
             }
         }
+        robot.WobbleRotator.setPower(0);
     }
 }

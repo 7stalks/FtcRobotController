@@ -19,7 +19,7 @@ public class Odometry {
     }
 
     public double[] lastIterationOdometryInfo = {0, 0, 0};
-    double[] robotPosition = {0, 0, 0};
+    public double[] robotPosition = {0, 0, 0};
     double[] odometryInfo;
     double firstOLeft = 0;
     double firstORight = 0;

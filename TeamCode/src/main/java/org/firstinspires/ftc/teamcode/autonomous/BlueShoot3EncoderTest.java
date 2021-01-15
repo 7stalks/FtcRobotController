@@ -72,23 +72,22 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         return numberOfRings;
     }
 
-    void shoot(int numberOfRings) {
+    void shoot(int numberOfRings, int timeout) {
         int i = 0;
         int numberOfFailedShots = 0;
         boolean attemptedShot = false;
-        while (i<numberOfRings && numberOfFailedShots < 3 && opModeIsActive() && !gamepad2.back) {
-            if (encoderThread.revolutionsPerMinute < 4000 && attemptedShot) {
+        while (i<numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.back) {
+            if (encoderThread.revolutionsPerMinute < 4450 && attemptedShot) {
                 i++;
                 attemptedShot = false;
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                sleep(50);
             }
-            if (encoderThread.revolutionsPerMinute > 4000 && !attemptedShot) {
+            if (encoderThread.revolutionsPerMinute > 4600 && !attemptedShot) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
                 attemptedShot = true;
                 myShooterTimer.reset();
             }
-            if (encoderThread.revolutionsPerMinute > 4000 && attemptedShot && myShooterTimer.milliseconds() > 250) {
+            if (encoderThread.revolutionsPerMinute > 4500 && attemptedShot && myShooterTimer.milliseconds() > 350) {
                 attemptedShot = false;
                 numberOfFailedShots++;
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
@@ -109,26 +108,29 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         robot.ShooterElevator.setPosition(0.345);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
-        shoot(3);
+        shoot(3, 3);
         robot.Shooter.setPower(0);
     }
 
     void shootPowerShots() {
-        odometryMove.doubleStrafeToPoint(-4, -9, 0);
+        odometryMove.doubleStrafeToPoint(-4, -8.2, 0);
         odometryMove.rotateTo0();
-        robot.ShooterElevator.setPosition(.245);
+        robot.ShooterElevator.setPosition(.2455);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
 
-        shoot(1);
+        while (encoderThread.revolutionsPerMinute < 4600) {
+            idle();
+        }
+        shoot(1, 2);
+        robot.sleepTimer(75, this);
+        odometryMove.rotate(0.11);
+        robot.sleepTimer(175, this);
+        shoot(1, 2);
         robot.sleepTimer(25, this);
-        odometryMove.rotate(0.1003);
-        robot.sleepTimer(125, this);
-        shoot(1);
-        robot.sleepTimer(25, this);
-        odometryMove.rotate(0.2006);
-        robot.sleepTimer(125, this);
-        shoot(1);
+        odometryMove.rotate(0.22);
+        robot.sleepTimer(175, this);
+        shoot(1, 2);
         robot.sleepTimer(50, this);
         robot.Shooter.setPower(0);
 
@@ -146,6 +148,13 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
             if (wobbleThread.isAlive()) {
                 wobbleThread.quitThread = true;
             }
+            throw err;
+        }
+        if (encoderThread.isAlive()) {
+            encoderThread.quitThread = true;
+        }
+        if (wobbleThread.isAlive()) {
+            wobbleThread.quitThread = true;
         }
     }
 
@@ -220,7 +229,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         avgRot = avgRot / sampleSize;
         telemetry.addData("avg x, y, z", Arrays.toString(new double[]{avgX, avgY, avgRot}));
         telemetry.update();
-        odometry.inputVuforia(avgX, avgY, avgRot);
+        odometry.inputVuforia(avgX, avgY, 0);
 
         // shoots the rings
         shootPowerShots();
@@ -239,7 +248,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
             wobbleY = -48;
         }
         // proceeds to go to that point and drop the wobble goal
-        odometryMove.doubleStrafeToPoint(wobbleX+2, wobbleY+2, 0);
+        odometryMove.doubleStrafeToPoint(wobbleX+4, wobbleY+3, 0);
         while (robot.WobbleRotator.getCurrentPosition() > -65) {
             robot.WobbleRotator.setPower(-1);
         }
@@ -258,35 +267,27 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         drive.stop();
 
         // move up the wobble rotator to pickup position and hightail it to the other wobble
-        wobbleThread.position = -180;
+        wobbleThread.position = -155;
         wobbleThread.start();
         odometryMove.testDoubleStrafeToPoint(-30, -50, -Math.PI/2);
         drive.stop();
-//        odometryMove.rotate(-Math.PI/2);
-//        odometryMove.testDoubleStrafeToPoint(-35, -38.5, -Math.PI/2);
-//        drive.stop();
 
         // inch into the wobble goal and then clamp onto it before moving it up
-        odometryMove.testDoubleStrafeToPoint(-37, -50, -Math.PI/2);
+        odometryMove.testDoubleStrafeToPoint(-38, -50, -Math.PI/2);
         drive.stop();
         robot.closWobble();
         robot.sleepTimer(300, this);
-        wobbleThread.position = -150;
+        wobbleThread.position = -120;
         robot.sleepTimer(250, this);
 
         // get back to the drop zone and drop the wobble
-//        odometryMove.testDoubleStrafeToPoint(-30, -43, -Math.PI/2);
-//        odometryMove.rotate(0);
+        odometryMove.doubleStrafeToPoint(wobbleX-2, wobbleY + 21, 0);
         odometryMove.doubleStrafeToPoint(wobbleX+1, wobbleY + 15, 0);
         drive.stop();
-//        wobbleThread.join();
         wobbleThread.quitThread = true;
 
         robot.WobbleRotator.setPower(0);
         robot.openWobble();
-//        while(robot.WobbleRotator.getCurrentPosition() > -185) {
-//            robot.WobbleRotator.setPower(-.4);
-//        }
         robot.sleepTimer(300, this);
 
         // move onto the line and then finish
@@ -295,9 +296,6 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
             drive.circlepadMove(0, -1, 0);
         }
         odometryMove.goToPoint(10, 0);
-//        while (opModeIsActive()) {
-//            odometry.queryOdometry();
-//        }
         wobbleThread.quitThread = true;
     }
 }

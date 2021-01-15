@@ -22,8 +22,6 @@ public class EncoderThread extends Thread {
     double lastTime = 0;
     public volatile boolean quitThread = false;
 
-    public String output = "";
-
     // constructor to get the robotHardware
     public EncoderThread(RobotHardware robot, LinearOpMode opMode) {
         this.robot = robot;
@@ -31,7 +29,7 @@ public class EncoderThread extends Thread {
     }
 
     public void run() {
-        while(!EncoderThread.currentThread().isInterrupted() && opMode.opModeIsActive() && !quitThread) {
+        while(!isInterrupted() && !quitThread) {
 
             // gives encoder ticks per ms using the precise time before sleeping for 5 ms
             encoderDifferencePerMillisecond = (Math.abs(robot.Shooter.getCurrentPosition()) - lastPosition) / (System.currentTimeMillis() - lastTime);

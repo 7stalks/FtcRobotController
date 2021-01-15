@@ -45,32 +45,61 @@ public class MainTest extends LinearOpMode {
     // gamepad 2 X: raises wobble rotator to pickup position
     // gamepad 2 Y: raises the wobble rotator to lifting position
 
-    void shoot(int numberOfRings) {
-        int i = 0;
-        int numberOfFailedShots = 0;
-        boolean attemptedShot = false;
-        while (i<numberOfRings && numberOfFailedShots < 4 && opModeIsActive() && !gamepad2.back) {
-            if (encoderThread.revolutionsPerMinute < 4750 && attemptedShot) {
-                i++;
-                attemptedShot = false;
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                sleep(250);
-            }
-            if (encoderThread.revolutionsPerMinute > 5000 && !attemptedShot) {
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-                attemptedShot = true;
-                myShooterTimer.reset();
-            }
-            if (encoderThread.revolutionsPerMinute > 5000 && attemptedShot && myShooterTimer.milliseconds() > 250) {
-                attemptedShot = false;
-                numberOfFailedShots++;
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                sleep(250);
-            }
-            telemetry.addLine("I'm inside of a while loop, hit BACK on GAMEPAD 2 to get out of it");
-            telemetry.update();
-        }
-    }
+     void shoot(int numberOfRings, int timeout) {
+         int i = 0;
+         int numberOfFailedShots = 0;
+         boolean attemptedShot = false;
+         while (i<numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.back) {
+             if (encoderThread.revolutionsPerMinute < 4450 && attemptedShot) {
+                 i++;
+                 attemptedShot = false;
+                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+             }
+             if (encoderThread.revolutionsPerMinute > 4600 && !attemptedShot) {
+                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+                 attemptedShot = true;
+                 myShooterTimer.reset();
+             }
+             if (encoderThread.revolutionsPerMinute > 4500 && attemptedShot && myShooterTimer.milliseconds() > 350) {
+                 attemptedShot = false;
+                 numberOfFailedShots++;
+                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+                 sleep(200);
+             }
+             telemetry.addData("i", i);
+             telemetry.addData("number of failed shots", numberOfFailedShots);
+             telemetry.addData("attempted shot", attemptedShot);
+             telemetry.addData("encoder", encoderThread.revolutionsPerMinute);
+             telemetry.addLine("I'm inside of a while loop, hit BACK on GAMEPAD 2 to get out of it");
+             telemetry.update();
+         }
+         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+     }
+
+     void shootPowerShots() {
+         odometryMove.doubleStrafeToPoint(-4, -8.2, 0);
+         odometryMove.rotateTo0();
+         robot.ShooterElevator.setPosition(.2455);
+         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+         robot.Shooter.setPower(1);
+
+         while (encoderThread.revolutionsPerMinute < 4600) {
+             idle();
+         }
+         shoot(1, 2);
+         robot.sleepTimer(75, this);
+         odometryMove.rotate(0.11);
+         robot.sleepTimer(175, this);
+         shoot(1, 2);
+         robot.sleepTimer(25, this);
+         odometryMove.rotate(0.22);
+         robot.sleepTimer(175, this);
+         shoot(1, 2);
+         robot.sleepTimer(50, this);
+         robot.Shooter.setPower(0);
+
+         odometryMove.rotateTo0();
+     }
 
     // there wasn't an override here before and i think it worked fine... oh well! we'll see
     @Override
@@ -87,7 +116,7 @@ public class MainTest extends LinearOpMode {
         while (opModeIsActive()) {
 
             nav.navigationNoTelemetry();
-            if (nav.targetVisible && gamepad1.back) {
+            if (nav.targetVisible && gamepad1.start) {
                 double avgX = 0, avgY = 0, avgRot = 0, i;
                 for (i=0; i<75; i++) {
                     avgX += (nav.X + 8);
@@ -97,11 +126,15 @@ public class MainTest extends LinearOpMode {
                 avgX = avgX/i;
                 avgY = avgY/i;
                 avgRot = avgRot/i;
-                odometry.inputVuforia(avgX, avgY, avgRot);
+                odometry.inputVuforia(avgX, avgY, odometry.robotPosition[2]);
             }
 
-            if (gamepad1.start) {
-                odometryMove.doubleStrafeToPoint(-4, -8, 0);
+            if (gamepad2.right_stick_button) {
+                odometry.robotPosition[2] = 0;
+            }
+
+            if (gamepad1.back) {
+                shootPowerShots();
             }
 
             if (gamepad1.y) {
@@ -137,7 +170,6 @@ public class MainTest extends LinearOpMode {
                 }
             }
 
-            // when the intake is on, you cannot change position of shooter; when it is off you can change position of shooter using bumpers
             if (gamepad2.right_bumper) {
                 robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .003);
             } else if (gamepad2.left_bumper) {
@@ -229,13 +261,12 @@ public class MainTest extends LinearOpMode {
             telemetry.addData("shooter servo position", robot.ShooterServo.getPosition());
             odometry.queryOdometry();
 
-            if (gamepad2.start) {
-                shoot(3);
+            if (gamepad2.back) {
+                shoot(3, 3);
             }
 
         }
         if (encoderThread.isAlive()) {
-            encoderThread.join();
             encoderThread.quitThread = true;
         }
         nav.targetsUltimateGoal.deactivate();
