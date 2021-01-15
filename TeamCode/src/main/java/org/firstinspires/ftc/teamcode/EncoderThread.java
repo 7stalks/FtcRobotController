@@ -29,7 +29,7 @@ public class EncoderThread extends Thread {
     }
 
     public void run() {
-        while(!isInterrupted() && !quitThread) {
+        while(!Thread.currentThread().isInterrupted() && !quitThread) {
 
             // gives encoder ticks per ms using the precise time before sleeping for 5 ms
             encoderDifferencePerMillisecond = (Math.abs(robot.Shooter.getCurrentPosition()) - lastPosition) / (System.currentTimeMillis() - lastTime);

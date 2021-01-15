@@ -29,7 +29,7 @@ public class wobbleTest extends LinearOpMode {
         telemetry.setMsTransmissionInterval(5);
         telemetry.update();
 
-        odometryMove.rotate(Math.PI/2);
+//        odometryMove.rotate(Math.PI/2);
         waitForStart();
 
         while (opModeIsActive()) {
@@ -59,12 +59,12 @@ public class wobbleTest extends LinearOpMode {
 //            telemetry.update();
 ////            robot.WobbleRotator.setPower(1);
 //        }
-
-
-            if (gamepad1.a) {
-                odometryMove.testDoubleStrafeToPoint(12, 12, Math.PI / 2);
-            }
-            odometry.queryOdometry();
+            telemetry.addData("wobble position", robot.WobbleRotator.getCurrentPosition());
+            telemetry.update();
+//            if (gamepad1.a) {
+//                odometryMove.testDoubleStrafeToPoint(12, 12, Math.PI / 2);
+//            }
+//            odometry.queryOdometry();
         }
     }
 }

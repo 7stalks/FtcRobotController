@@ -63,16 +63,14 @@ public class RobotHardware {
     final public double SHOOTER_SERVO_START = 0.88;
     final public double SHOOTER_SERVO_MAX = 0.32;
 
-    final public double wobbleRotatorMin = 0;
-    final public double wobbleRotatorMax = 1.0;
-    final public double wobbleRotatorPickup = 0.24;
-    final public double wobbleRotatorTop = 0.6;
+    final public int wobbleRotatorPickup = 30;
+    final public int wobbleRotatorTop = 90;
     final public double wobbleCatcherFrontMin = 0.29;
     final public double wobbleCatcherFrontMax = 0.57;
     final public double wobbleCatcherBackMin = 0.27;
     final public double wobbleCatcherBackMax = 0.64;
-    final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMax-wobbleCatcherFrontMin)*0.0135135135;
-    final public double wobbleCatcherBackSpeed = (wobbleCatcherBackMax-wobbleCatcherBackMin)*0.0135135135;
+    final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMax-wobbleCatcherFrontMin)*0.03;
+    final public double wobbleCatcherBackSpeed = (wobbleCatcherBackMax-wobbleCatcherBackMin)*0.03;
 
     ElapsedTime timer = new ElapsedTime();
 
@@ -380,7 +378,7 @@ public class RobotHardware {
         WobbleCatcherFront.setPosition(wobbleCatcherFrontMin);
     }
 
-    int lastPosition = 0;
+//    int lastPosition = 0;
     public void wobbleToPosition(int position, Telemetry telemetry) {
         int distanceToPosition;
         double power = 0;
@@ -399,6 +397,33 @@ public class RobotHardware {
             WobbleRotator.setPower(0);
         }
         telemetry.addData("power", power);
+//        lastPosition = WobbleRotator.getCurrentPosition();
+    }
+
+    int lastPosition = 0;
+    public void wobbleGoToPosition(int position, Telemetry telemetry) {
+        double distanceToPosition = position - WobbleRotator.getCurrentPosition();
+
+        int movement = WobbleRotator.getCurrentPosition() - lastPosition;
+        double power = (distanceToPosition/192) + .2;
+        if (Math.abs(distanceToPosition) > 5) {
+            if (movement > 5) {
+                power = power/5;
+            }
+            if (movement <= 1) {
+                if (distanceToPosition < -50) {
+                    power = 1;
+                } else {
+                    power += 0.35;
+                }
+            }
+            WobbleRotator.setPower(power);
+        } else {
+            WobbleRotator.setPower(0);
+        }
+        telemetry.addData("power", power);
+        telemetry.addData("movement", movement);
+        telemetry.addData("distanceToPosition", distanceToPosition);
         lastPosition = WobbleRotator.getCurrentPosition();
     }
 }

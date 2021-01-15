@@ -23,6 +23,7 @@ public class MainTest extends LinearOpMode {
     EncoderThread encoderThread = new EncoderThread(robot, this);
     ElapsedTime myShooterTimer = new ElapsedTime();
     ElapsedTime manualShooterTimer = new ElapsedTime();
+    ElapsedTime manualWobbleTimer = new ElapsedTime();
 
     boolean intakeOn = false;
     int wobblePosition = 0;
@@ -52,7 +53,7 @@ public class MainTest extends LinearOpMode {
          int i = 0;
          int numberOfFailedShots = 0;
          boolean attemptedShot = false;
-         while (i<numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.back) {
+         while (i < numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.start) {
              if (encoderThread.revolutionsPerMinute < 4450 && attemptedShot) {
                  i++;
                  attemptedShot = false;
@@ -108,10 +109,12 @@ public class MainTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, telemetry);
+        robot.closWobble();
         robot.initVuforia(hardwareMap, telemetry);
         nav.navigationInit(robot);
         robot.switchableCamera.setActiveCamera(robot.backWebcam);
         encoderThread.start();
+        manualWobbleTimer.reset();
         telemetry.setMsTransmissionInterval(1);
 
         waitForStart();
@@ -141,10 +144,10 @@ public class MainTest extends LinearOpMode {
             }
 
             if (gamepad1.y) {
-                odometryMove.deltaRotate(.095);
+                odometryMove.deltaRotate(.1);
             }
             if (gamepad1.x) {
-                odometryMove.deltaRotate(-.095);
+                odometryMove.deltaRotate(-.1);
             }
 
             // drive goes to gamepad 1. the left and right sticks control circlepad, dpad is for the fast move
@@ -210,17 +213,18 @@ public class MainTest extends LinearOpMode {
 
             // gamepad 2's dpad controls wobble stuff
             // up raises the entire apparatus, down lowers it
-            if (gamepad2.dpad_up) {
-                wobblePosition++;
+            if (gamepad2.dpad_up && wobblePosition < 192) {
+                wobblePosition += 2;
             }
-            if (gamepad2.dpad_down) {
-                wobblePosition--;
+            if (gamepad2.dpad_down && wobblePosition > 0) {
+                wobblePosition -= 2;
             }
-            if (gamepad2.left_stick_button) {
+            if (gamepad2.left_stick_button && manualWobbleTimer.milliseconds() > 200) {
                 wobbleRotatorOn = !wobbleRotatorOn;
+                manualWobbleTimer.reset();
             }
             if (wobbleRotatorOn) {
-                robot.wobbleToPosition(wobblePosition, telemetry);
+                robot.wobbleGoToPosition(wobblePosition, telemetry);
             }
             telemetry.addData("wobble position from dpad", wobblePosition);
 
@@ -249,10 +253,10 @@ public class MainTest extends LinearOpMode {
             // gamepad 2 x raises the wobble to pickup position
             // gamepad 2 y raises the wobble to lifting position
             if (gamepad2.x) {
-                robot.WobbleRotatorServo.setPosition(robot.wobbleRotatorPickup);
+                wobblePosition = robot.wobbleRotatorPickup;
             }
             if (gamepad2.y) {
-                robot.WobbleRotatorServo.setPosition(robot.wobbleRotatorTop);
+                wobblePosition = robot.wobbleRotatorTop;
             }
 
             if (encoderThread.revolutionsPerMinute > 4400) {

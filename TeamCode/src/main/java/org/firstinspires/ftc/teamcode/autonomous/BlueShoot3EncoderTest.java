@@ -156,6 +156,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         if (wobbleThread.isAlive()) {
             wobbleThread.quitThread = true;
         }
+
     }
 
     public void runMyOpMode() throws InterruptedException {
