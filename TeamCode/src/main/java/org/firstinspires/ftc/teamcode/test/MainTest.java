@@ -32,6 +32,8 @@ public class MainTest extends LinearOpMode {
     // gamepad 1 sticks: control drive
     // gamepad 1 A: turns on/off the intake
     // gamepad 1 B: reverses on/off the intake
+    // gamepad 1 start: takes picture
+    // gamepad 1 back: does all the powershot stuff after photos
     //
     // gamepad 2 right bumper: raises the shooter
     // gamepad 2 left bumper: lowers the shooter
@@ -44,6 +46,7 @@ public class MainTest extends LinearOpMode {
     // gamepad 2 B: aims the shooter at the power shots
     // gamepad 2 X: raises wobble rotator to pickup position
     // gamepad 2 Y: raises the wobble rotator to lifting position
+    // gamepad 2 start: shoots 3 rings automatically
 
      void shoot(int numberOfRings, int timeout) {
          int i = 0;
