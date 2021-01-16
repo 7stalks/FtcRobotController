@@ -17,7 +17,7 @@ public class WobbleThread extends Thread {
 
     @Override
     public void run() {
-        while (!Thread.currentThread().isInterrupted() && !quitThread) {
+        while (!isInterrupted() && !quitThread) {
             if (moveWobble) {
                 robot.wobbleToPosition(position, opMode.telemetry);
             }

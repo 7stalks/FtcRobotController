@@ -81,7 +81,7 @@ public class MainTest extends LinearOpMode {
      }
 
      void shootPowerShots() {
-         odometryMove.doubleStrafeToPoint(-4, -8.2, 0);
+         odometryMove.doubleStrafeToPoint(-4, -8.7, 0);
          odometryMove.rotateTo0();
          robot.ShooterElevator.setPosition(.2455);
          robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
@@ -110,9 +110,9 @@ public class MainTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, telemetry);
         robot.closWobble();
-        robot.initVuforia(hardwareMap, telemetry);
-        nav.navigationInit(robot);
-        robot.switchableCamera.setActiveCamera(robot.backWebcam);
+//        robot.initVuforia(hardwareMap, telemetry);
+//        nav.navigationInit(robot);
+//        robot.switchableCamera.setActiveCamera(robot.backWebcam);
         encoderThread.start();
         manualWobbleTimer.reset();
         telemetry.setMsTransmissionInterval(1);
@@ -121,33 +121,33 @@ public class MainTest extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            nav.navigationNoTelemetry();
-            if (nav.targetVisible && gamepad1.start) {
-                double avgX = 0, avgY = 0, avgRot = 0, i;
-                for (i=0; i<75; i++) {
-                    avgX += (nav.X + 8);
-                    avgY += nav.Y;
-                    avgRot += (nav.Rotation + Math.PI/2);
-                }
-                avgX = avgX/i;
-                avgY = avgY/i;
-                avgRot = avgRot/i;
-                odometry.inputVuforia(avgX, avgY, odometry.robotPosition[2]);
-            }
+//            nav.navigationNoTelemetry();
+//            if (nav.targetVisible && gamepad1.start) {
+//                double avgX = 0, avgY = 0, avgRot = 0, i;
+//                for (i=0; i<75; i++) {
+//                    avgX += (nav.X + 8);
+//                    avgY += nav.Y;
+//                    avgRot += (nav.Rotation + Math.PI/2);
+//                }
+//                avgX = avgX/i;
+//                avgY = avgY/i;
+//                avgRot = avgRot/i;
+//                odometry.inputVuforia(avgX, avgY, odometry.robotPosition[2]);
+//            }
+//
+//            if (gamepad2.right_stick_button) {
+//                odometry.robotPosition[2] = 0;
+//            }
 
-            if (gamepad2.right_stick_button) {
-                odometry.robotPosition[2] = 0;
-            }
-
-            if (gamepad1.back) {
-                shootPowerShots();
-            }
+//            if (gamepad1.back) {
+//                shootPowerShots();
+//            }
 
             if (gamepad1.y) {
-                odometryMove.deltaRotate(.1);
+                odometryMove.deltaRotate(.11);
             }
             if (gamepad1.x) {
-                odometryMove.deltaRotate(-.1);
+                odometryMove.deltaRotate(-.11);
             }
 
             // drive goes to gamepad 1. the left and right sticks control circlepad, dpad is for the fast move
@@ -224,7 +224,7 @@ public class MainTest extends LinearOpMode {
                 manualWobbleTimer.reset();
             }
             if (wobbleRotatorOn) {
-                robot.wobbleGoToPosition(wobblePosition, telemetry);
+                robot.wobbleToPosition(wobblePosition, telemetry);
             }
             telemetry.addData("wobble position from dpad", wobblePosition);
 
@@ -276,6 +276,6 @@ public class MainTest extends LinearOpMode {
         if (encoderThread.isAlive()) {
             encoderThread.quitThread = true;
         }
-        nav.targetsUltimateGoal.deactivate();
+//        nav.targetsUltimateGoal.deactivate();
     }
 }

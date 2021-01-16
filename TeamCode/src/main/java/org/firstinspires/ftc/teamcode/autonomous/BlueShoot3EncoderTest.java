@@ -113,7 +113,8 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
     }
 
     void shootPowerShots() {
-        odometryMove.doubleStrafeToPoint(-4, -8.2, 0);
+        odometryMove.doubleStrafeToPoint(-4, -7.8, 0);
+        odometryMove.doubleStrafeToPoint(-4, -7.8, 0);
         odometryMove.rotateTo0();
         robot.ShooterElevator.setPosition(.2455);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);

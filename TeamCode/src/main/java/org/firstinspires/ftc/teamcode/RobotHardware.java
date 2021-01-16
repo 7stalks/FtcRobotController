@@ -405,13 +405,13 @@ public class RobotHardware {
         double distanceToPosition = position - WobbleRotator.getCurrentPosition();
 
         int movement = WobbleRotator.getCurrentPosition() - lastPosition;
-        double power = (distanceToPosition/192) + .2;
+        double power = (distanceToPosition/192) + .3;
         if (Math.abs(distanceToPosition) > 5) {
-            if (movement > 5) {
-                power = power/5;
+            if (movement > 2) {
+                power = power/3;
             }
             if (movement <= 1) {
-                if (distanceToPosition < -50) {
+                if (WobbleRotator.getCurrentPosition() > 150) {
                     power = 1;
                 } else {
                     power += 0.35;
@@ -419,11 +419,12 @@ public class RobotHardware {
             }
             WobbleRotator.setPower(power);
         } else {
-            WobbleRotator.setPower(0);
+            WobbleRotator.setPower(power - .3);
         }
         telemetry.addData("power", power);
         telemetry.addData("movement", movement);
         telemetry.addData("distanceToPosition", distanceToPosition);
+        telemetry.addData("position", position);
         lastPosition = WobbleRotator.getCurrentPosition();
     }
 }
