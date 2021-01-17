@@ -11,6 +11,8 @@ import org.firstinspires.ftc.teamcode.VuforiaNavigation;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
 import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 
+import java.util.Arrays;
+
  @TeleOp(name = "Main test", group = "Robot")
 public class MainTest extends LinearOpMode {
 
@@ -24,10 +26,12 @@ public class MainTest extends LinearOpMode {
     ElapsedTime myShooterTimer = new ElapsedTime();
     ElapsedTime manualShooterTimer = new ElapsedTime();
     ElapsedTime manualWobbleTimer = new ElapsedTime();
+    ElapsedTime anotherShootTimer = new ElapsedTime();
 
     boolean intakeOn = false;
     int wobblePosition = 0;
     boolean wobbleRotatorOn = false;
+    int counter = 0;
 
     //// As of 31 December 2020:
     // gamepad 1 sticks: control drive
@@ -49,27 +53,41 @@ public class MainTest extends LinearOpMode {
     // gamepad 2 Y: raises the wobble rotator to lifting position
     // gamepad 2 start: shoots 3 rings automatically
 
+     void shooterTimerTime(int milliseconds) {
+         anotherShootTimer.reset();
+         while (opModeIsActive() && !gamepad2.back && anotherShootTimer.milliseconds() < milliseconds) {
+             idle();
+         }
+     }
+
      void shoot(int numberOfRings, int timeout) {
+//         robot.ShooterElevator.setPosition(.34);
          int i = 0;
+         int counter = 0;
+         double[] counterList = new double[3];
          int numberOfFailedShots = 0;
          boolean attemptedShot = false;
-         while (i < numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.start) {
-             if (encoderThread.revolutionsPerMinute < 4450 && attemptedShot) {
+         while (i<numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.back) {
+             if (encoderThread.revolutionsPerMinute < 4700 && attemptedShot) {
                  i++;
                  attemptedShot = false;
                  robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+                 shooterTimerTime(100);
+                 counterList[i-1] = counter;
              }
-             if (encoderThread.revolutionsPerMinute > 4600 && !attemptedShot) {
+             if (encoderThread.revolutionsPerMinute > 5200 && !attemptedShot) {
                  robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
                  attemptedShot = true;
                  myShooterTimer.reset();
+//                 shooterTimerTime(25);
              }
-             if (encoderThread.revolutionsPerMinute > 4500 && attemptedShot && myShooterTimer.milliseconds() > 350) {
+             if (encoderThread.revolutionsPerMinute > 5200 && attemptedShot && myShooterTimer.milliseconds() > 500) {
                  attemptedShot = false;
                  numberOfFailedShots++;
                  robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                 sleep(200);
+                 shooterTimerTime(300);
              }
+             counter++;
              telemetry.addData("i", i);
              telemetry.addData("number of failed shots", numberOfFailedShots);
              telemetry.addData("attempted shot", attemptedShot);
@@ -77,6 +95,9 @@ public class MainTest extends LinearOpMode {
              telemetry.addLine("I'm inside of a while loop, hit BACK on GAMEPAD 2 to get out of it");
              telemetry.update();
          }
+         telemetry.addData("counters", Arrays.toString(counterList));
+         telemetry.update();
+         shooterTimerTime(3000);
          robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
      }
 
@@ -144,10 +165,10 @@ public class MainTest extends LinearOpMode {
 //            }
 
             if (gamepad1.y) {
-                odometryMove.deltaRotate(.11);
+                odometryMove.deltaRotate(0.1);
             }
             if (gamepad1.x) {
-                odometryMove.deltaRotate(-.11);
+                odometryMove.deltaRotate(-0.1);
             }
 
             // drive goes to gamepad 1. the left and right sticks control circlepad, dpad is for the fast move
@@ -204,10 +225,10 @@ public class MainTest extends LinearOpMode {
             // gamepad 2 a is for the high goal
             // gamepad 2 b is for the powershots
             if (gamepad2.a) {
-                robot.ShooterElevator.setPosition(.285);
+                robot.ShooterElevator.setPosition(.31);
             }
             if (gamepad2.b) {
-                robot.ShooterElevator.setPosition(.235);
+                robot.ShooterElevator.setPosition(.238);
             }
 
 
@@ -224,7 +245,7 @@ public class MainTest extends LinearOpMode {
                 manualWobbleTimer.reset();
             }
             if (wobbleRotatorOn) {
-                robot.wobbleToPosition(wobblePosition, telemetry);
+                robot.wobbleGoToPosition(wobblePosition, telemetry);
             }
             telemetry.addData("wobble position from dpad", wobblePosition);
 
@@ -266,10 +287,12 @@ public class MainTest extends LinearOpMode {
             }
             telemetry.addData("revs per minute", encoderThread.revolutionsPerMinute);
             telemetry.addData("shooter servo position", robot.ShooterServo.getPosition());
+            telemetry.addData("counter", counter);
             odometry.queryOdometry();
 
-            if (gamepad2.back) {
+            if (gamepad2.start) {
                 shoot(3, 3);
+                counter++;
             }
 
         }

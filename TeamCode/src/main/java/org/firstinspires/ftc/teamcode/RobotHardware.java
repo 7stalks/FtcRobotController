@@ -405,7 +405,7 @@ public class RobotHardware {
         double distanceToPosition = position - WobbleRotator.getCurrentPosition();
 
         int movement = WobbleRotator.getCurrentPosition() - lastPosition;
-        double power = (distanceToPosition/192) + .3;
+        double power = ((distanceToPosition/192) + .3) * (distanceToPosition/Math.abs(distanceToPosition));
         if (Math.abs(distanceToPosition) > 5) {
             if (movement > 2) {
                 power = power/3;

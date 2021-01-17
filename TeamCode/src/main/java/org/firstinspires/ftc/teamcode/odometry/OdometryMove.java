@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.odometry;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
@@ -70,7 +71,7 @@ public class OdometryMove {
     public void rotateTo0() {
         double wantedAngle = (Math.round(odometry.robotPosition[2]/(2*Math.PI))) * 2 * Math.PI;
         double driveSpeed = .65;
-        while (odometry.robotPosition[2] < wantedAngle - .01 || odometry.robotPosition[2] > wantedAngle + .01 && opMode.opModeIsActive()) {
+        while (odometry.robotPosition[2] < wantedAngle - .0065 || odometry.robotPosition[2] > wantedAngle + .0065 && opMode.opModeIsActive()) {
             if (odometry.robotPosition[2] < wantedAngle - .01) {
                 drive.circlepadMove(0, 0, driveSpeed);
                 odometry.queryOdometry();
@@ -80,7 +81,7 @@ public class OdometryMove {
             }
             // once there's a radian to go, start proportionally reducing drivespeed to .3
             if (Math.abs(odometry.robotPosition[2] - wantedAngle) < 1) {
-                driveSpeed = .2 + (.2 * Math.abs(odometry.robotPosition[2] - wantedAngle));
+                driveSpeed = .27 + (.2 * Math.abs(odometry.robotPosition[2] - wantedAngle));
             }
             odometry.queryOdometry();
         }
@@ -89,7 +90,7 @@ public class OdometryMove {
 
     public void rotate(double theta) {
         double driveSpeed = .45;
-        while (odometry.robotPosition[2] < theta - .01 || odometry.robotPosition[2] > theta + .01 && opMode.opModeIsActive()) {
+        while (odometry.robotPosition[2] < theta - .007 || odometry.robotPosition[2] > theta + .007 && opMode.opModeIsActive()) {
             if (odometry.robotPosition[2] < theta - .01) {
                 drive.circlepadMove(0, 0, driveSpeed);
                 odometry.queryOdometry();
@@ -99,7 +100,7 @@ public class OdometryMove {
             }
             // once there's a radian to go, start proportionally reducing drivespeed to .3
             if (Math.abs(odometry.robotPosition[2] - theta) < 1) {
-                driveSpeed = .2 + (.2 * Math.abs(odometry.robotPosition[2] - theta));
+                driveSpeed = .27 + (.2 * Math.abs(odometry.robotPosition[2] - theta));
             }
             odometry.queryOdometry();
         }
@@ -109,17 +110,17 @@ public class OdometryMove {
     public void deltaRotate(double dTheta) {
         double driveSpeed = .45;
         double theta = odometry.robotPosition[2] + dTheta;
-        while (odometry.robotPosition[2] < theta - .01 || odometry.robotPosition[2] > theta + .01 && opMode.opModeIsActive()) {
-            if (odometry.robotPosition[2] < theta - .01) {
+        while (odometry.robotPosition[2] < theta - .007 || odometry.robotPosition[2] > theta + .007 && opMode.opModeIsActive()) {
+            if (odometry.robotPosition[2] < theta - .007) {
                 drive.circlepadMove(0, 0, driveSpeed);
                 odometry.queryOdometry();
-            } else if (odometry.robotPosition[2] > theta + .01) {
+            } else if (odometry.robotPosition[2] > theta + .007) {
                 drive.circlepadMove(0, 0, -driveSpeed);
                 odometry.queryOdometry();
             }
             // once there's a radian to go, start proportionally reducing drivespeed to .3
             if (Math.abs(odometry.robotPosition[2] - theta) < 1) {
-                driveSpeed = .2 + (.2 * Math.abs(odometry.robotPosition[2] - theta));
+                driveSpeed = .1 + (.2 * Math.abs(odometry.robotPosition[2] - theta));
             }
             odometry.queryOdometry();
         }
@@ -130,7 +131,7 @@ public class OdometryMove {
         rotateTo0();
         double hyp, initialX, initialY, thetaOfPoint, driveX, driveY, distance;
         double thetaSpeed = 0;
-        while (((odometry.robotPosition[0] < x-.5 || odometry.robotPosition[0] > x+.5) || (odometry.robotPosition[1] < y-.5 || odometry.robotPosition[1] > y+.5)) && opMode.opModeIsActive()) {
+        while (((odometry.robotPosition[0] < x-.2 || odometry.robotPosition[0] > x+.2) || (odometry.robotPosition[1] < y-.2 || odometry.robotPosition[1] > y+.2)) && opMode.opModeIsActive()) {
             thetaSpeed = -(odometry.robotPosition[2]+(rotation));
             hyp = Math.sqrt((x - odometry.robotPosition[0])*(x - odometry.robotPosition[0]) + (y - odometry.robotPosition[1])*(y - odometry.robotPosition[1]));
             driveX = (x - odometry.robotPosition[0]) / hyp;
@@ -154,7 +155,7 @@ public class OdometryMove {
     public void testDoubleStrafeToPoint(double x, double y, double rotation) {
         double hyp, initialX, initialY, thetaOfPoint, driveX, driveY, distance;
         double thetaSpeed = 0;
-        while (((odometry.robotPosition[0] < x-.5 || odometry.robotPosition[0] > x+.5) || (odometry.robotPosition[1] < y-.5 || odometry.robotPosition[1] > y+.5)) && opMode.opModeIsActive()) {
+        while (((odometry.robotPosition[0] < x-.3 || odometry.robotPosition[0] > x+.3) || (odometry.robotPosition[1] < y-.3 || odometry.robotPosition[1] > y+.3)) && opMode.opModeIsActive()) {
             thetaSpeed = -(odometry.robotPosition[2]-(rotation));
             hyp = Math.sqrt((x - odometry.robotPosition[0])*(x - odometry.robotPosition[0]) + (y - odometry.robotPosition[1])*(y - odometry.robotPosition[1]));
             initialX = (x - odometry.robotPosition[0]) / hyp;
@@ -174,6 +175,34 @@ public class OdometryMove {
             }
             drive.circlepadMove(driveX, -driveY, thetaSpeed);
             odometry.queryOdometry();
+        }
+        drive.stop();
+    }
+
+    public void wobbleTestDoubleStrafeToPoint(double x, double y, double rotation, int wobblePosition, Telemetry telemetry) {
+        double hyp, initialX, initialY, thetaOfPoint, driveX, driveY, distance;
+        double thetaSpeed = 0;
+        while (((odometry.robotPosition[0] < x-.3 || odometry.robotPosition[0] > x+.3) || (odometry.robotPosition[1] < y-.3 || odometry.robotPosition[1] > y+.3)) && opMode.opModeIsActive()) {
+            thetaSpeed = -(odometry.robotPosition[2]-(rotation));
+            hyp = Math.sqrt((x - odometry.robotPosition[0])*(x - odometry.robotPosition[0]) + (y - odometry.robotPosition[1])*(y - odometry.robotPosition[1]));
+            initialX = (x - odometry.robotPosition[0]) / hyp;
+            initialY = (y - odometry.robotPosition[1]) / hyp;
+            thetaOfPoint = Math.atan(initialY/initialX) + rotation;
+            driveX = Math.cos(thetaOfPoint);
+            driveY = Math.sin(thetaOfPoint);
+            opMode.telemetry.addData("initialX", initialX);
+            opMode.telemetry.addData("initialY", initialY);
+            opMode.telemetry.addData("theta", thetaOfPoint);
+            opMode.telemetry.addData("driveX", driveX);
+            opMode.telemetry.addData("driveY", driveY);
+            distance = Math.sqrt(Math.pow(Math.abs(odometry.robotPosition[0] - x), 2) + Math.pow(Math.abs(odometry.robotPosition[1] - y), 2));
+            if (distance < 12) {
+                driveX = driveX * (.325 + (.95-.325)*(distance/12));
+                driveY = driveY * (.325 + (.95-.325)*(distance/12));
+            }
+            drive.circlepadMove(driveX, -driveY, thetaSpeed);
+            odometry.queryOdometry();
+            robot.wobbleToPosition(wobblePosition, telemetry);
         }
         drive.stop();
     }

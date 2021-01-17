@@ -2,16 +2,21 @@ package org.firstinspires.ftc.teamcode.odometry;
 
 import android.sax.StartElementListener;
 
+import com.qualcomm.robotcore.util.ElapsedTime;
+
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.R;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 
+import java.util.logging.Logger;
+
 public class Odometry {
 
     RobotHardware robot = new RobotHardware();
     Telemetry telemetry;
+    ElapsedTime brokenThingsTimer = new ElapsedTime();
 
     public Odometry(RobotHardware robot, Telemetry telemetry) {
         this.robot = robot;
@@ -103,12 +108,39 @@ public class Odometry {
         lastIterationOdometryInfo = new double[] {0, 0, 0};
     }
 
+    double Left = 0;
+    double Right = 0;
+    double Middle = 0;
+    public double[] getPositions() throws InterruptedException {
+        Left = robot.OLeft.getCurrentPosition() - firstOLeft;
+        Right = robot.ORight.getCurrentPosition() - firstORight;
+        Middle = robot.OMiddle.getCurrentPosition() - firstOMiddle;
+        return new double[] {Left, Right, Middle};
+    }
+
     public void queryOdometry() {
-        odometryInfo = new double[]{
-                robot.OLeft.getCurrentPosition() - firstOLeft,
-                robot.ORight.getCurrentPosition() - firstORight,
-                robot.OMiddle.getCurrentPosition() - firstOMiddle
-        };
+        int breakCounter = 0;
+        while (true) {
+            try {
+                odometryInfo = getPositions();
+                break;
+            } catch (InterruptedException err) {
+                telemetry.addData("err", err);
+                breakCounter++;
+                brokenThingsTimer.reset();
+                while (brokenThingsTimer.milliseconds() < 30) {
+                }
+            }
+            if (breakCounter>3) {
+                break;
+            }
+        }
+
+//        odometryInfo = new double[]{
+//                robot.OLeft.getCurrentPosition() - firstOLeft,
+//                robot.ORight.getCurrentPosition() - firstORight,
+//                robot.OMiddle.getCurrentPosition() - firstOMiddle
+//        };
         robotPosition = getPosition(robotPosition, odometryInfo, telemetry);
         telemetry.addData("X", robotPosition[0]);
         telemetry.addData("Y", robotPosition[1]);
