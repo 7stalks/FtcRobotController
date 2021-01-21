@@ -25,6 +25,9 @@ public class Odometry {
 
     public double[] lastIterationOdometryInfo = {0, 0, 0};
     public double[] robotPosition = {0, 0, 0};
+    public double[] myPosition = new double[7];
+    public double[] deltas = new double[3];
+    public double[] encoderPositions = new double[3];
     double[] odometryInfo;
     double firstOLeft = 0;
     double firstORight = 0;
@@ -58,7 +61,10 @@ public class Odometry {
         double deltaOMiddle = (odometryInfo[2] - lastIterationOdometryInfo[2]) / encoderCountsPerIn;
         // woooooaahhh. copies last odometryinfo onto lastiterodometryinfo
         System.arraycopy(odometryInfo, 0, lastIterationOdometryInfo, 0, 3);
-        return new double[]{deltaOLeft, deltaORight, deltaOMiddle};
+        deltas[0] = deltaOLeft;
+        deltas[1] = deltaORight;
+        deltas[2] = deltaOMiddle;
+        return deltas;
     }
 
     // This one is self explanatory, the change in theta (orientation)
@@ -97,7 +103,15 @@ public class Odometry {
         double deltaX = (h * Math.cos(oldTheta+(deltaTheta/2))) + (horizontalChange * Math.sin(oldTheta + (deltaTheta/2)));
         double deltaY = (h * Math.sin(oldTheta+(deltaTheta/2))) - (horizontalChange * Math.cos(oldTheta + (deltaTheta/2)));
 
-        return new double[]{deltaX + oldX, deltaY + oldY, newTheta, deltaDistances[0], deltaDistances[1], deltaTheta, horizontalChange};
+        myPosition[0] = deltaX + oldX;
+        myPosition[1] = deltaY + oldY;
+        myPosition[2] = newTheta;
+        myPosition[3] = deltaDistances[0];
+                myPosition[4] = deltaDistances[1];
+        myPosition[5] = deltaTheta;
+        myPosition[6] = horizontalChange;
+
+        return myPosition;
     }
 
     public void inputVuforia(double x, double y, double theta) {
@@ -115,7 +129,10 @@ public class Odometry {
         Left = robot.OLeft.getCurrentPosition() - firstOLeft;
         Right = robot.ORight.getCurrentPosition() - firstORight;
         Middle = robot.OMiddle.getCurrentPosition() - firstOMiddle;
-        return new double[] {Left, Right, Middle};
+        encoderPositions[0] = Left;
+        encoderPositions[1] = Right;
+        encoderPositions[2] = Middle;
+        return encoderPositions;
     }
 
     public void queryOdometry() {

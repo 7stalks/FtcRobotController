@@ -61,27 +61,31 @@ public class MainTest extends LinearOpMode {
      }
 
      void shoot(int numberOfRings, int timeout) {
-//         robot.ShooterElevator.setPosition(.34);
+         robot.ShooterElevator.setPosition(.324);
+         robot.Shooter.setPower(1);
          int i = 0;
          int counter = 0;
          double[] counterList = new double[3];
          int numberOfFailedShots = 0;
          boolean attemptedShot = false;
          while (i<numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.back) {
-             if (encoderThread.revolutionsPerMinute < 4700 && attemptedShot) {
+             if (encoderThread.revolutionsPerMinute < 4500 && attemptedShot) {
                  i++;
                  attemptedShot = false;
                  robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
                  shooterTimerTime(100);
+                 if (i==2) {
+                     shooterTimerTime(400);
+                 }
                  counterList[i-1] = counter;
              }
-             if (encoderThread.revolutionsPerMinute > 5200 && !attemptedShot) {
+             if (encoderThread.revolutionsPerMinute > 4900 && !attemptedShot) {
                  robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
                  attemptedShot = true;
                  myShooterTimer.reset();
 //                 shooterTimerTime(25);
              }
-             if (encoderThread.revolutionsPerMinute > 5200 && attemptedShot && myShooterTimer.milliseconds() > 500) {
+             if (encoderThread.revolutionsPerMinute > 4800 && attemptedShot && myShooterTimer.milliseconds() > 300) {
                  attemptedShot = false;
                  numberOfFailedShots++;
                  robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
@@ -97,8 +101,8 @@ public class MainTest extends LinearOpMode {
          }
          telemetry.addData("counters", Arrays.toString(counterList));
          telemetry.update();
-         shooterTimerTime(3000);
-         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+//         shooterTimerTime(3000);
+//         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
      }
 
      void shootPowerShots() {
@@ -165,10 +169,10 @@ public class MainTest extends LinearOpMode {
 //            }
 
             if (gamepad1.y) {
-                odometryMove.deltaRotate(0.1);
+                odometryMove.deltaRotate(0.097  );
             }
             if (gamepad1.x) {
-                odometryMove.deltaRotate(-0.1);
+                odometryMove.deltaRotate(-0.097);
             }
 
             // drive goes to gamepad 1. the left and right sticks control circlepad, dpad is for the fast move

@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -12,6 +14,7 @@ import org.firstinspires.ftc.teamcode.VuforiaNavigation;
 import org.firstinspires.ftc.teamcode.WobbleThread;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
 import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
+import org.firstinspires.ftc.teamcode.test.CpuTest;
 
 import java.util.List;
 import java.util.Arrays;
@@ -40,6 +43,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
     WobbleThread wobbleThread = new WobbleThread(robot, this);
     EncoderThread encoderThread = new EncoderThread(robot, this);
     ElapsedTime anotherShootTimer = new ElapsedTime();
+//    CpuTest memThing = new CpuTest();
 
     // yeah yeah, plucked straight from TensorTest... but it works!!!
     public String checkForRings(double seconds) {
@@ -145,11 +149,11 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         }
         shoot(1, 1);
         robot.sleepTimer(100, this);
-        odometryMove.deltaRotate(0.105);
+        odometryMove.deltaRotate(0.093);
         robot.sleepTimer(100, this);
         shoot(1, 1);
         robot.sleepTimer(100, this);
-        odometryMove.deltaRotate(0.105);
+        odometryMove.deltaRotate(0.093);
         robot.sleepTimer(100, this);
         shoot(1, 1);
         robot.sleepTimer(50, this);
@@ -171,12 +175,12 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
             }
             throw err;
         }
-        if (encoderThread.isAlive()) {
+        if (encoderThread != null && encoderThread.isAlive()) {
             encoderThread.quitThread = true;
         }
-        if (wobbleThread.isAlive()) {
-            wobbleThread.quitThread = true;
-        }
+//        if (wobbleThread.isAlive()) {
+//            wobbleThread.quitThread = true;
+//        }
 
     }
 
@@ -259,8 +263,12 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
 
         try {
             robot.vuforia.close();
+            if (robot.vuforia != null) {
+                robot.vuforia = null;
+            }
         } catch (NullPointerException err) {
             telemetry.addData("err", err);
+            Log.i("vu error", err.toString());
         }
 
         // calculates where it needs to go to drop wobble using numberOfRings from earlier
@@ -277,9 +285,15 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         }
         if (encoderThread.isAlive()) {
             encoderThread.quitThread = true;
+            if (encoderThread != null) {
+                encoderThread = null;
+            }
         }
+
+        System.gc();
+
         // proceeds to go to that point and drop the wobble goal
-        odometryMove.doubleStrafeToPoint(wobbleX+5, wobbleY-1, 0);
+        odometryMove.doubleStrafeToPoint(wobbleX+3, wobbleY-1, 0);
         while (robot.WobbleRotator.getCurrentPosition() > -65) {
             robot.WobbleRotator.setPower(-1);
         }
@@ -290,7 +304,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         robot.openWobble();
         robot.sleepTimer(600, this);
 
-        // moves a little to the right and then back to the line
+        // moves a little to the right
         timer.reset();
         while (timer.milliseconds() < 700 && opModeIsActive()) {
             drive.circlepadMove(0, -1, 0);
@@ -326,21 +340,25 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
 //        while (timer.milliseconds() < 400 && opModeIsActive()) {
 //            drive.circlepadMove(0, -1, 0);
 //        }
+
+
+
+
         int wobblePosition = -169;
         robot.wobbleToPosition(wobblePosition, telemetry);
         odometryMove.wobbleTestDoubleStrafeToPoint(-30, -50, -Math.PI/2, wobblePosition, telemetry);
         drive.stop();
 
-        odometryMove.wobbleTestDoubleStrafeToPoint(-30, -50, -Math.PI/2, wobblePosition, telemetry);
+        odometryMove.wobbleTestDoubleStrafeToPoint(-38, -50, -Math.PI/2, wobblePosition, telemetry);
         drive.stop();
         robot.closWobble();
         timer.reset();
-        while (timer.milliseconds() < 300) {
+        while (timer.milliseconds() < 300 && opModeIsActive()) {
             robot.wobbleToPosition(wobblePosition, telemetry);
         }
         wobblePosition = -120;
         timer.reset();
-        while (timer.milliseconds() < 300) {
+        while (timer.milliseconds() < 300 && opModeIsActive()) {
             robot.wobbleToPosition(wobblePosition, telemetry);
         }
         odometryMove.wobbleTestDoubleStrafeToPoint(wobbleX-2, wobbleY + 21, 0, wobblePosition, telemetry);
