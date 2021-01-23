@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.test;
 
 import android.graphics.Path;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -12,6 +13,7 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 
 import java.util.List;
 
+@Disabled
 @TeleOp(name = "Tensor Test")
 public class TensorTestTeleop extends LinearOpMode {
 

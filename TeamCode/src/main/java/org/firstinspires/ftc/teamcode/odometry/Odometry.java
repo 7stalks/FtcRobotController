@@ -114,14 +114,6 @@ public class Odometry {
         return myPosition;
     }
 
-    public void inputVuforia(double x, double y, double theta) {
-        robotPosition = new double[] {x, y, theta};
-        firstOLeft = robot.OLeft.getCurrentPosition();
-        firstORight = robot.ORight.getCurrentPosition();
-        firstOMiddle = robot.OMiddle.getCurrentPosition();
-        lastIterationOdometryInfo = new double[] {0, 0, 0};
-    }
-
     double Left = 0;
     double Right = 0;
     double Middle = 0;
@@ -135,6 +127,23 @@ public class Odometry {
         return encoderPositions;
     }
 
+    /**
+     * Input vuforia info into odometry -- starts over from the new point
+     * @param x the x from vuforia
+     * @param y the y from vuforia
+     * @param theta the theta from vuforia
+     */
+    public void inputVuforia(double x, double y, double theta) {
+        robotPosition = new double[] {x, y, theta};
+        firstOLeft = robot.OLeft.getCurrentPosition();
+        firstORight = robot.ORight.getCurrentPosition();
+        firstOMiddle = robot.OMiddle.getCurrentPosition();
+        lastIterationOdometryInfo = new double[] {0, 0, 0};
+    }
+
+    /**
+     * The main method -- updates odometry so that values are correct. Must be done in every loop!
+     */
     public void queryOdometry() {
         int breakCounter = 0;
         while (true) {
@@ -153,11 +162,6 @@ public class Odometry {
             }
         }
 
-//        odometryInfo = new double[]{
-//                robot.OLeft.getCurrentPosition() - firstOLeft,
-//                robot.ORight.getCurrentPosition() - firstORight,
-//                robot.OMiddle.getCurrentPosition() - firstOMiddle
-//        };
         robotPosition = getPosition(robotPosition, odometryInfo, telemetry);
         telemetry.addData("X", robotPosition[0]);
         telemetry.addData("Y", robotPosition[1]);

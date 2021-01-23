@@ -4,13 +4,12 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.EncoderThread;
+import org.firstinspires.ftc.teamcode.ShooterRpmThread;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
 import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 
-import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -21,7 +20,7 @@ public class shootTest extends LinearOpMode {
     GoBildaDrive drive = new GoBildaDrive(robot);
     Odometry odometry = new Odometry(robot, telemetry);
     OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
-    EncoderThread encoderThread = new EncoderThread(robot, this);
+    ShooterRpmThread encoderThread = new ShooterRpmThread(robot, this);
     ElapsedTime myShooterTimer = new ElapsedTime();
 
     void shoot(int numberOfRings) {

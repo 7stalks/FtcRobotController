@@ -7,20 +7,19 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.teamcode.EncoderThread;
+import org.firstinspires.ftc.teamcode.ShooterRpmThread;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
 import org.firstinspires.ftc.teamcode.WobbleThread;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
 import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
-import org.firstinspires.ftc.teamcode.test.CpuTest;
 
 import java.util.List;
 import java.util.Arrays;
 
 @Autonomous(name = "Blue Close Shoot 3 Encoder")
-public class BlueShoot3EncoderTest extends LinearOpMode {
+public class MainAuto extends LinearOpMode {
 
     // core:
     RobotHardware robot = new RobotHardware();
@@ -41,9 +40,8 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
             };
     Thread switchCameraThread = new Thread(switchCamera);
     WobbleThread wobbleThread = new WobbleThread(robot, this);
-    EncoderThread encoderThread = new EncoderThread(robot, this);
+    ShooterRpmThread encoderThread = new ShooterRpmThread(robot, this);
     ElapsedTime anotherShootTimer = new ElapsedTime();
-//    CpuTest memThing = new CpuTest();
 
     // yeah yeah, plucked straight from TensorTest... but it works!!!
     public String checkForRings(double seconds) {
@@ -84,15 +82,6 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         }
     }
 
-    void newShoots(int numberOfRings) {
-        for (int i=0; i<numberOfRings; i++) {
-            while (encoderThread.revolutionsPerMinute < 4600) {
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-            }
-
-        }
-    }
-
     void shoot(int numberOfRings, int timeout) {
         int i = 0;
         int numberOfFailedShots = 0;
@@ -127,7 +116,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
     }
 
     void shootHighGoal() {
-        odometryMove.doubleStrafeToPoint(-4, -21.5, 0);
+        odometryMove.zeroThetaDiagonalToPoint(-4, -21.5);
         robot.ShooterElevator.setPosition(0.345);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
@@ -136,10 +125,8 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
     }
 
     void shootPowerShots() {
-        odometryMove.doubleStrafeToPoint(-4, -8, 0);
+        odometryMove.zeroThetaDiagonalToPoint(-4, -8);
         odometryMove.deltaRotate(-0.01);
-//        odometryMove.doubleStrafeToPoint(-4, -7.8, 0);
-//        odometryMove.rotateTo0();
         robot.ShooterElevator.setPosition(.2455);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
@@ -187,7 +174,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
     public void runMyOpMode() throws InterruptedException {
         // initialization things
         robot.init(hardwareMap, telemetry);
-        robot.closWobble();
+        robot.closeWobble();
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
@@ -229,7 +216,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
 
         //vuforia time! gotta move over to the picture too. odometry time
         odometryMove.goToPoint(3, 0);
-        odometryMove.doubleStrafeToPoint(12, 24, 0);
+        odometryMove.zeroThetaDiagonalToPoint(12, 24);
 
         // waits for the camera to switch. as soon as it's done it joins the thread
         while (nav == null && opModeIsActive()) {
@@ -293,7 +280,7 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         System.gc();
 
         // proceeds to go to that point and drop the wobble goal
-        odometryMove.doubleStrafeToPoint(wobbleX+3, wobbleY-1, 0);
+        odometryMove.zeroThetaDiagonalToPoint(wobbleX+3, wobbleY-1);
         while (robot.WobbleRotator.getCurrentPosition() > -65) {
             robot.WobbleRotator.setPower(-1);
         }
@@ -346,12 +333,12 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
 
         int wobblePosition = -169;
         robot.wobbleToPosition(wobblePosition, telemetry);
-        odometryMove.wobbleTestDoubleStrafeToPoint(-30, -50, -Math.PI/2, wobblePosition, telemetry);
+        odometryMove.wobbleDiagonalToPoint(-30, -50, -Math.PI/2, wobblePosition, telemetry);
         drive.stop();
 
-        odometryMove.wobbleTestDoubleStrafeToPoint(-38, -50, -Math.PI/2, wobblePosition, telemetry);
+        odometryMove.wobbleDiagonalToPoint(-38, -50, -Math.PI/2, wobblePosition, telemetry);
         drive.stop();
-        robot.closWobble();
+        robot.closeWobble();
         timer.reset();
         while (timer.milliseconds() < 300 && opModeIsActive()) {
             robot.wobbleToPosition(wobblePosition, telemetry);
@@ -361,8 +348,8 @@ public class BlueShoot3EncoderTest extends LinearOpMode {
         while (timer.milliseconds() < 300 && opModeIsActive()) {
             robot.wobbleToPosition(wobblePosition, telemetry);
         }
-        odometryMove.wobbleTestDoubleStrafeToPoint(wobbleX-2, wobbleY + 21, 0, wobblePosition, telemetry);
-        odometryMove.wobbleTestDoubleStrafeToPoint(wobbleX, wobbleY + 14, 0, wobblePosition, telemetry);
+        odometryMove.wobbleDiagonalToPoint(wobbleX-2, wobbleY + 21, 0, wobblePosition, telemetry);
+        odometryMove.wobbleDiagonalToPoint(wobbleX, wobbleY + 14, 0, wobblePosition, telemetry);
         drive.stop();
         robot.WobbleRotator.setPower(0);
         robot.openWobble();

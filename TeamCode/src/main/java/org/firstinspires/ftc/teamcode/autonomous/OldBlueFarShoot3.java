@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -13,7 +14,8 @@ import org.firstinspires.ftc.teamcode.odometry.Odometry;
 import java.util.List;
 
 @Autonomous(name = "Blue Far Shoot 3")
-public class BlueFarShoot3 extends LinearOpMode {
+@Disabled
+public class OldBlueFarShoot3 extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);

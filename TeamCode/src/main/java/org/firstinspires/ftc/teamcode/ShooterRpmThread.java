@@ -4,12 +4,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.odometry.OdometryThread;
 
-public class EncoderThread extends Thread {
+public class ShooterRpmThread extends Thread {
 
     // the 1:1 motor goes 6000 rpm, which is 100 rots per sec, 0.1 rots per ms
     // ONE ROT PER 10 MS
 
-    // TODO the rpm needs to be tested, as well as the ticks per revolution
     // 28 ticks per revolution
 
     RobotHardware robot;
@@ -22,8 +21,12 @@ public class EncoderThread extends Thread {
     double lastTime = 0;
     public volatile boolean quitThread = false;
 
-    // constructor to get the robotHardware
-    public EncoderThread(RobotHardware robot, LinearOpMode opMode) {
+    /**
+     * Uses the shooter's encoder to calculate its rpm
+     * @param robot the instantiated RobotHardware
+     * @param opMode the current opMode
+     */
+    public ShooterRpmThread(RobotHardware robot, LinearOpMode opMode) {
         this.robot = robot;
         this.opMode = opMode;
     }
@@ -41,9 +44,9 @@ public class EncoderThread extends Thread {
             revolutionsPerSecond = encoderDifferencePerSecond / 28;
             revolutionsPerMinute = revolutionsPerSecond * 60;
 
-            // sleep for 5 ms
+            // sleep for 10 ms
             try {
-                Thread.sleep(15);
+                Thread.sleep(10);
             } catch (InterruptedException ignored) { }
         }
     }

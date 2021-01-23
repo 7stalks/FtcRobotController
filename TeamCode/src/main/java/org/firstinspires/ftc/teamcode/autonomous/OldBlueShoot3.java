@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -14,8 +15,9 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 import java.util.List;
 import java.util.Arrays;
 
-@Autonomous(name = "Blue Close Shoot 3")
-public class BlueShoot3 extends LinearOpMode {
+@Autonomous(name = "Main Autonomous")
+@Disabled
+public class OldBlueShoot3 extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
@@ -64,7 +66,7 @@ public class BlueShoot3 extends LinearOpMode {
     }
 
     void shootHighGoal() {
-        odometryMove.doubleStrafeToPoint(-4, -21.5, 0);
+        odometryMove.zeroThetaDiagonalToPoint(-4, -21.5);
         robot.ShooterElevator.setPosition(0.245);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
@@ -92,7 +94,7 @@ public class BlueShoot3 extends LinearOpMode {
     }
 
     void shootPowerShots() {
-        odometryMove.doubleStrafeToPoint(-4, -8, 0);
+        odometryMove.zeroThetaDiagonalToPoint(-4, -8);
         robot.ShooterElevator.setPosition(0.235);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
@@ -173,7 +175,7 @@ public class BlueShoot3 extends LinearOpMode {
 
         //vuforia time! gotta move over to the picture too. odometry time
         odometryMove.goToPoint(3, 0);
-        odometryMove.doubleStrafeToPoint(12, 24, 0);
+        odometryMove.zeroThetaDiagonalToPoint(12, 24);
         robot.sleepTimer(100, this);
 
         // waits for the camera to switch. as soon as it's done it joins the thread
@@ -216,7 +218,7 @@ public class BlueShoot3 extends LinearOpMode {
             wobbleY = -48;
         }
         // proceeds to go to that point and drop the wobble goal
-        odometryMove.doubleStrafeToPoint(wobbleX, wobbleY, 0);
+        odometryMove.zeroThetaDiagonalToPoint(wobbleX, wobbleY);
         robot.WobbleRotatorServo.setPosition(robot.wobbleRotatorPickup - .05);
         robot.WobbleCatcherFront.setPosition(robot.wobbleCatcherFrontMax);
         robot.WobbleCatcherBack.setPosition(robot.wobbleCatcherBackMin);

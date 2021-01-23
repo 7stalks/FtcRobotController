@@ -46,7 +46,6 @@ public class RobotHardware {
     // Servos
     public Servo ShooterServo;
     public Servo ShooterElevator;
-    public Servo WobbleServo;
 
     public Servo WobbleRotatorServo;
     public Servo WobbleCatcherFront;
@@ -91,7 +90,11 @@ public class RobotHardware {
     private static final String LABEL_SECOND_ELEMENT = "Single";
 
 
-    // This will be used on robotTeleop. Inits everything
+    /**
+     * Always do this before starting an opMode. Initializes the entire robot
+     * @param hardwareMap the given hardwareMap for the opMode
+     * @param telemetry the given telemetry for the opMode
+     */
     public void init(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
 
@@ -280,7 +283,11 @@ public class RobotHardware {
         //end of robot init
     }
 
-    // Inits just the mecanum drive (nothing else)
+    /**
+     * Initializes only the mecanum drive
+     * @param hardwareMap the opMode's given hardwareMap
+     * @param telemetry the opMode's given telemetry
+     */
     public void initMecanum(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
         try {
@@ -325,6 +332,11 @@ public class RobotHardware {
         }
     }
 
+    /**
+     * Initializes vuforia
+     * @param hardwareMap the opMode's given hardwareMap
+     * @param telemetry the opMode's given telemetry
+     */
     public void initVuforia(HardwareMap hardwareMap, Telemetry telemetry) {
         try {
             frontWebcam = hardwareMap.get(WebcamName.class, "front_webcam");
@@ -348,6 +360,10 @@ public class RobotHardware {
         }
     }
 
+    /**
+     * Initializes tensorflow -- vuforia must be initialized!!
+     * @param telemetry the opMode's telemetry
+     */
     public void initTFOD(Telemetry telemetry) {
         /* Initialize Tensor Flow Object Detection */
         if (vuforia != null) {
@@ -364,22 +380,37 @@ public class RobotHardware {
         }
     }
 
+    /**
+     * A sleep function that doesn't break the opMode
+     * @param milliseconds the milliseconds wanted to sleep
+     * @param opMode the current opMode (just type in "this" to use the class)
+     */
     public void sleepTimer(int milliseconds, LinearOpMode opMode) {
         timer.reset();
         while (timer.milliseconds() <= milliseconds && opMode.opModeIsActive()) {opMode.idle();}
     }
 
+    /**
+     * Opens the wobble catcher
+     */
     public void openWobble() {
         WobbleCatcherBack.setPosition(wobbleCatcherBackMin);
         WobbleCatcherFront.setPosition(wobbleCatcherFrontMax);
     }
 
-    public void closWobble() {
+    /**
+     * Closes the wobble catcher
+     */
+    public void closeWobble() {
         WobbleCatcherBack.setPosition(wobbleCatcherBackMax);
         WobbleCatcherFront.setPosition(wobbleCatcherFrontMin);
     }
 
-//    int lastPosition = 0;
+    /**
+     * Moves the wobble to a certain position (like a servo) -- WIP
+     * @param position the position for the wobble servo to go to
+     * @param telemetry the opMode's telemetry
+     */
     public void wobbleToPosition(int position, Telemetry telemetry) {
         int distanceToPosition;
         double power = 0;
@@ -402,6 +433,11 @@ public class RobotHardware {
     }
 
     int lastPosition = 0;
+    /**
+     * Moves the wobble to a rough position and then bobbles around there -- WIP
+     * @param position the position for the wobble servo to go to
+     * @param telemetry the opMode's telemetry
+     */
     public void wobbleGoToPosition(int position, Telemetry telemetry) {
         double distanceToPosition = position - WobbleRotator.getCurrentPosition();
 

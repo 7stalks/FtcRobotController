@@ -44,7 +44,10 @@ public class VuforiaNavigation {
 
     public VuforiaTrackables targetsUltimateGoal;
 
-    // Omitted the "this." from robot.vuforia.loadTrackablesFromAsset("Skystone");
+    /**
+     * Initializes the vuforia navigation
+     * @param robot the current instantiated RobotHardware being used in the opMode
+     */
     public void navigationInit(RobotHardware robot) {
 
         // Load the data sets for the trackable objects. These particular data
@@ -110,6 +113,10 @@ public class VuforiaNavigation {
         targetsUltimateGoal.activate();
     }
 
+    /**
+     * Looks through trackables and gets an x and y (outputting it with telemtry). Done in a loop
+     * @param telemetry the opMode's telemetry
+     */
     public void navigation(Telemetry telemetry) {
         // check all the trackable targets to see which one (if any) is visible.
         targetVisible = false;
@@ -147,6 +154,10 @@ public class VuforiaNavigation {
         telemetry.update();
     }
 
+    /**
+     * Looks through trackables to get an x, y, and theta relative to the center of the course.
+     * Doesn't output any telemetry
+     */
     public void navigationNoTelemetry() {
         for (VuforiaTrackable trackable : allTrackables) {
             if (((VuforiaTrackableDefaultListener) trackable.getListener()).isVisible()) {

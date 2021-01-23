@@ -9,8 +9,8 @@ import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
 import org.firstinspires.ftc.teamcode.odometry.OdometryThread;
 
-@TeleOp(name = "RyanTest")
-public class RyanTest extends LinearOpMode {
+@TeleOp(name = "Odometry Experimental Values Test")
+public class OdometryExperimentTest extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
@@ -50,7 +50,7 @@ public class RyanTest extends LinearOpMode {
     }
 
     void getSeparation() {
-        rotateToPoint(2*Math.PI);
+        rotateToPoint(8*Math.PI);
         while (opModeIsActive()) {
             telemetry.addLine("Change the wheel base separation");
             telemetry.addLine("Use the left stick's y to change it");
@@ -74,7 +74,7 @@ public class RyanTest extends LinearOpMode {
     }
 
     void getOffset(double oldTicks) {
-        rotateToPoint(.5*Math.PI);
+        rotateToPoint(2*Math.PI);
         while (!gamepad1.b && opModeIsActive()) {
             telemetry.addLine("Press B to return");
             telemetry.addData("ticks per inch", 306.3816404153158);

@@ -23,13 +23,6 @@ public class MotorTestTeleop extends LinearOpMode {
 
         // Insert anything to be iterated in a loop
         while (opModeIsActive()) {
-            // Does the circle pad movements and dpad drive (one or the other)
-            // Gives priority to dpad move because it's after and the power values will trump the
-            // circle pad ones
-//            telemetry.addData("Hey", "I'm working");
-//            telemetry.addData("leftstick x", gamepad1.left_stick_x);
-//            telemetry.addData("leftstick y", gamepad1.left_stick_y);
-//            telemetry.addData("rightstick x", gamepad1.right_stick_x);
             telemetry.addData("encoder position", robot.WobbleRotator.getCurrentPosition());
             telemetry.update();
             if (gamepad2.a) {

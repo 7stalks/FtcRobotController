@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.EncoderThread;
+import org.firstinspires.ftc.teamcode.ShooterRpmThread;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
@@ -22,7 +22,7 @@ public class MainTest extends LinearOpMode {
     VuforiaNavigation nav = new VuforiaNavigation();
     Odometry odometry = new Odometry(robot, telemetry);
     OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
-    EncoderThread encoderThread = new EncoderThread(robot, this);
+    ShooterRpmThread encoderThread = new ShooterRpmThread(robot, this);
     ElapsedTime myShooterTimer = new ElapsedTime();
     ElapsedTime manualShooterTimer = new ElapsedTime();
     ElapsedTime manualWobbleTimer = new ElapsedTime();
@@ -106,7 +106,7 @@ public class MainTest extends LinearOpMode {
      }
 
      void shootPowerShots() {
-         odometryMove.doubleStrafeToPoint(-4, -8.7, 0);
+         odometryMove.zeroThetaDiagonalToPoint(-4, -8.7);
          odometryMove.rotateTo0();
          robot.ShooterElevator.setPosition(.2455);
          robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
@@ -134,7 +134,7 @@ public class MainTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, telemetry);
-        robot.closWobble();
+        robot.closeWobble();
 //        robot.initVuforia(hardwareMap, telemetry);
 //        nav.navigationInit(robot);
 //        robot.switchableCamera.setActiveCamera(robot.backWebcam);

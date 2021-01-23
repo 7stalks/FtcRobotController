@@ -12,7 +12,12 @@ public class GoBildaDrive {
         robot = givenRobot;
     }
 
-    // for the circle pad movement (rotation and strafing 360 degrees)
+    /**
+     * Put your circlepad sticks into this to move the robot in full 360 degree motion
+     * @param leftStickY the raw left stick's y -- make sure to negate!!
+     * @param leftStickX the raw left stick's x -- make sure to negate!!
+     * @param rightStickX the raw right stick's x, don't negate
+     */
     public void circlepadMove(double leftStickY, double leftStickX, double rightStickX) {
 
         // Make sure that the circle pad sticks don't accidentally move the robot
@@ -36,7 +41,14 @@ public class GoBildaDrive {
         }
     }
 
-    // Allows for faster directional movements. CirclepadMove doesn't allow full speed
+    /**
+     * Allows for faster movement forwards, backwards, left, and right. circlepadMove() isn't as
+     * fast as possible when going in these directions
+     * @param right the right dpad
+     * @param up the up dpad
+     * @param left the left dpad
+     * @param down the down dpad
+     */
     public void dpadMove(boolean right, boolean up, boolean left, boolean down) {
         if (right) {
             robot.RightFront.setPower(1);
@@ -61,6 +73,9 @@ public class GoBildaDrive {
         }
     }
 
+    /**
+     * Stops the drive. Sets power to 0 on all drive motors (effectively braking)
+     */
     public void stop() {
         robot.RightFront.setPower(0);
         robot.RightBack.setPower(0);
