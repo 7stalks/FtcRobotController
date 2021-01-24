@@ -15,7 +15,7 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 import java.util.List;
 import java.util.Arrays;
 
-@Autonomous(name = "Main Autonomous")
+@Autonomous(name = "Old shoot 3")
 @Disabled
 public class OldBlueShoot3 extends LinearOpMode {
 
@@ -229,7 +229,7 @@ public class OldBlueShoot3 extends LinearOpMode {
         while (timer.milliseconds() < 500 && opModeIsActive()) {
             drive.circlepadMove(0, -.6, 0);
         }
-        drive.stop();
+        drive.brake();
 //        odometryMove.doubleStrafeToPoint();
     }
 }

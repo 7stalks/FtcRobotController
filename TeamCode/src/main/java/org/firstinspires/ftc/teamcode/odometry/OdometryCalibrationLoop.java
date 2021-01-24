@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.odometry;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -69,7 +68,7 @@ public class OdometryCalibrationLoop extends LinearOpMode {
                 telemetry.addData("bottom_angle", bottom_angle );
                 telemetry.addData("angle", angle);
             }
-            drive.stop();
+            drive.brake();
 
             // Record IMU and encoder values to calculate the constants
             double newTopAngle = robot.top_imu.getAngularOrientation().firstAngle;

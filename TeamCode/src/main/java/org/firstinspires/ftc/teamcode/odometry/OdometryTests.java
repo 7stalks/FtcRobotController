@@ -34,7 +34,7 @@ public class OdometryTests extends LinearOpMode {
                 telemetry.addData("ANGLE", angle);
                 telemetry.update();
             }
-            drive.stop();
+            drive.brake();
         }
     }
 
@@ -98,7 +98,7 @@ public class OdometryTests extends LinearOpMode {
             drive.circlepadMove(0, 0, .25);
             queryOdometry();
         }
-        drive.stop();
+        drive.brake();
         timer.reset();
         initialAngle = robotPosition[2];
         while (timer.seconds() < 2 && opModeIsActive()) {
@@ -109,7 +109,7 @@ public class OdometryTests extends LinearOpMode {
             drive.circlepadMove(0, 0, -.25);
             queryOdometry();
         }
-        drive.stop();
+        drive.brake();
         timer.reset();
         while (timer.seconds() < 30 && opModeIsActive()) {
             queryOdometry();
@@ -124,7 +124,7 @@ public class OdometryTests extends LinearOpMode {
             drive.circlepadMove(.53, 0, 0);
             queryOdometry();
         }
-        drive.stop();
+        drive.brake();
         timer.reset();
         while (timer.seconds() < 60 && opModeIsActive()) {
             queryOdometry();
@@ -138,7 +138,7 @@ public class OdometryTests extends LinearOpMode {
         queryOdometry();
         goToStrafePoint(12);
         goToPoint(-48);
-        drive.stop();
+        drive.brake();
         boolean middle = false;
         boolean top = false;
         double wobbleX;
@@ -174,7 +174,7 @@ public class OdometryTests extends LinearOpMode {
 
         goToPoint(wobbleX);
         goToStrafePoint(wobbleY);
-        drive.stop();
+        drive.brake();
 
         timer.reset();
         while ((timer.seconds() < 3) && opModeIsActive()) {
@@ -224,7 +224,7 @@ public class OdometryTests extends LinearOpMode {
                 drive.circlepadMove(moveSpeed, 0, thetaSpeed);
                 queryOdometry();
             } else if (robotPosition[0] < (x-.1) || robotPosition[0] > (x+.1)) {
-                drive.stop();
+                drive.brake();
                 break;
             }
             if (Math.abs(-robotPosition[0] - x) < 15) {
@@ -245,7 +245,7 @@ public class OdometryTests extends LinearOpMode {
                 drive.circlepadMove(0, moveSpeed, thetaSpeed);
                 queryOdometry();
             } else if (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1)) {
-                drive.stop();
+                drive.brake();
                 break;
             }
             if (Math.abs(robotPosition[1] - y) < 7) {
@@ -260,7 +260,7 @@ public class OdometryTests extends LinearOpMode {
             drive.circlepadMove(0, 0, .5);
             queryOdometry();
         }
-        drive.stop();
+        drive.brake();
     }
 
     void rotateTo0() {
@@ -278,7 +278,7 @@ public class OdometryTests extends LinearOpMode {
             }
             queryOdometry();
         }
-        drive.stop();
+        drive.brake();
     }
 
     void diagonalToPoint(double x, double y) {
@@ -299,7 +299,7 @@ public class OdometryTests extends LinearOpMode {
             }
             queryOdometry();
         }
-        drive.stop();
+        drive.brake();
         telemetry.addData("hyp", hyp);
         telemetry.addData("first x", first_drive_x);
         telemetry.addData("first y", first_drive_y);
@@ -321,7 +321,7 @@ public class OdometryTests extends LinearOpMode {
             drive.circlepadMove(driveX, -driveY, 0);
             queryOdometry();
         }
-        drive.stop();
+        drive.brake();
         rotateTo0();
     }
 

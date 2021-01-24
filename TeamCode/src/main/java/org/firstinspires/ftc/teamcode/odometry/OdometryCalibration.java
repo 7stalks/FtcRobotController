@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.odometry;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -59,7 +58,7 @@ public class OdometryCalibration extends LinearOpMode {
                 telemetry.addData("IMU Angle", angle);
                 telemetry.update();
             }
-            drive.stop();
+            drive.brake();
             timer.reset();
             // Record IMU and encoder values to calculate the constants
             while (timer.milliseconds() < 1000 && opModeIsActive()) {

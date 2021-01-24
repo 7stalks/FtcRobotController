@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.hardware.DcMotor;
-
 public class GoBildaDrive {
 
     // introduce variables and members
-    private RobotHardware robot;
+    private final RobotHardware robot;
 
     // constructor
     public GoBildaDrive(RobotHardware givenRobot) {
@@ -23,7 +21,7 @@ public class GoBildaDrive {
         // Make sure that the circle pad sticks don't accidentally move the robot
         if (Math.abs(leftStickX) < robot.stickThres && Math.abs(leftStickY) < robot.stickThres
                 && Math.abs(rightStickX) < robot.stickThres) {
-            stop();
+            this.brake();
         } else {
             // Create the magnitude (or radius, r) and angle of the sticks
             double r = Math.hypot(leftStickX, leftStickY);
@@ -76,7 +74,7 @@ public class GoBildaDrive {
     /**
      * Stops the drive. Sets power to 0 on all drive motors (effectively braking)
      */
-    public void stop() {
+    public void brake() {
         robot.RightFront.setPower(0);
         robot.RightBack.setPower(0);
         robot.LeftFront.setPower(0);
@@ -94,7 +92,7 @@ public class GoBildaDrive {
         } else if (left) {
             robot.LeftFront.setPower(1);
         } else {
-            stop();
+            brake();
         }
     }
 }

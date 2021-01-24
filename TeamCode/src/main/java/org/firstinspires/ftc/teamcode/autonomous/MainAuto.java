@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 import java.util.List;
 import java.util.Arrays;
 
-@Autonomous(name = "Blue Close Shoot 3 Encoder")
+@Autonomous(name = "Main Autonomous")
 public class MainAuto extends LinearOpMode {
 
     // core:
@@ -30,6 +30,7 @@ public class MainAuto extends LinearOpMode {
     // timers:
     ElapsedTime timer = new ElapsedTime();
     ElapsedTime myShooterTimer = new ElapsedTime();
+    ElapsedTime anotherShootTimer = new ElapsedTime();
     // threads:
     Runnable switchCamera =
             new Runnable() {
@@ -41,7 +42,6 @@ public class MainAuto extends LinearOpMode {
     Thread switchCameraThread = new Thread(switchCamera);
     WobbleThread wobbleThread = new WobbleThread(robot, this);
     ShooterRpmThread encoderThread = new ShooterRpmThread(robot, this);
-    ElapsedTime anotherShootTimer = new ElapsedTime();
 
     // yeah yeah, plucked straight from TensorTest... but it works!!!
     public String checkForRings(double seconds) {
@@ -296,7 +296,7 @@ public class MainAuto extends LinearOpMode {
         while (timer.milliseconds() < 700 && opModeIsActive()) {
             drive.circlepadMove(0, -1, 0);
         }
-        drive.stop();
+        drive.brake();
 
 //        // move up the wobble rotator to pickup position and hightail it to the other wobble
 //        wobbleThread.position = -169;
@@ -334,10 +334,10 @@ public class MainAuto extends LinearOpMode {
         int wobblePosition = -169;
         robot.wobbleToPosition(wobblePosition, telemetry);
         odometryMove.wobbleDiagonalToPoint(-30, -50, -Math.PI/2, wobblePosition, telemetry);
-        drive.stop();
+        drive.brake();
 
         odometryMove.wobbleDiagonalToPoint(-38, -50, -Math.PI/2, wobblePosition, telemetry);
-        drive.stop();
+        drive.brake();
         robot.closeWobble();
         timer.reset();
         while (timer.milliseconds() < 300 && opModeIsActive()) {
@@ -350,7 +350,7 @@ public class MainAuto extends LinearOpMode {
         }
         odometryMove.wobbleDiagonalToPoint(wobbleX-2, wobbleY + 21, 0, wobblePosition, telemetry);
         odometryMove.wobbleDiagonalToPoint(wobbleX, wobbleY + 14, 0, wobblePosition, telemetry);
-        drive.stop();
+        drive.brake();
         robot.WobbleRotator.setPower(0);
         robot.openWobble();
         robot.sleepTimer(300, this);

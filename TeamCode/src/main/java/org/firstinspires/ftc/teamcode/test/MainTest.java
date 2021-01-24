@@ -101,8 +101,6 @@ public class MainTest extends LinearOpMode {
          }
          telemetry.addData("counters", Arrays.toString(counterList));
          telemetry.update();
-//         shooterTimerTime(3000);
-//         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
      }
 
      void shootPowerShots() {
@@ -209,7 +207,7 @@ public class MainTest extends LinearOpMode {
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
-            if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 4500)) {
+            if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 4900)) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
                 manualShooterTimer.reset();
             } else if (robot.ShooterServo.getPosition() < robot.SHOOTER_SERVO_START && manualShooterTimer.milliseconds() > 200){

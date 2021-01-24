@@ -98,14 +98,14 @@ public class OldBlueFarShoot3 extends LinearOpMode {
                 drive.circlepadMove(-moveSpeed, 0, thetaSpeed);
                 queryOdometry();
             } else if (robotPosition[0] < (x-.1) || robotPosition[1] > (x+.1)) {
-                drive.stop();
+                drive.brake();
                 break;
             }
             if (Math.abs(robotPosition[0] - x) < 15) {
                 moveSpeed = .15 + (((.7-.15)/(15)) * (Math.abs(robotPosition[0] - x)));
             }
         }
-        drive.stop();
+        drive.brake();
     }
 
     // moves left right (y direction)
@@ -121,14 +121,14 @@ public class OldBlueFarShoot3 extends LinearOpMode {
                 drive.circlepadMove(0, moveSpeed, thetaSpeed);
                 queryOdometry();
             } else if (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1)) {
-                drive.stop();
+                drive.brake();
                 break;
             }
             if (Math.abs(robotPosition[1] - y) < 9) {
                 moveSpeed = .2 + (((.55-.2)/(9)) * (Math.abs(robotPosition[1] - y)));
             }
         }
-        drive.stop();
+        drive.brake();
     }
 
     void shoot() {
@@ -224,7 +224,7 @@ public class OldBlueFarShoot3 extends LinearOpMode {
         goToStrafePoint(-22);
 //        drive.circlepadMove(0, 0, -.4);
 //        sleep(100);
-        drive.stop();
+        drive.brake();
 
         robot.ShooterElevator.setPosition(0.33);
         sleep(300);

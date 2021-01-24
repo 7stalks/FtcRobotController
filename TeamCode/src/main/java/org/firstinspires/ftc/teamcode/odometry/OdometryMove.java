@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.odometry;
 
+import android.util.Log;
+import android.util.LogPrinter;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -12,6 +15,8 @@ public class OdometryMove {
     GoBildaDrive drive;
     Odometry odometry;
     LinearOpMode opMode;
+
+    String TAG = "OdometryMove";
 
     /**
      * Moves the robot using odometry
@@ -39,7 +44,7 @@ public class OdometryMove {
                 drive.circlepadMove(-moveSpeed, 0, thetaSpeed);
                 odometry.queryOdometry();
             } else if (odometry.robotPosition[0] < (x-.1) || odometry.robotPosition[0] > (x+.1)) {
-                drive.stop();
+                drive.brake();
                 break;
             }
             if (Math.abs(odometry.robotPosition[0] - x) < 16) {
@@ -47,7 +52,7 @@ public class OdometryMove {
             }
         }
         odometry.queryOdometry();
-        drive.stop();
+        drive.brake();
     }
 
     // OLD
@@ -64,7 +69,7 @@ public class OdometryMove {
                 drive.circlepadMove(0, moveSpeed, thetaSpeed);
                 odometry.queryOdometry();
             } else if (odometry.robotPosition[1] < (y-.1) || odometry.robotPosition[1] > (y+.1)) {
-                drive.stop();
+                drive.brake();
                 break;
             }
             if (Math.abs(odometry.robotPosition[1] - y) < 10) {
@@ -72,7 +77,7 @@ public class OdometryMove {
             }
         }
         odometry.queryOdometry();
-        drive.stop();
+        drive.brake();
     }
 
     /**
@@ -95,7 +100,7 @@ public class OdometryMove {
             }
             odometry.queryOdometry();
         }
-        drive.stop();
+        drive.brake();
     }
 
     /**
@@ -119,7 +124,7 @@ public class OdometryMove {
             }
             odometry.queryOdometry();
         }
-        drive.stop();
+        drive.brake();
     }
 
     /**
@@ -144,7 +149,7 @@ public class OdometryMove {
             }
             odometry.queryOdometry();
         }
-        drive.stop();
+        drive.brake();
     }
 
     /**
@@ -170,7 +175,7 @@ public class OdometryMove {
             drive.circlepadMove(driveX, -driveY, thetaSpeed);
             odometry.queryOdometry();
         }
-        drive.stop();
+        drive.brake();
         rotateTo0();
     }
 
@@ -186,27 +191,37 @@ public class OdometryMove {
         double hyp, initialX, initialY, thetaOfPoint, driveX, driveY, distance;
         double thetaSpeed = 0;
         while (((odometry.robotPosition[0] < x-.3 || odometry.robotPosition[0] > x+.3) || (odometry.robotPosition[1] < y-.3 || odometry.robotPosition[1] > y+.3)) && opMode.opModeIsActive()) {
-            thetaSpeed = -(odometry.robotPosition[2]-(rotation));
+            thetaSpeed = -(odometry.robotPosition[2]-rotation);
             hyp = Math.sqrt((x - odometry.robotPosition[0])*(x - odometry.robotPosition[0]) + (y - odometry.robotPosition[1])*(y - odometry.robotPosition[1]));
             initialX = (x - odometry.robotPosition[0]) / hyp;
             initialY = (y - odometry.robotPosition[1]) / hyp;
             thetaOfPoint = Math.atan(initialY/initialX) + rotation;
             driveX = Math.cos(thetaOfPoint);
             driveY = Math.sin(thetaOfPoint);
-            opMode.telemetry.addData("initialX", initialX);
-            opMode.telemetry.addData("initialY", initialY);
-            opMode.telemetry.addData("theta", thetaOfPoint);
-            opMode.telemetry.addData("driveX", driveX);
-            opMode.telemetry.addData("driveY", driveY);
             distance = Math.sqrt(Math.pow(Math.abs(odometry.robotPosition[0] - x), 2) + Math.pow(Math.abs(odometry.robotPosition[1] - y), 2));
             if (distance < 12) {
                 driveX = driveX * (.325 + (.95-.325)*(distance/12));
                 driveY = driveY * (.325 + (.95-.325)*(distance/12));
             }
+            Log.v(TAG, "thetaSpeed: " + thetaSpeed);
+            Log.v(TAG, "hyp: " + hyp);
+            Log.v(TAG, "initialX: " + initialX);
+            Log.v(TAG, "initialY: " + initialY);
+            Log.v(TAG, "distance: " + distance);
+            Log.v(TAG, "driveX: " + driveX);
+            Log.v(TAG, "driveY: " + driveY);
+            Log.v(TAG, "x: " + odometry.robotPosition[0]);
+            Log.v(TAG, "y: " + odometry.robotPosition[1]);
+            Log.v(TAG, "theta: " + odometry.robotPosition[2]);
+            Log.v(TAG, " --- ");
             drive.circlepadMove(driveX, -driveY, thetaSpeed);
             odometry.queryOdometry();
         }
-        drive.stop();
+        drive.brake();
+    }
+
+    public void newDiagonalToPoint(double x, double y, double theta) {
+
     }
 
     /**
@@ -245,7 +260,7 @@ public class OdometryMove {
             odometry.queryOdometry();
             robot.wobbleToPosition(wobblePosition, telemetry);
         }
-        drive.stop();
+        drive.brake();
     }
 
     double closestShootingPosition;
