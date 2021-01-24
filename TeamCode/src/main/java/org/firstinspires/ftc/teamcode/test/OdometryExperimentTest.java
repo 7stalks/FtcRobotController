@@ -43,25 +43,23 @@ public class OdometryExperimentTest extends LinearOpMode {
     }
 
     public void myDiagonalToPoint(double x, double y, double rotation) {
-//        double hyp, initialX, initialY, thetaOfPoint, driveX, driveY, distance;
-//        double thetaSpeed = 0;
-//        while (((odometry.robotPosition[0] < x-.1 || odometry.robotPosition[0] > x+.1) || (odometry.robotPosition[1] < y-.1 || odometry.robotPosition[1] > y+.1) ||
-//                (odometry.robotPosition[2] < rotation - .01 || odometry.robotPosition[2] > rotation + .01)) && opModeIsActive()) {
-//            thetaSpeed = -(odometry.robotPosition[2]-(rotation));
-//            hyp = Math.sqrt((x - odometry.robotPosition[0])*(x - odometry.robotPosition[0]) + (y - odometry.robotPosition[1])*(y - odometry.robotPosition[1]));
-//            initialX = (x - odometry.robotPosition[0]) / hyp;
-//            initialY = (y - odometry.robotPosition[1]) / hyp;
-//            thetaOfPoint = Math.atan(initialY/initialX) + rotation;
-//            driveX = .3*Math.cos(thetaOfPoint);
-//            driveY = .3*Math.sin(thetaOfPoint);
-//            //distance = Math.sqrt(Math.pow(Math.abs(odometry.robotPosition[0] - x), 2) + Math.pow(Math.abs(odometry.robotPosition[1] - y), 2));
-//
-//            drive.circlepadMove(driveX, -driveY, thetaSpeed);
-//            odometry.queryOdometry();
-//        }
-        odometryMove.rotate(rotation);
-        odometryMove.diagonalToPoint(x, y, rotation);
-        odometryMove.rotate(rotation);
+        double initialX, initialY, driveX, driveY, distance;
+        double thetaSpeed = 0;
+        while (((odometry.robotPosition[0] < x-.3 || odometry.robotPosition[0] > x+.3) || (odometry.robotPosition[1] < y-.3 || odometry.robotPosition[1] > y+.3))
+                || (odometry.robotPosition[2] < rotation - .01 || odometry.robotPosition[2] > rotation) && opModeIsActive()) {
+            thetaSpeed = -(odometry.robotPosition[2]-rotation);
+            distance = Math.sqrt(Math.pow(Math.abs(odometry.robotPosition[0] - x), 2) + Math.pow(Math.abs(odometry.robotPosition[1] - y), 2));
+            initialX = (x - odometry.robotPosition[0]) / distance;
+            initialY = (y - odometry.robotPosition[1]) / distance;
+            driveX = initialX * Math.cos(-rotation) - initialY * Math.sin(-rotation);
+            driveY = initialX * Math.sin(-rotation) + initialY * Math.cos(-rotation);
+            if (distance < 12) {
+                driveX = driveX * (.325 + (.95-.325)*(distance/12));
+                driveY = driveY * (.325 + (.95-.325)*(distance/12));
+            }
+            drive.circlepadMove(driveX, -driveY, thetaSpeed);
+            odometry.queryOdometry();
+        }
         drive.brake();
     }
 
@@ -134,7 +132,7 @@ public class OdometryExperimentTest extends LinearOpMode {
                 oldMiddleTicks = robot.OMiddle.getCurrentPosition();
             }
             if (gamepad1.y) {
-                odometryMove.diagonalToPoint(12, 12, 0);
+                odometryMove.diagonalToPoint(12, 12, Math.PI/2);
                 drive.brake();
             }
             if (gamepad1.b) {

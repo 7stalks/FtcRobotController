@@ -82,24 +82,29 @@ public class MainAuto extends LinearOpMode {
         }
     }
 
+    String TAG = "MainAuto";
+
     void shoot(int numberOfRings, int timeout) {
         int i = 0;
         int numberOfFailedShots = 0;
         boolean attemptedShot = false;
         while (i<numberOfRings && numberOfFailedShots < timeout && opModeIsActive()) {
-            if (encoderThread.revolutionsPerMinute < 4600 && attemptedShot) {
+            if (encoderThread.revolutionsPerMinute < 4500 && attemptedShot) {
                 i++;
                 attemptedShot = false;
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                shooterTimerTime(75);
+                shooterTimerTime(200);
+                Log.v(TAG, "Just went back to start");
+                Log.v(TAG, "i: " + i);
+                Log.v(TAG, "time: " + System.currentTimeMillis());
             }
-            if (encoderThread.revolutionsPerMinute > 4600 && !attemptedShot) {
+            if (encoderThread.revolutionsPerMinute > 4900 && !attemptedShot) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
                 attemptedShot = true;
                 myShooterTimer.reset();
                 shooterTimerTime(75);
             }
-            if (encoderThread.revolutionsPerMinute > 4600 && attemptedShot && myShooterTimer.milliseconds() > 500) {
+            if (encoderThread.revolutionsPerMinute > 4900 && attemptedShot && myShooterTimer.milliseconds() > 500) {
                 attemptedShot = false;
                 numberOfFailedShots++;
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
@@ -126,7 +131,7 @@ public class MainAuto extends LinearOpMode {
 
     void shootPowerShots() {
         odometryMove.zeroThetaDiagonalToPoint(-4, -8);
-        odometryMove.deltaRotate(-0.01);
+        odometryMove.deltaRotate(-0.03);
         robot.ShooterElevator.setPosition(.2455);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
@@ -134,7 +139,7 @@ public class MainAuto extends LinearOpMode {
         while (encoderThread.revolutionsPerMinute < 4800) {
             idle();
         }
-        shoot(1, 1);
+        shoot(1, 3);
         robot.sleepTimer(100, this);
         odometryMove.deltaRotate(0.093);
         robot.sleepTimer(100, this);
@@ -142,7 +147,7 @@ public class MainAuto extends LinearOpMode {
         robot.sleepTimer(100, this);
         odometryMove.deltaRotate(0.093);
         robot.sleepTimer(100, this);
-        shoot(1, 1);
+        shoot(1, 3);
         robot.sleepTimer(50, this);
         robot.Shooter.setPower(0);
 
@@ -298,59 +303,26 @@ public class MainAuto extends LinearOpMode {
         }
         drive.brake();
 
-//        // move up the wobble rotator to pickup position and hightail it to the other wobble
-//        wobbleThread.position = -169;
-//        wobbleThread.start();
-//        odometryMove.testDoubleStrafeToPoint(-30, -50, -Math.PI/2);
-//        drive.stop();
-//
-//        // inch into the wobble goal and then clamp onto it before moving it up
-//        odometryMove.testDoubleStrafeToPoint(-38, -50, -Math.PI/2);
-//        drive.stop();
-//        robot.closWobble();
-//        robot.sleepTimer(300, this);
-//        wobbleThread.position = -120;
-//        robot.sleepTimer(250, this);
-//
-//        // get back to the drop zone and drop the wobble
-//        odometryMove.doubleStrafeToPoint(wobbleX-2, wobbleY + 21, 0);
-//        odometryMove.doubleStrafeToPoint(wobbleX+1, wobbleY + 14, 0);
-//        drive.stop();
-//        wobbleThread.quitThread = true;
-//
-//        robot.WobbleRotator.setPower(0);
-//        robot.openWobble();
-//        robot.sleepTimer(300, this);
-//
-//        // move onto the line and then finish
-//        timer.reset();
-//        while (timer.milliseconds() < 400 && opModeIsActive()) {
-//            drive.circlepadMove(0, -1, 0);
-//        }
-
-
-
-
-        int wobblePosition = -169;
-        robot.wobbleToPosition(wobblePosition, telemetry);
-        odometryMove.wobbleDiagonalToPoint(-30, -50, -Math.PI/2, wobblePosition, telemetry);
+        // move up the wobble rotator to pickup position and hightail it to the other wobble
+        wobbleThread.position = -169;
+        wobbleThread.start();
+        odometryMove.diagonalToPoint(-30, -52, -Math.PI/2);
         drive.brake();
 
-        odometryMove.wobbleDiagonalToPoint(-38, -50, -Math.PI/2, wobblePosition, telemetry);
+        // inch into the wobble goal and then clamp onto it before moving it up
+        odometryMove.diagonalToPoint(-38, -52, -Math.PI/2);
         drive.brake();
         robot.closeWobble();
-        timer.reset();
-        while (timer.milliseconds() < 300 && opModeIsActive()) {
-            robot.wobbleToPosition(wobblePosition, telemetry);
-        }
-        wobblePosition = -120;
-        timer.reset();
-        while (timer.milliseconds() < 300 && opModeIsActive()) {
-            robot.wobbleToPosition(wobblePosition, telemetry);
-        }
-        odometryMove.wobbleDiagonalToPoint(wobbleX-2, wobbleY + 21, 0, wobblePosition, telemetry);
-        odometryMove.wobbleDiagonalToPoint(wobbleX, wobbleY + 14, 0, wobblePosition, telemetry);
+        robot.sleepTimer(300, this);
+        wobbleThread.position = -120;
+        robot.sleepTimer(250, this);
+
+        // get back to the drop zone and drop the wobble
+        odometryMove.diagonalToPoint(wobbleX-2, wobbleY + 21, 0);
+        odometryMove.diagonalToPoint(wobbleX+1, wobbleY + 11, 0);
         drive.brake();
+        wobbleThread.quitThread = true;
+
         robot.WobbleRotator.setPower(0);
         robot.openWobble();
         robot.sleepTimer(300, this);
@@ -362,7 +334,42 @@ public class MainAuto extends LinearOpMode {
         }
 
 
+
+
+//        int wobblePosition = -169;
+//        robot.wobbleToPosition(wobblePosition, telemetry);
+//        odometryMove.wobbleDiagonalToPoint(-30, -50, -Math.PI/2, wobblePosition, telemetry);
+//        drive.brake();
+//
+//        odometryMove.wobbleDiagonalToPoint(-38, -50, -Math.PI/2, wobblePosition, telemetry);
+//        drive.brake();
+//        robot.closeWobble();
+//        timer.reset();
+//        while (timer.milliseconds() < 300 && opModeIsActive()) {
+//            robot.wobbleToPosition(wobblePosition, telemetry);
+//        }
+//        wobblePosition = -120;
+//        timer.reset();
+//        while (timer.milliseconds() < 300 && opModeIsActive()) {
+//            robot.wobbleToPosition(wobblePosition, telemetry);
+//        }
+//        odometryMove.wobbleDiagonalToPoint(wobbleX-2, wobbleY + 21, 0, wobblePosition, telemetry);
+//        odometryMove.wobbleDiagonalToPoint(wobbleX, wobbleY + 14, 0, wobblePosition, telemetry);
+//        drive.brake();
+//        robot.WobbleRotator.setPower(0);
+//        robot.openWobble();
+//        robot.sleepTimer(300, this);
+//
+//        // move onto the line and then finish
+//        timer.reset();
+//        while (timer.milliseconds() < 400 && opModeIsActive()) {
+//            drive.circlepadMove(0, -1, 0);
+//        }
+
+
         odometryMove.goToPoint(10, 0);
-        wobbleThread.quitThread = true;
+        if (wobbleThread != null) {
+            wobbleThread.quitThread = true;
+        }
     }
 }
