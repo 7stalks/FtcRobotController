@@ -6,8 +6,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -55,6 +57,10 @@ public class RobotHardware {
     public BNO055IMU bottom_imu;
     public BNO055IMU top_imu;
 
+    // Touch sensors
+    public DigitalChannel topWobbleLimit;
+    public DigitalChannel bottomWobbleLimit;
+
     public WebcamName frontWebcam;
     public WebcamName backWebcam;
 
@@ -69,8 +75,8 @@ public class RobotHardware {
     final public double wobbleCatcherFrontMax = 0.57;
     final public double wobbleCatcherBackMin = 0.27;
     final public double wobbleCatcherBackMax = 0.64;
-    final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMax-wobbleCatcherFrontMin)*0.03;
-    final public double wobbleCatcherBackSpeed = (wobbleCatcherBackMax-wobbleCatcherBackMin)*0.03;
+    final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMax - wobbleCatcherFrontMin) * 0.03;
+    final public double wobbleCatcherBackSpeed = (wobbleCatcherBackMax - wobbleCatcherBackMin) * 0.03;
 
     ElapsedTime timer = new ElapsedTime();
 
@@ -92,8 +98,9 @@ public class RobotHardware {
 
     /**
      * Always do this before starting an opMode. Initializes the entire robot
+     *
      * @param hardwareMap the given hardwareMap for the opMode
-     * @param telemetry the given telemetry for the opMode
+     * @param telemetry   the given telemetry for the opMode
      */
     public void init(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
@@ -211,13 +218,6 @@ public class RobotHardware {
             ShooterElevator = null;
         }
         try {
-            WobbleRotatorServo = hardwareMap.get(Servo.class, "wobble_rotator");
-            telemetry.addData("Status", "Servo: wobble rotator identified");    //
-        } catch (IllegalArgumentException err) {
-            telemetry.addData("Warning", "Servo: wobble rotator not plugged in");    //
-            WobbleRotatorServo = null;
-        }
-        try {
             WobbleCatcherBack = hardwareMap.get(Servo.class, "wobble_catcher_back");
             telemetry.addData("Status", "Servo: wobble catcher back identified");    //
             WobbleCatcherBack.setPosition(wobbleCatcherBackMax);
@@ -237,6 +237,22 @@ public class RobotHardware {
         OLeft = RightFront;
         ORight = RightBack;
         OMiddle = LeftBack;
+
+        try {
+            topWobbleLimit = hardwareMap.get(DigitalChannel.class, "top_wobble_limit");
+            topWobbleLimit.setMode(DigitalChannel.Mode.INPUT);
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Touch sensor: top wobble limit not working");    //
+            topWobbleLimit = null;
+        }
+
+        try {
+            bottomWobbleLimit = hardwareMap.get(DigitalChannel.class, "bottom_wobble_limit");
+            bottomWobbleLimit.setMode(DigitalChannel.Mode.INPUT);
+        } catch (IllegalArgumentException err) {
+            telemetry.addData("Warning", "Touch sensor: bottom wobble limit not working");    //
+            bottomWobbleLimit = null;
+        }
 
         // Init the IMUs/Gyros
         try {
@@ -285,8 +301,9 @@ public class RobotHardware {
 
     /**
      * Initializes only the mecanum drive
+     *
      * @param hardwareMap the opMode's given hardwareMap
-     * @param telemetry the opMode's given telemetry
+     * @param telemetry   the opMode's given telemetry
      */
     public void initMecanum(HardwareMap hardwareMap, Telemetry telemetry) {
         this.hardwareMap = hardwareMap;
@@ -334,8 +351,9 @@ public class RobotHardware {
 
     /**
      * Initializes vuforia
+     *
      * @param hardwareMap the opMode's given hardwareMap
-     * @param telemetry the opMode's given telemetry
+     * @param telemetry   the opMode's given telemetry
      */
     public void initVuforia(HardwareMap hardwareMap, Telemetry telemetry) {
         try {
@@ -362,6 +380,7 @@ public class RobotHardware {
 
     /**
      * Initializes tensorflow -- vuforia must be initialized!!
+     *
      * @param telemetry the opMode's telemetry
      */
     public void initTFOD(Telemetry telemetry) {
@@ -382,12 +401,15 @@ public class RobotHardware {
 
     /**
      * A sleep function that doesn't break the opMode
+     *
      * @param milliseconds the milliseconds wanted to sleep
-     * @param opMode the current opMode (just type in "this" to use the class)
+     * @param opMode       the current opMode (just type in "this" to use the class)
      */
     public void sleepTimer(int milliseconds, LinearOpMode opMode) {
         timer.reset();
-        while (timer.milliseconds() <= milliseconds && opMode.opModeIsActive()) {opMode.idle();}
+        while (timer.milliseconds() <= milliseconds && opMode.opModeIsActive()) {
+            opMode.idle();
+        }
     }
 
     /**
@@ -408,7 +430,8 @@ public class RobotHardware {
 
     /**
      * Moves the wobble to a certain position (like a servo) -- WIP
-     * @param position the position for the wobble servo to go to
+     *
+     * @param position  the position for the wobble servo to go to
      * @param telemetry the opMode's telemetry
      */
     public void wobbleToPosition(int position, Telemetry telemetry) {
@@ -416,7 +439,7 @@ public class RobotHardware {
         double power = 0;
         if (WobbleRotator.getCurrentPosition() < position - 5) {
             distanceToPosition = Math.abs(WobbleRotator.getCurrentPosition()) - Math.abs(position);
-            power = .25 + (.75*distanceToPosition / 125);
+            power = .25 + (.75 * distanceToPosition / 125);
             if (WobbleCatcherFront.getPosition() == wobbleCatcherFrontMin) {
                 power = 1;
             }
@@ -433,19 +456,21 @@ public class RobotHardware {
     }
 
     int lastPosition = 0;
+
     /**
      * Moves the wobble to a rough position and then bobbles around there -- WIP
-     * @param position the position for the wobble servo to go to
+     *
+     * @param position  the position for the wobble servo to go to
      * @param telemetry the opMode's telemetry
      */
     public void wobbleGoToPosition(int position, Telemetry telemetry) {
         double distanceToPosition = position - WobbleRotator.getCurrentPosition();
 
         int movement = WobbleRotator.getCurrentPosition() - lastPosition;
-        double power = ((distanceToPosition/192) + .3) * (distanceToPosition/Math.abs(distanceToPosition));
+        double power = ((distanceToPosition / 192) + .3) * (distanceToPosition / Math.abs(distanceToPosition));
         if (Math.abs(distanceToPosition) > 5) {
             if (movement > 2) {
-                power = power/3;
+                power = power / 3;
             }
             if (movement <= 1) {
                 if (WobbleRotator.getCurrentPosition() > 150) {
@@ -464,4 +489,42 @@ public class RobotHardware {
         telemetry.addData("position", position);
         lastPosition = WobbleRotator.getCurrentPosition();
     }
+
+    public void bestWobbleToPosition(int position, WobbleRpmThread wobble) {
+        double distanceToPosition = position - WobbleRotator.getCurrentPosition();
+        double power;
+        if (Math.abs(distanceToPosition) < 30) {
+            power = 1;
+        } else {
+            power = .2 + (1 - .2) * (Math.abs(distanceToPosition) / 30);
+        }
+
+        if (wobble.isStuck() && distanceToPosition < -1) {
+            WobbleRotator.setPower(-1);
+        } else if (wobble.isStuck() && distanceToPosition > 1) {
+            WobbleRotator.setPower(1);
+        } else if (wobble.isTooFast() && distanceToPosition < -1) {
+            WobbleRotator.setPower(.1);
+        } else if (wobble.isTooFast() && distanceToPosition > 1) {
+            WobbleRotator.setPower(-.1);
+        } else if (distanceToPosition < -1) {
+            WobbleRotator.setPower(-power);
+        } else if (distanceToPosition > 1) {
+            WobbleRotator.setPower(power);
+        } else {
+            WobbleRotator.setPower(0);
+        }
+    }
+
+    public void simpleWobbleToPosition(int position) {
+        double distanceToPosition = position - WobbleRotator.getCurrentPosition();
+        double power = .25 + (.75 * distanceToPosition / 100);
+        if (distanceToPosition < -1 || distanceToPosition > 1) {
+            WobbleRotator.setPower(power);
+        } else {
+            WobbleRotator.setPower(0);
+        }
+    }
+
+
 }

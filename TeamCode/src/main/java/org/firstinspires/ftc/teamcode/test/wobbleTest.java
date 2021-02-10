@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.test;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
@@ -13,58 +14,48 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 public class wobbleTest extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
-    GoBildaDrive drive = new GoBildaDrive(robot);
-    Odometry odometry = new Odometry(robot, telemetry);
-    OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
+    ElapsedTime myTimer = new ElapsedTime();
 
-    boolean goToPosition = false;
-    boolean goToHighPosition = false;
-    boolean closeWobble = false;
+    boolean wobbleOn = false;
+    double wobblePower;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         robot.init(hardwareMap, telemetry);
-        robot.openWobble();
         telemetry.setMsTransmissionInterval(5);
         telemetry.update();
+        myTimer.reset();
 
-//        odometryMove.rotate(Math.PI/2);
         waitForStart();
 
         while (opModeIsActive()) {
-//            if (gamepad1.a) {
-//                goToPosition = !goToPosition;
-//                goToHighPosition = false;
-//            }
-//            if (goToPosition) {
-//                robot.wobbleToPosition(-150, telemetry);
-//            }
-//            if (gamepad1.x) {
-//                goToHighPosition = !goToHighPosition;
-//                goToPosition = false;
-//            }
-//            if (goToHighPosition) {
-//                robot.wobbleToPosition(-80, telemetry);
-//            }
-//            if (gamepad1.b) {
-//                closeWobble = !closeWobble;
-//            }
-//            if (closeWobble) {
-//                robot.closWobble();
-//            } else {
-//                robot.openWobble();
-//            }
-//            telemetry.addData("wobble position", robot.WobbleRotator.getCurrentPosition());
-//            telemetry.update();
-////            robot.WobbleRotator.setPower(1);
-//        }
+
+            if (myTimer.milliseconds() > 250) {
+                if (gamepad1.a) {
+                    wobbleOn = !wobbleOn;
+                    wobblePower = .15;
+                    myTimer.reset();
+                } else if (gamepad1.b) {
+                    wobbleOn = !wobbleOn;
+                    wobblePower = -.15;
+                    myTimer.reset();
+                }
+            }
+
+            if (wobbleOn) {
+                if ((!robot.topWobbleLimit.getState() && wobblePower > 0) || (!robot.bottomWobbleLimit.getState() && wobblePower < 0)) {
+                    wobblePower = 0;
+                }
+                robot.WobbleRotator.setPower(wobblePower);
+            } else {
+                robot.WobbleRotator.setPower(0);
+            }
+
+            telemetry.addData("is the top limit pressed?", !robot.topWobbleLimit.getState());
+            telemetry.addData("is the bottom limit pressed?", !robot.bottomWobbleLimit.getState());
             telemetry.addData("wobble position", robot.WobbleRotator.getCurrentPosition());
             telemetry.update();
-//            if (gamepad1.a) {
-//                odometryMove.testDoubleStrafeToPoint(12, 12, Math.PI / 2);
-//            }
-//            odometry.queryOdometry();
         }
     }
 }

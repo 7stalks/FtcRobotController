@@ -27,6 +27,16 @@ public class MainTest extends LinearOpMode {
     ElapsedTime manualShooterTimer = new ElapsedTime();
     ElapsedTime manualWobbleTimer = new ElapsedTime();
     ElapsedTime anotherShootTimer = new ElapsedTime();
+    volatile boolean quitVuforiaThread = false;
+    Runnable vuforia = new Runnable() {
+        @Override
+        public void run() {
+            while (!quitVuforiaThread) {
+                nav.navigationNoTelemetry();
+            }
+        }
+    };
+    Thread navThread = new Thread(vuforia);
 
     boolean intakeOn = false;
     int wobblePosition = 0;
@@ -61,29 +71,28 @@ public class MainTest extends LinearOpMode {
      }
 
      void shoot(int numberOfRings, int timeout) {
-         robot.ShooterElevator.setPosition(.324);
          robot.Shooter.setPower(1);
+         while (encoderThread.revolutionsPerMinute < 4800) {
+             idle();
+         }
          int i = 0;
-         int counter = 0;
-         double[] counterList = new double[3];
          int numberOfFailedShots = 0;
          boolean attemptedShot = false;
-         while (i<numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.back) {
-             if (encoderThread.revolutionsPerMinute < 4500 && attemptedShot) {
+         myShooterTimer.reset();
+         while (i < numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.back) {
+             if (encoderThread.revolutionsPerMinute < 4700 && attemptedShot) {
                  i++;
                  attemptedShot = false;
                  robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
                  shooterTimerTime(100);
                  if (i==2) {
-                     shooterTimerTime(400);
+                     shooterTimerTime(300);
                  }
-                 counterList[i-1] = counter;
              }
              if (encoderThread.revolutionsPerMinute > 4900 && !attemptedShot) {
                  robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
                  attemptedShot = true;
                  myShooterTimer.reset();
-//                 shooterTimerTime(25);
              }
              if (encoderThread.revolutionsPerMinute > 4800 && attemptedShot && myShooterTimer.milliseconds() > 300) {
                  attemptedShot = false;
@@ -91,7 +100,6 @@ public class MainTest extends LinearOpMode {
                  robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
                  shooterTimerTime(300);
              }
-             counter++;
              telemetry.addData("i", i);
              telemetry.addData("number of failed shots", numberOfFailedShots);
              telemetry.addData("attempted shot", attemptedShot);
@@ -99,8 +107,6 @@ public class MainTest extends LinearOpMode {
              telemetry.addLine("I'm inside of a while loop, hit BACK on GAMEPAD 2 to get out of it");
              telemetry.update();
          }
-         telemetry.addData("counters", Arrays.toString(counterList));
-         telemetry.update();
      }
 
      void shootPowerShots() {
@@ -128,46 +134,52 @@ public class MainTest extends LinearOpMode {
          odometryMove.rotateTo0();
      }
 
+     void goToHighGoal() {
+         double wantedAngle = (Math.round(odometry.robotPosition[2]/(2*Math.PI))) * 2 * Math.PI;
+         odometryMove.diagonalToPoint(-2.5, -26, wantedAngle);
+         odometryMove.rotateTo0();
+     }
+
     // there wasn't an override here before and i think it worked fine... oh well! we'll see
     @Override
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, telemetry);
         robot.closeWobble();
-//        robot.initVuforia(hardwareMap, telemetry);
-//        nav.navigationInit(robot);
-//        robot.switchableCamera.setActiveCamera(robot.backWebcam);
+        robot.initVuforia(hardwareMap, telemetry);
+        nav.navigationInit(robot);
+        robot.switchableCamera.setActiveCamera(robot.backWebcam);
         encoderThread.start();
         manualWobbleTimer.reset();
         telemetry.setMsTransmissionInterval(1);
+        navThread.start();
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-//            nav.navigationNoTelemetry();
-//            if (nav.targetVisible && gamepad1.start) {
-//                double avgX = 0, avgY = 0, avgRot = 0, i;
-//                for (i=0; i<75; i++) {
-//                    avgX += (nav.X + 8);
-//                    avgY += nav.Y;
-//                    avgRot += (nav.Rotation + Math.PI/2);
-//                }
-//                avgX = avgX/i;
-//                avgY = avgY/i;
-//                avgRot = avgRot/i;
-//                odometry.inputVuforia(avgX, avgY, odometry.robotPosition[2]);
-//            }
-//
-//            if (gamepad2.right_stick_button) {
-//                odometry.robotPosition[2] = 0;
-//            }
+            if (nav.targetVisible && gamepad1.start) {
+                double avgX = 0, avgY = 0, avgRot = 0, i;
+                for (i=1; i<76; i++) {
+                    avgX += (nav.X + 8);
+                    avgY += nav.Y;
+                    avgRot += (nav.Rotation + Math.PI/2);
+                }
+                avgX = avgX/i;
+                avgY = avgY/i;
+                avgRot = avgRot/i;
+                odometry.inputVuforia(avgX, avgY, -avgRot);
+            }
 
-//            if (gamepad1.back) {
-//                shootPowerShots();
-//            }
+            if (gamepad2.right_stick_button) {
+                odometry.robotPosition[2] = 0;
+            }
+
+            if (gamepad1.back) {
+                goToHighGoal();
+            }
 
             if (gamepad1.y) {
-                odometryMove.deltaRotate(0.097  );
+                odometryMove.deltaRotate(0.097);
             }
             if (gamepad1.x) {
                 odometryMove.deltaRotate(-0.097);
@@ -301,6 +313,9 @@ public class MainTest extends LinearOpMode {
         if (encoderThread.isAlive()) {
             encoderThread.quitThread = true;
         }
-//        nav.targetsUltimateGoal.deactivate();
+        if (navThread.isAlive()) {
+            quitVuforiaThread = true;
+        }
+        nav.targetsUltimateGoal.deactivate();
     }
 }

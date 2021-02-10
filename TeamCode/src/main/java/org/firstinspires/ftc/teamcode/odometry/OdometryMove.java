@@ -159,10 +159,11 @@ public class OdometryMove {
      */
     public void zeroThetaDiagonalToPoint(double x, double y) {
         rotateTo0();
+        double wantedAngle = (Math.round(odometry.robotPosition[2]/(2*Math.PI))) * 2 * Math.PI;
         double hyp, driveX, driveY, distance;
         double thetaSpeed;
         while (((odometry.robotPosition[0] < x-.2 || odometry.robotPosition[0] > x+.2) || (odometry.robotPosition[1] < y-.2 || odometry.robotPosition[1] > y+.2)) && opMode.opModeIsActive()) {
-            thetaSpeed = -odometry.robotPosition[2];
+            thetaSpeed = -(odometry.robotPosition[2] - wantedAngle);
             hyp = Math.sqrt((x - odometry.robotPosition[0])*(x - odometry.robotPosition[0]) + (y - odometry.robotPosition[1])*(y - odometry.robotPosition[1]));
             driveX = (x - odometry.robotPosition[0]) / hyp;
             driveY = (y - odometry.robotPosition[1]) / hyp;
