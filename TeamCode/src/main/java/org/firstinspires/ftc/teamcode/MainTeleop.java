@@ -13,8 +13,7 @@ public class MainTeleop extends LinearOpMode {
     ElapsedTime intakeTimer = new ElapsedTime();
 
     boolean intakeOn = false;
-    int wobblePosition = 0;
-    boolean wobbleRotatorOn = false;
+    int position = 0;
 
     //// As of 31 December 2020:
     // gamepad 1 sticks: control drive
@@ -38,6 +37,7 @@ public class MainTeleop extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot.init(hardwareMap, telemetry);
+        robot.initWobble();
         telemetry.update();
 
         waitForStart();
@@ -109,22 +109,6 @@ public class MainTeleop extends LinearOpMode {
                 robot.ShooterElevator.setPosition(.235);
             }
 
-            // gamepad 2's dpad controls wobble stuff
-            // up raises the entire apparatus, down lowers it
-            if (gamepad2.dpad_up) {
-                wobblePosition++;
-            }
-            if (gamepad2.dpad_down) {
-                wobblePosition--;
-            }
-            if (gamepad2.left_stick_button) {
-                wobbleRotatorOn = !wobbleRotatorOn;
-            }
-            if (wobbleRotatorOn) {
-                robot.wobbleToPosition(wobblePosition, telemetry);
-            }
-            telemetry.addData("wobble position from dpad", wobblePosition);
-
             // the back servo goes from min to max
             // the front servo goes from max to min
             // dpad left closes clamp
@@ -146,17 +130,40 @@ public class MainTeleop extends LinearOpMode {
                 }
             }
 
-            // quick shortcuts:
-            // gamepad 2 x raises the wobble to pickup position
-            // gamepad 2 y raises the wobble to lifting position
-            if (gamepad2.x) {
-                robot.WobbleRotatorServo.setPosition(robot.wobbleRotatorPickup);
-            }
-            if (gamepad2.y) {
-                robot.WobbleRotatorServo.setPosition(robot.wobbleRotatorTop);
+            if (gamepad2.dpad_up && position < 0) {
+                position += 35;
+            } else if (gamepad2.dpad_down && position > robot.wobbleRotatorMinimum) {
+                position -= 35;
             }
 
-            telemetry.addData("wobble rotator position", robot.WobbleRotatorServo.getPosition());
+            if (gamepad2.x) {
+                position = robot.wobbleRotatorMinimum;
+            } else if (gamepad2.y) {
+                position = robot.wobbleRotatorFullUp;
+            }
+            telemetry.addData("position", position);
+            telemetry.addData("wobble position", robot.getWobblePosition());
+            robot.wobbleSetPosition(position);
+
+            // the back servo goes from min to max
+            // the front servo goes from max to min
+            // dpad left closes clamp
+            // dpad right opens it
+            if (gamepad2.dpad_left) {
+                if (!(robot.WobbleCatcherBack.getPosition() > robot.wobbleCatcherBackMax)) {
+                    robot.WobbleCatcherBack.setPosition(robot.WobbleCatcherBack.getPosition() + robot.wobbleCatcherBackSpeed);
+                    robot.WobbleCatcherFront.setPosition(robot.WobbleCatcherFront.getPosition() + robot.wobbleCatcherFrontSpeed);
+                }
+            } else if (gamepad2.dpad_right) {
+                if (!(robot.WobbleCatcherBack.getPosition() < robot.wobbleCatcherBackMin)) {
+                    robot.WobbleCatcherBack.setPosition(robot.WobbleCatcherBack.getPosition() - robot.wobbleCatcherBackSpeed);
+                    robot.WobbleCatcherFront.setPosition(robot.WobbleCatcherFront.getPosition() - robot.wobbleCatcherFrontSpeed);
+                }
+            }
+            if (!robot.topWobbleLimit.getState()) {
+                robot.wobbleEncoder0 = 0;
+            }
+
             telemetry.addData("wobble catcher back position", robot.WobbleCatcherBack.getPosition());
             telemetry.addData("wobble catcher front position", robot.WobbleCatcherFront.getPosition());
             telemetry.update();

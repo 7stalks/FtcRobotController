@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 @TeleOp(name = "shoot test")
+@Disabled
 public class shootTest extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();

@@ -259,7 +259,7 @@ public class MainTest extends LinearOpMode {
                 manualWobbleTimer.reset();
             }
             if (wobbleRotatorOn) {
-                robot.wobbleGoToPosition(wobblePosition, telemetry);
+//                robot.wobbleGoToPosition(wobblePosition, telemetry);
             }
             telemetry.addData("wobble position from dpad", wobblePosition);
 

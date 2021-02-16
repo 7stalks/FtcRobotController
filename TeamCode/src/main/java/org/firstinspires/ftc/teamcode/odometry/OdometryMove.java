@@ -242,7 +242,7 @@ public class OdometryMove {
             }
             drive.circlepadMove(driveX, -driveY, thetaSpeed);
             odometry.queryOdometry();
-            robot.wobbleToPosition(wobblePosition, telemetry);
+//            robot.wobbleToPosition(wobblePosition, telemetry);
         }
         drive.brake();
     }

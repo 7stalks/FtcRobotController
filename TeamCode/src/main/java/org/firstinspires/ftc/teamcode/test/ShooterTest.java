@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.test;
 
 import android.util.Log;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.ShooterRpmThread;
 import java.util.Arrays;
 
 @TeleOp (name = "shooter test")
+@Disabled
 public class ShooterTest extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();

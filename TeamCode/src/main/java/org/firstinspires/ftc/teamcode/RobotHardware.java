@@ -69,14 +69,22 @@ public class RobotHardware {
     final public double SHOOTER_SERVO_START = 0.88;
     final public double SHOOTER_SERVO_MAX = 0.32;
 
+    // DEPRECATED
     final public int wobbleRotatorPickup = 30;
     final public int wobbleRotatorTop = 90;
-    final public double wobbleCatcherFrontMin = 0.29;
-    final public double wobbleCatcherFrontMax = 0.57;
-    final public double wobbleCatcherBackMin = 0.27;
-    final public double wobbleCatcherBackMax = 0.64;
-    final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMax - wobbleCatcherFrontMin) * 0.03;
+
+
+    final public double wobbleCatcherFrontMin = 0;
+    final public double wobbleCatcherFrontMax = 0.6;
+    final public double wobbleCatcherBackMin = 0.03;
+    final public double wobbleCatcherBackMax = 0.36;
+    final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMin - wobbleCatcherFrontMax) * 0.03;
     final public double wobbleCatcherBackSpeed = (wobbleCatcherBackMax - wobbleCatcherBackMin) * 0.03;
+
+    public int wobbleEncoder0 = 0;
+    public final int wobbleRotatorMinimum = -6150;
+    public final int wobbleRotatorFullUp = -3400;
+    public final int wobbleRotatorUp = -5750;
 
     ElapsedTime timer = new ElapsedTime();
 
@@ -154,6 +162,10 @@ public class RobotHardware {
             telemetry.addData("Warning", "Motor: right_back not plugged in");    //
             RightBack = null;
         }
+        // naming for the odometers (they use the encoders on the controlhub)
+        OLeft = RightFront;
+        ORight = RightBack;
+        OMiddle = LeftBack;
 
         // intake and shooter motors
         try {
@@ -233,10 +245,7 @@ public class RobotHardware {
             telemetry.addData("Warning", "Servo: wobble catcher front not plugged in");    //
             WobbleCatcherFront = null;
         }
-        // naming for the odometers (they use the encoders on the controlhub)
-        OLeft = RightFront;
-        ORight = RightBack;
-        OMiddle = LeftBack;
+
 
         try {
             topWobbleLimit = hardwareMap.get(DigitalChannel.class, "top_wobble_limit");
@@ -429,102 +438,44 @@ public class RobotHardware {
     }
 
     /**
-     * Moves the wobble to a certain position (like a servo) -- WIP
-     *
-     * @param position  the position for the wobble servo to go to
-     * @param telemetry the opMode's telemetry
+     * Puts the wobble rotator up to start position and sets the initial wobble encoder
+     * position to wherever it is
      */
-    public void wobbleToPosition(int position, Telemetry telemetry) {
-        int distanceToPosition;
-        double power = 0;
-        if (WobbleRotator.getCurrentPosition() < position - 5) {
-            distanceToPosition = Math.abs(WobbleRotator.getCurrentPosition()) - Math.abs(position);
-            power = .25 + (.75 * distanceToPosition / 125);
-            if (WobbleCatcherFront.getPosition() == wobbleCatcherFrontMin) {
-                power = 1;
-            }
-            WobbleRotator.setPower(power);
-        } else if (WobbleRotator.getCurrentPosition() > position + 5) {
-            distanceToPosition = Math.abs(WobbleRotator.getCurrentPosition() - position);
-            power = .25 + (.75 * distanceToPosition / 125);
-            WobbleRotator.setPower(-power);
-        } else {
-            WobbleRotator.setPower(0);
+    public void initWobble() {
+        while (topWobbleLimit.getState()) {
+            WobbleRotator.setPower(.3);
         }
-        telemetry.addData("power", power);
-//        lastPosition = WobbleRotator.getCurrentPosition();
+        WobbleRotator.setPower(0);
+        wobbleEncoder0 = WobbleRotator.getCurrentPosition();
     }
-
-    int lastPosition = 0;
 
     /**
-     * Moves the wobble to a rough position and then bobbles around there -- WIP
-     *
-     * @param position  the position for the wobble servo to go to
-     * @param telemetry the opMode's telemetry
+     * returns the actual position of the wobble rotator relative to the top "0" position
+     * @return the actual wobble position relative to the top
      */
-    public void wobbleGoToPosition(int position, Telemetry telemetry) {
-        double distanceToPosition = position - WobbleRotator.getCurrentPosition();
+    public int getWobblePosition() {
+        return WobbleRotator.getCurrentPosition() - wobbleEncoder0;
+    }
 
-        int movement = WobbleRotator.getCurrentPosition() - lastPosition;
-        double power = ((distanceToPosition / 192) + .3) * (distanceToPosition / Math.abs(distanceToPosition));
-        if (Math.abs(distanceToPosition) > 5) {
-            if (movement > 2) {
-                power = power / 3;
+    /**
+     * Puts the wobble rotator at a certain position. Needs to be run in a loop
+     * @param position the position specified (0 is the top and it goes negative to go down)
+     */
+    public void wobbleSetPosition(int position) {
+        double power = 0;
+        int currentPosition = getWobblePosition();
+        if (position - currentPosition != 0) {
+            int signOfPower = Math.abs(position - currentPosition) / (position - currentPosition);
+            power = .6 * ((position - currentPosition) / 750.) + (.2 * signOfPower);
+            if (power > 1 || power < -1) {
+                power = Math.abs(power) / power;
             }
-            if (movement <= 1) {
-                if (WobbleRotator.getCurrentPosition() > 150) {
-                    power = 1;
-                } else {
-                    power += 0.35;
-                }
+            if ((!topWobbleLimit.getState() && power > 0) || (!bottomWobbleLimit.getState() && power < 0)
+                    || (getWobblePosition() < wobbleRotatorMinimum && power < 0)
+                    || (getWobblePosition() > position - 10 && getWobblePosition() < position + 10)) {
+                power = 0;
             }
-            WobbleRotator.setPower(power);
-        } else {
-            WobbleRotator.setPower(power - .3);
         }
-        telemetry.addData("power", power);
-        telemetry.addData("movement", movement);
-        telemetry.addData("distanceToPosition", distanceToPosition);
-        telemetry.addData("position", position);
-        lastPosition = WobbleRotator.getCurrentPosition();
+        WobbleRotator.setPower(power);
     }
-
-    public void bestWobbleToPosition(int position, WobbleRpmThread wobble) {
-        double distanceToPosition = position - WobbleRotator.getCurrentPosition();
-        double power;
-        if (Math.abs(distanceToPosition) < 30) {
-            power = 1;
-        } else {
-            power = .2 + (1 - .2) * (Math.abs(distanceToPosition) / 30);
-        }
-
-        if (wobble.isStuck() && distanceToPosition < -1) {
-            WobbleRotator.setPower(-1);
-        } else if (wobble.isStuck() && distanceToPosition > 1) {
-            WobbleRotator.setPower(1);
-        } else if (wobble.isTooFast() && distanceToPosition < -1) {
-            WobbleRotator.setPower(.1);
-        } else if (wobble.isTooFast() && distanceToPosition > 1) {
-            WobbleRotator.setPower(-.1);
-        } else if (distanceToPosition < -1) {
-            WobbleRotator.setPower(-power);
-        } else if (distanceToPosition > 1) {
-            WobbleRotator.setPower(power);
-        } else {
-            WobbleRotator.setPower(0);
-        }
-    }
-
-    public void simpleWobbleToPosition(int position) {
-        double distanceToPosition = position - WobbleRotator.getCurrentPosition();
-        double power = .25 + (.75 * distanceToPosition / 100);
-        if (distanceToPosition < -1 || distanceToPosition > 1) {
-            WobbleRotator.setPower(power);
-        } else {
-            WobbleRotator.setPower(0);
-        }
-    }
-
-
 }
