@@ -82,54 +82,7 @@ public class MainAuto extends LinearOpMode {
         }
     }
 
-    String TAG = "MainAuto";
-
-    void oldshoot(int numberOfRings, int timeout) {
-        int i = 0;
-        int numberOfFailedShots = 0;
-        boolean attemptedShot = false;
-        myShooterTimer.reset();
-        Log.v(TAG, "About to get into the while");
-        while (i<numberOfRings && numberOfFailedShots < timeout && opModeIsActive()) {
-            if (encoderThread.revolutionsPerMinute < 4700 && attemptedShot) {
-                Log.v(TAG, "Inside of the i++ part");
-                i++;
-                attemptedShot = false;
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                shooterTimerTime(200);
-            }
-            if (encoderThread.revolutionsPerMinute > 4800 && !attemptedShot) {
-                Log.v(TAG, "Inside fo the shooting part, about to put the shooter to max position");
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-                attemptedShot = true;
-                myShooterTimer.reset();
-//                shooterTimerTime(75);
-            }
-            if (encoderThread.revolutionsPerMinute > 4800 && attemptedShot && myShooterTimer.milliseconds() > 500) {
-                Log.v(TAG, "I just timed out, 500 ms passed since last shot");
-                attemptedShot = false;
-                numberOfFailedShots++;
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                shooterTimerTime(75);
-            }
-            if (System.currentTimeMillis() % 3 == 0) {
-                Log.v(TAG, "--------");
-                Log.v(TAG, "time: " + System.currentTimeMillis());
-                Log.v(TAG, "i: " + i);
-                Log.v(TAG, "failed shots: " + numberOfFailedShots);
-                Log.v(TAG, "attempted shot?: " + attemptedShot);
-                Log.v(TAG, "rpm: " + encoderThread.revolutionsPerMinute);
-                Log.v(TAG, "timeout timer: " + myShooterTimer.milliseconds());
-                Log.v(TAG, "position of the servo: " + robot.ShooterServo.getPosition());
-            }
-        }
-        Log.v(TAG, "Just got out of the while");
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-    }
-
     void shoot(int numberOfRings, int timeout) {
-//        robot.ShooterElevator.setPosition(.2455);
-//        robot.Shooter.setPower(1);
         int i = 0;
         int numberOfFailedShots = 0;
         boolean attemptedShot = false;
@@ -216,6 +169,7 @@ public class MainAuto extends LinearOpMode {
         // initialization things
         robot.init(hardwareMap, telemetry);
         robot.closeWobble();
+        robot.initWobble();
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
@@ -320,13 +274,7 @@ public class MainAuto extends LinearOpMode {
 
         // proceeds to go to that point and drop the wobble goal
         odometryMove.zeroThetaDiagonalToPoint(wobbleX+3, wobbleY-1);
-        while (robot.WobbleRotator.getCurrentPosition() > -65) {
-            robot.WobbleRotator.setPower(-1);
-        }
-        while (robot.WobbleRotator.getCurrentPosition() > -160) {
-            robot.WobbleRotator.setPower(-.4);
-        }
-        robot.WobbleRotator.setPower(0);
+        robot.wobbleSetPosition(robot.wobbleRotatorMinimum);
         robot.openWobble();
         robot.sleepTimer(600, this);
 
@@ -338,7 +286,7 @@ public class MainAuto extends LinearOpMode {
         drive.brake();
 
         // move up the wobble rotator to pickup position and hightail it to the other wobble
-        wobbleThread.position = -170;
+        wobbleThread.position = robot.wobbleRotatorMinimum;
         wobbleThread.start();
         odometryMove.diagonalToPoint(-30, -51, -Math.PI/2);
         drive.brake();
@@ -349,22 +297,22 @@ public class MainAuto extends LinearOpMode {
         robot.sleepTimer(100, this);
         robot.closeWobble();
         robot.sleepTimer(300, this);
-        wobbleThread.position = -120;
-        robot.sleepTimer(250, this);
+        wobbleThread.position = robot.wobbleRotatorUp;
 
         // get back to the drop zone and drop the wobble
         odometryMove.diagonalToPoint(wobbleX-2, wobbleY + 25, 0);
         odometryMove.diagonalToPoint(wobbleX+1, wobbleY + 11, 0);
         drive.brake();
+        wobbleThread.position = robot.wobbleRotatorMinimum;
+        robot.sleepTimer(250, this);
         wobbleThread.quitThread = true;
 
-        robot.WobbleRotator.setPower(0);
         robot.openWobble();
         robot.sleepTimer(300, this);
 
         // move onto the line and then finish
         timer.reset();
-        while (timer.milliseconds() < 400 && opModeIsActive()) {
+        while (timer.milliseconds() < 300 && opModeIsActive()) {
             drive.circlepadMove(0, -1, 0);
         }
 

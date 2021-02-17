@@ -471,7 +471,7 @@ public class RobotHardware {
         int currentPosition = getWobblePosition();
         if (position - currentPosition != 0) {
             int signOfPower = Math.abs(position - currentPosition) / (position - currentPosition);
-            power = .6 * ((position - currentPosition) / 750.) + (.2 * signOfPower);
+            power = .6 * ((position - currentPosition) / 750.) + (.3 * signOfPower);
             if (power > 1 || power < -1) {
                 power = Math.abs(power) / power;
             }
