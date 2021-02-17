@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.util.Log;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -73,6 +75,8 @@ public class RobotHardware {
     final public int wobbleRotatorPickup = 30;
     final public int wobbleRotatorTop = 90;
 
+    final public double shooterElevatorHighGoal = 0.32;
+
 
     final public double wobbleCatcherFrontMin = 0;
     final public double wobbleCatcherFrontMax = 0.6;
@@ -81,7 +85,7 @@ public class RobotHardware {
     final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMin - wobbleCatcherFrontMax) * 0.03;
     final public double wobbleCatcherBackSpeed = (wobbleCatcherBackMax - wobbleCatcherBackMin) * 0.03;
 
-    public int wobbleEncoder0 = 0;
+    public int wobbleEncoder0;
     public final int wobbleRotatorMinimum = -6150;
     public final int wobbleRotatorFullUp = -3400;
     public final int wobbleRotatorUp = -5750;
@@ -116,7 +120,7 @@ public class RobotHardware {
         // Mecanum motors initialization
         try {
             LeftFront = hardwareMap.get(DcMotor.class, "left_front");
-            LeftFront.setDirection(DcMotor.Direction.FORWARD);
+            LeftFront.setDirection(DcMotor.Direction.REVERSE);
             LeftFront.setPower(0);
             LeftFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             LeftFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -128,7 +132,7 @@ public class RobotHardware {
         }
         try {
             RightFront = hardwareMap.get(DcMotor.class, "right_front");
-            RightFront.setDirection(DcMotor.Direction.REVERSE);
+            RightFront.setDirection(DcMotor.Direction.FORWARD);
             RightFront.setPower(0);
             RightFront.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             RightFront.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -140,7 +144,7 @@ public class RobotHardware {
         }
         try {
             LeftBack = hardwareMap.get(DcMotor.class, "left_back");
-            LeftBack.setDirection(DcMotor.Direction.FORWARD);
+            LeftBack.setDirection(DcMotor.Direction.REVERSE);
             LeftBack.setPower(0);
             LeftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             LeftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -152,7 +156,7 @@ public class RobotHardware {
         }
         try {
             RightBack = hardwareMap.get(DcMotor.class, "right_back");
-            RightBack.setDirection(DcMotor.Direction.REVERSE);
+            RightBack.setDirection(DcMotor.Direction.FORWARD);
             RightBack.setPower(0);
             RightBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             RightBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -164,8 +168,8 @@ public class RobotHardware {
         }
         // naming for the odometers (they use the encoders on the controlhub)
         OLeft = RightFront;
-        ORight = RightBack;
-        OMiddle = LeftBack;
+        ORight = LeftBack;
+        OMiddle = LeftFront;
 
         // intake and shooter motors
         try {
@@ -446,7 +450,7 @@ public class RobotHardware {
             WobbleRotator.setPower(.3);
         }
         WobbleRotator.setPower(0);
-        wobbleEncoder0 = WobbleRotator.getCurrentPosition();
+        this.wobbleEncoder0 = WobbleRotator.getCurrentPosition();
     }
 
     /**
@@ -454,7 +458,8 @@ public class RobotHardware {
      * @return the actual wobble position relative to the top
      */
     public int getWobblePosition() {
-        return WobbleRotator.getCurrentPosition() - wobbleEncoder0;
+        Log.v("in robothardware", "wobble encoder 0 " + this.wobbleEncoder0);
+        return (WobbleRotator.getCurrentPosition() - this.wobbleEncoder0);
     }
 
     /**

@@ -103,31 +103,10 @@ public class MainTeleop extends LinearOpMode {
             // gamepad 2 a is for the high goal
             // gamepad 2 b is for the powershots
             if (gamepad2.a) {
-                robot.ShooterElevator.setPosition(.285);
+                robot.ShooterElevator.setPosition(.32);
             }
             if (gamepad2.b) {
                 robot.ShooterElevator.setPosition(.235);
-            }
-
-            // the back servo goes from min to max
-            // the front servo goes from max to min
-            // dpad left closes clamp
-            if (gamepad2.dpad_left) {
-                double backPosition = robot.WobbleCatcherBack.getPosition();
-                double frontPosition = robot.WobbleCatcherFront.getPosition();
-                if (!(backPosition > robot.wobbleCatcherBackMax)) {
-                    robot.WobbleCatcherBack.setPosition(backPosition + robot.wobbleCatcherBackSpeed);
-                    robot.WobbleCatcherFront.setPosition(frontPosition - robot.wobbleCatcherFrontSpeed);
-                }
-            }
-            // dpad right opens it
-            if (gamepad2.dpad_right) {
-                double backPosition = robot.WobbleCatcherBack.getPosition();
-                double frontPosition = robot.WobbleCatcherFront.getPosition();
-                if (!(backPosition < robot.wobbleCatcherBackMin)) {
-                    robot.WobbleCatcherBack.setPosition(backPosition - robot.wobbleCatcherBackSpeed);
-                    robot.WobbleCatcherFront.setPosition(frontPosition + robot.wobbleCatcherFrontSpeed);
-                }
             }
 
             if (gamepad2.dpad_up && position < 0) {
@@ -141,6 +120,7 @@ public class MainTeleop extends LinearOpMode {
             } else if (gamepad2.y) {
                 position = robot.wobbleRotatorFullUp;
             }
+            telemetry.addData("wobble encoder 0", robot.wobbleEncoder0);
             telemetry.addData("position", position);
             telemetry.addData("wobble position", robot.getWobblePosition());
             robot.wobbleSetPosition(position);
@@ -161,7 +141,7 @@ public class MainTeleop extends LinearOpMode {
                 }
             }
             if (!robot.topWobbleLimit.getState()) {
-                robot.wobbleEncoder0 = 0;
+                robot.wobbleEncoder0 = robot.WobbleRotator.getCurrentPosition();
             }
 
             telemetry.addData("wobble catcher back position", robot.WobbleCatcherBack.getPosition());

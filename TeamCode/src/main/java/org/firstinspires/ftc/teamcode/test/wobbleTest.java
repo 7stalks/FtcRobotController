@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 public class wobbleTest extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
-    ElapsedTime myTimer = new ElapsedTime();
 
     double wobblePower;
     int position = 0;
@@ -26,7 +25,6 @@ public class wobbleTest extends LinearOpMode {
         robot.initWobble();
         telemetry.setMsTransmissionInterval(5);
         telemetry.update();
-        myTimer.reset();
 
         waitForStart();
 

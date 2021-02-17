@@ -1,5 +1,7 @@
  package org.firstinspires.ftc.teamcode.test;
 
+import android.util.Log;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -67,7 +69,16 @@ public class MainTest extends LinearOpMode {
          anotherShootTimer.reset();
          while (opModeIsActive() && !gamepad2.back && anotherShootTimer.milliseconds() < milliseconds) {
              idle();
+             Log.v("TAG", "waiting in the shootertimertime");
          }
+     }
+
+     double takeAverage(int n) {
+         double total = 0;
+         for (int i = 0; i<n; i++) {
+             total += encoderThread.revolutionsPerMinute;
+         }
+         return total/n;
      }
 
      void shoot(int numberOfRings, int timeout) {
@@ -80,21 +91,31 @@ public class MainTest extends LinearOpMode {
          boolean attemptedShot = false;
          myShooterTimer.reset();
          while (i < numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.back) {
-             if (encoderThread.revolutionsPerMinute < 4700 && attemptedShot) {
-                 i++;
-                 attemptedShot = false;
-                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                 shooterTimerTime(100);
-                 if (i==2) {
+             if (encoderThread.revolutionsPerMinute < 4200 && attemptedShot) {
+                 shooterTimerTime(25);
+                 double avg = takeAverage(100);
+                 if (avg < 4200) {
+                     telemetry.addData("revs per min while in if", encoderThread.revolutionsPerMinute);
+                     Log.v("TAG", "revs per min in here " + encoderThread.revolutionsPerMinute);
+                     i++;
+                     attemptedShot = false;
+                     robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
                      shooterTimerTime(300);
+                     if (i == 2) {
+                         shooterTimerTime(300);
+                     }
                  }
              }
              if (encoderThread.revolutionsPerMinute > 4900 && !attemptedShot) {
+                 telemetry.addData("      revs per min while in if", encoderThread.revolutionsPerMinute);
+                 Log.v("TAG", "     revs per min in here " + encoderThread.revolutionsPerMinute);
                  robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
                  attemptedShot = true;
                  myShooterTimer.reset();
              }
-             if (encoderThread.revolutionsPerMinute > 4800 && attemptedShot && myShooterTimer.milliseconds() > 300) {
+             if (encoderThread.revolutionsPerMinute > 4900 && attemptedShot && myShooterTimer.milliseconds() > 400) {
+                 telemetry.addData("           revs per min while in if", encoderThread.revolutionsPerMinute);
+                 Log.v("TAG", "          revs per min in here " + encoderThread.revolutionsPerMinute);
                  attemptedShot = false;
                  numberOfFailedShots++;
                  robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);

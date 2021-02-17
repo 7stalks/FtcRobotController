@@ -57,8 +57,8 @@ public class Odometry {
     private double[] odometryInfoToDeltaInches(double[] odometryInfo) {
         // OLeft's encoder is reversed, hence the negative
         double deltaOLeft = -((odometryInfo[0]) - lastIterationOdometryInfo[0]) / encoderCountsPerIn;
-        double deltaORight = (odometryInfo[1] - lastIterationOdometryInfo[1]) / encoderCountsPerIn;
-        double deltaOMiddle = (odometryInfo[2] - lastIterationOdometryInfo[2]) / encoderCountsPerIn;
+        double deltaORight = -(odometryInfo[1] - lastIterationOdometryInfo[1]) / encoderCountsPerIn;
+        double deltaOMiddle = -(odometryInfo[2] - lastIterationOdometryInfo[2]) / encoderCountsPerIn;
         // woooooaahhh. copies last odometryinfo onto lastiterodometryinfo
         System.arraycopy(odometryInfo, 0, lastIterationOdometryInfo, 0, 3);
         deltas[0] = deltaOLeft;
@@ -69,7 +69,7 @@ public class Odometry {
 
     // This one is self explanatory, the change in theta (orientation)
     private double getDeltaTheta(double leftDistance, double rightDistance) {
-        return (rightDistance - leftDistance) / robotEncoderWheelDistance;
+        return (leftDistance - rightDistance) / robotEncoderWheelDistance;
     }
 
     // The main method. Will return the new (x, y) position. Feed it the old (x, y) position
@@ -107,7 +107,7 @@ public class Odometry {
         myPosition[1] = deltaY + oldY;
         myPosition[2] = newTheta;
         myPosition[3] = deltaDistances[0];
-                myPosition[4] = deltaDistances[1];
+        myPosition[4] = deltaDistances[1];
         myPosition[5] = deltaTheta;
         myPosition[6] = horizontalChange;
 

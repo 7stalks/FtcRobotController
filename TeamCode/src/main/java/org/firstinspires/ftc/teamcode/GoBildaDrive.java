@@ -17,7 +17,7 @@ public class GoBildaDrive {
      * @param rightStickX the raw right stick's x, don't negate
      */
     public void circlepadMove(double leftStickY, double leftStickX, double rightStickX) {
-
+        rightStickX = -rightStickX;
         // Make sure that the circle pad sticks don't accidentally move the robot
         if (Math.abs(leftStickX) < robot.stickThres && Math.abs(leftStickY) < robot.stickThres
                 && Math.abs(rightStickX) < robot.stickThres) {
