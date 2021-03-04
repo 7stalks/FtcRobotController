@@ -44,6 +44,7 @@ public class MainTest extends LinearOpMode {
     int wobblePosition = 0;
     boolean wobbleRotatorOn = false;
     int counter = 0;
+    int servoCounter = 0;
     int position = 0;
 
     //// As of 31 December 2020:
@@ -246,9 +247,9 @@ public class MainTest extends LinearOpMode {
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
             if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 5000)) {
+                robot.sleepTimer(50, this);
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-                manualShooterTimer.reset();
-            } else if (robot.ShooterServo.getPosition() < robot.SHOOTER_SERVO_START){
+            } else if (robot.ShooterServo.getPosition() < robot.SHOOTER_SERVO_START) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START+.01);
             }
 
