@@ -135,7 +135,7 @@ public class OdometryMove {
     public void deltaRotate(double dTheta) {
         double driveSpeed = .45;
         double theta = odometry.robotPosition[2] + dTheta;
-        while ((odometry.robotPosition[2] < theta - .004 || odometry.robotPosition[2] > theta + .004) && opMode.opModeIsActive()) {
+        while ((odometry.robotPosition[2] < theta - .007 || odometry.robotPosition[2] > theta + .007) && opMode.opModeIsActive()) {
             // once there's a radian to go, start proportionally reducing drivespeed to .3
             if (Math.abs(odometry.robotPosition[2] - theta) < 1) {
                 driveSpeed = .12 + (.17 * Math.abs(odometry.robotPosition[2] - theta));

@@ -44,15 +44,15 @@ public class OdometryExperimentTest extends LinearOpMode {
 
     public void myDiagonalToPoint(double x, double y, double rotation) {
         double initialX, initialY, driveX, driveY, distance;
-        double thetaSpeed = 0;
-        while (((odometry.robotPosition[0] < x-.3 || odometry.robotPosition[0] > x+.3) || (odometry.robotPosition[1] < y-.3 || odometry.robotPosition[1] > y+.3))
-                || (odometry.robotPosition[2] < rotation - .01 || odometry.robotPosition[2] > rotation) && opModeIsActive()) {
-            thetaSpeed = -(odometry.robotPosition[2]-rotation);
+        double thetaSpeed;
+        while (((odometry.robotPosition[0] < x-.1 || odometry.robotPosition[0] > x+.1) || (odometry.robotPosition[1] < y-.1 || odometry.robotPosition[1] > y+.1))
+                || (odometry.robotPosition[2] > rotation - .01 || odometry.robotPosition[2] < rotation + .01) && opModeIsActive()) {
+            thetaSpeed = -.7*(odometry.robotPosition[2]-rotation);
             distance = Math.sqrt(Math.pow(Math.abs(odometry.robotPosition[0] - x), 2) + Math.pow(Math.abs(odometry.robotPosition[1] - y), 2));
             initialX = (x - odometry.robotPosition[0]) / distance;
             initialY = (y - odometry.robotPosition[1]) / distance;
-            driveX = initialX * Math.cos(-rotation) - initialY * Math.sin(-rotation);
-            driveY = initialX * Math.sin(-rotation) + initialY * Math.cos(-rotation);
+            driveX = initialX * Math.cos(-odometry.robotPosition[2]) - initialY * Math.sin(-odometry.robotPosition[2]);
+            driveY = initialX * Math.sin(-odometry.robotPosition[2]) + initialY * Math.cos(-odometry.robotPosition[2]);
             if (distance < 12) {
                 driveX = driveX * (.325 + (.95-.325)*(distance/12));
                 driveY = driveY * (.325 + (.95-.325)*(distance/12));
@@ -111,6 +111,10 @@ public class OdometryExperimentTest extends LinearOpMode {
         }
     }
 
+    void mySpecialRotate(double rotation) {
+//        while ()
+    }
+
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -135,10 +139,10 @@ public class OdometryExperimentTest extends LinearOpMode {
                 odometryMove.diagonalToPoint(12, 12, Math.PI/2);
                 drive.brake();
             }
-            if (gamepad1.b) {
-                odometryMove.zeroThetaDiagonalToPoint(12, 12);
-                drive.brake();
-            }
+//            if (gamepad1.b) {
+//                odometryMove.zeroThetaDiagonalToPoint(12, 12);
+//                drive.brake();
+//            }
             telemetry.addData("Left Odometer", robot.OLeft.getCurrentPosition());
             telemetry.addData("Right Odometer", robot.ORight.getCurrentPosition());
             telemetry.addData("Middle Odometer", robot.OMiddle.getCurrentPosition());

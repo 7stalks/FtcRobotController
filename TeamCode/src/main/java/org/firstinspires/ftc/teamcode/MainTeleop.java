@@ -37,6 +37,7 @@ public class MainTeleop extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot.init(hardwareMap, telemetry);
+        robot.openWobble();
         robot.initWobble();
         telemetry.update();
 

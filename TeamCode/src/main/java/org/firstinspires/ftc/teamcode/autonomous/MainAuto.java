@@ -87,7 +87,7 @@ public class MainAuto extends LinearOpMode {
         int numberOfFailedShots = 0;
         boolean attemptedShot = false;
         while (i<numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.back) {
-            if (encoderThread.revolutionsPerMinute < 4600 && attemptedShot) {
+            if (encoderThread.revolutionsPerMinute < 4300 && attemptedShot) {
                 i++;
                 attemptedShot = false;
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
@@ -121,7 +121,8 @@ public class MainAuto extends LinearOpMode {
 
     void shootPowerShots() {
         odometryMove.zeroThetaDiagonalToPoint(-4, -8);
-        odometryMove.deltaRotate(-0.01);
+        odometryMove.rotateTo0();
+        odometryMove.deltaRotate(-0.05);
         robot.ShooterElevator.setPosition(.2455);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
@@ -131,11 +132,11 @@ public class MainAuto extends LinearOpMode {
         }
         shoot(1, 3);
         robot.sleepTimer(100, this);
-        odometryMove.deltaRotate(0.089);
+        odometryMove.deltaRotate(0.095);
         robot.sleepTimer(100, this);
         shoot(1, 3);
         robot.sleepTimer(100, this);
-        odometryMove.deltaRotate(0.089);
+        odometryMove.deltaRotate(0.097);
         robot.sleepTimer(100, this);
         shoot(1, 3);
         robot.sleepTimer(50, this);
@@ -218,6 +219,8 @@ public class MainAuto extends LinearOpMode {
             idle();
         }
         encoderThread.start();
+        wobbleThread.start();
+        wobbleThread.position = robot.wobbleRotatorUp;
 
         // waits until it sees a target and then averages 100 snapshots
         double avgX = 0, avgY = 0, avgRot = 0;
@@ -273,52 +276,56 @@ public class MainAuto extends LinearOpMode {
         }
 
         // proceeds to go to that point and drop the wobble goal
-        odometryMove.zeroThetaDiagonalToPoint(wobbleX+3, wobbleY-1);
-        robot.wobbleSetPosition(robot.wobbleRotatorMinimum);
+        odometryMove.zeroThetaDiagonalToPoint(wobbleX+3, wobbleY);
+        wobbleThread.position = robot.wobbleRotatorMinimum-150;
+        while (robot.getWobblePosition() > robot.wobbleRotatorMinimum + 100) {
+            idle();
+        }
         robot.openWobble();
         robot.sleepTimer(600, this);
 
         // moves a little to the right
         timer.reset();
-        while (timer.milliseconds() < 700 && opModeIsActive()) {
+        while (timer.milliseconds() < 750 && opModeIsActive()) {
             drive.circlepadMove(0, -1, 0);
         }
         drive.brake();
 
         // move up the wobble rotator to pickup position and hightail it to the other wobble
-        wobbleThread.position = robot.wobbleRotatorMinimum;
-        wobbleThread.start();
-        odometryMove.diagonalToPoint(-30, -51, -Math.PI/2);
+        wobbleThread.position = robot.wobbleRotatorMinimum-75;
+        odometryMove.diagonalToPoint(-30, -50.5, -Math.PI/2);
         drive.brake();
 
         // inch into the wobble goal and then clamp onto it before moving it up
-        odometryMove.diagonalToPoint(-39, -51, -Math.PI/2);
+        odometryMove.diagonalToPoint(-39, -50.5, -Math.PI/2);
         drive.brake();
         robot.sleepTimer(100, this);
         robot.closeWobble();
         robot.sleepTimer(300, this);
         wobbleThread.position = robot.wobbleRotatorUp;
+        odometryMove.diagonalToPoint(-39, -35, -Math.PI/2);
 
         // get back to the drop zone and drop the wobble
-        odometryMove.diagonalToPoint(wobbleX-2, wobbleY + 25, 0);
-        odometryMove.diagonalToPoint(wobbleX+1, wobbleY + 11, 0);
+        odometryMove.diagonalToPoint(wobbleX-2, wobbleY + 22, 0);
+        odometryMove.diagonalToPoint(wobbleX+1, wobbleY + 10, 0);
         drive.brake();
-        wobbleThread.position = robot.wobbleRotatorMinimum;
+        wobbleThread.position = robot.wobbleRotatorMinimum-200;
         robot.sleepTimer(250, this);
         wobbleThread.quitThread = true;
 
         robot.openWobble();
-        robot.sleepTimer(300, this);
+        robot.sleepTimer(250, this);
 
         // move onto the line and then finish
         timer.reset();
-        while (timer.milliseconds() < 300 && opModeIsActive()) {
+        while (timer.milliseconds() < 350 && opModeIsActive()) {
             drive.circlepadMove(0, -1, 0);
         }
+        drive.brake();
 
         odometryMove.goToPoint(10, 0);
         if (wobbleThread != null) {
-            wobbleThread.quitThread = true;
+                wobbleThread.quitThread = true;
         }
     }
 }

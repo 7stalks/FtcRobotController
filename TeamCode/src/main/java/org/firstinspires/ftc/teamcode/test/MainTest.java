@@ -44,6 +44,7 @@ public class MainTest extends LinearOpMode {
     int wobblePosition = 0;
     boolean wobbleRotatorOn = false;
     int counter = 0;
+    int position = 0;
 
     //// As of 31 December 2020:
     // gamepad 1 sticks: control drive
@@ -157,7 +158,7 @@ public class MainTest extends LinearOpMode {
 
      void goToHighGoal() {
          double wantedAngle = (Math.round(odometry.robotPosition[2]/(2*Math.PI))) * 2 * Math.PI;
-         odometryMove.diagonalToPoint(-2.5, -26, wantedAngle);
+         odometryMove.diagonalToPoint(0, 0, wantedAngle);
          odometryMove.rotateTo0();
      }
 
@@ -165,38 +166,42 @@ public class MainTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, telemetry);
+        robot.initWobble();
         robot.closeWobble();
-        robot.initVuforia(hardwareMap, telemetry);
-        nav.navigationInit(robot);
-        robot.switchableCamera.setActiveCamera(robot.backWebcam);
+//        robot.initVuforia(hardwareMap, telemetry);
+//        nav.navigationInit(robot);
+//        robot.switchableCamera.setActiveCamera(robot.backWebcam);
         encoderThread.start();
         manualWobbleTimer.reset();
         telemetry.setMsTransmissionInterval(1);
-        navThread.start();
+//        navThread.start();
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-            if (nav.targetVisible && gamepad1.start) {
-                double avgX = 0, avgY = 0, avgRot = 0, i;
-                for (i=1; i<76; i++) {
-                    avgX += (nav.X + 8);
-                    avgY += nav.Y;
-                    avgRot += (nav.Rotation + Math.PI/2);
-                }
-                avgX = avgX/i;
-                avgY = avgY/i;
-                avgRot = avgRot/i;
-                odometry.inputVuforia(avgX, avgY, -avgRot);
-            }
-
-            if (gamepad2.right_stick_button) {
-                odometry.robotPosition[2] = 0;
-            }
+//            if (nav.targetVisible && gamepad1.start) {
+//                double avgX = 0, avgY = 0, avgRot = 0, i;
+//                for (i=1; i<76; i++) {
+//                    avgX += (nav.X + 8);
+//                    avgY += nav.Y;
+//                    avgRot += (nav.Rotation + Math.PI/2);
+//                }
+//                avgX = avgX/i;
+//                avgY = avgY/i;
+//                avgRot = avgRot/i;
+//                odometry.inputVuforia(avgX, avgY, -avgRot);
+//            }
+//
+//            if (gamepad2.right_stick_button) {
+//                odometry.robotPosition[2] = 0;
+//            }
 
             if (gamepad1.back) {
                 goToHighGoal();
+            }
+            if (gamepad1.start) {
+                odometry.inputVuforia(0, 0, 0);
             }
 
             if (gamepad1.y) {
@@ -240,11 +245,11 @@ public class MainTest extends LinearOpMode {
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
-            if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 4900)) {
+            if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 5000)) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
                 manualShooterTimer.reset();
-            } else if (robot.ShooterServo.getPosition() < robot.SHOOTER_SERVO_START && manualShooterTimer.milliseconds() > 200){
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+            } else if (robot.ShooterServo.getPosition() < robot.SHOOTER_SERVO_START){
+                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START+.01);
             }
 
             // gamepad 2 right trigger (analog) gets the shooter motor itself. has to hold down for it to work
@@ -267,53 +272,46 @@ public class MainTest extends LinearOpMode {
             }
 
 
-            // gamepad 2's dpad controls wobble stuff
-            // up raises the entire apparatus, down lowers it
-            if (gamepad2.dpad_up && wobblePosition < 192) {
-                wobblePosition += 2;
+
+            if (gamepad2.dpad_up && position < 0) {
+                position += 35;
+            } else if (gamepad2.dpad_down && position > robot.wobbleRotatorMinimum) {
+                position -= 35;
             }
-            if (gamepad2.dpad_down && wobblePosition > 0) {
-                wobblePosition -= 2;
+
+            if (gamepad2.x || gamepad1.left_bumper) {
+                position = robot.wobbleRotatorMinimum;
+            } else if (gamepad2.y || gamepad1.right_bumper) {
+                position = robot.wobbleRotatorFullUp;
             }
-            if (gamepad2.left_stick_button && manualWobbleTimer.milliseconds() > 200) {
-                wobbleRotatorOn = !wobbleRotatorOn;
-                manualWobbleTimer.reset();
-            }
-            if (wobbleRotatorOn) {
-//                robot.wobbleGoToPosition(wobblePosition, telemetry);
-            }
-            telemetry.addData("wobble position from dpad", wobblePosition);
+            telemetry.addData("wobble encoder 0", robot.wobbleEncoder0);
+            telemetry.addData("position", position);
+            telemetry.addData("wobble position", robot.getWobblePosition());
+            robot.wobbleSetPosition(position);
 
             // the back servo goes from min to max
             // the front servo goes from max to min
             // dpad left closes clamp
+            // dpad right opens it
             if (gamepad2.dpad_left) {
-                double backPosition = robot.WobbleCatcherBack.getPosition();
-                double frontPosition = robot.WobbleCatcherFront.getPosition();
-                if (!(backPosition > robot.wobbleCatcherBackMax)) {
-                    robot.WobbleCatcherBack.setPosition(backPosition + robot.wobbleCatcherBackSpeed);
-                    robot.WobbleCatcherFront.setPosition(frontPosition - robot.wobbleCatcherFrontSpeed);
+                if (!(robot.WobbleCatcherBack.getPosition() > robot.wobbleCatcherBackMax)) {
+                    robot.WobbleCatcherBack.setPosition(robot.WobbleCatcherBack.getPosition() + robot.wobbleCatcherBackSpeed);
+                    robot.WobbleCatcherFront.setPosition(robot.WobbleCatcherFront.getPosition() + robot.wobbleCatcherFrontSpeed);
+                }
+            } else if (gamepad2.dpad_right) {
+                if (!(robot.WobbleCatcherBack.getPosition() < robot.wobbleCatcherBackMin)) {
+                    robot.WobbleCatcherBack.setPosition(robot.WobbleCatcherBack.getPosition() - robot.wobbleCatcherBackSpeed);
+                    robot.WobbleCatcherFront.setPosition(robot.WobbleCatcherFront.getPosition() - robot.wobbleCatcherFrontSpeed);
                 }
             }
-            // dpad right opens it
-            if (gamepad2.dpad_right) {
-                double backPosition = robot.WobbleCatcherBack.getPosition();
-                double frontPosition = robot.WobbleCatcherFront.getPosition();
-                if (!(backPosition < robot.wobbleCatcherBackMin)) {
-                    robot.WobbleCatcherBack.setPosition(backPosition - robot.wobbleCatcherBackSpeed);
-                    robot.WobbleCatcherFront.setPosition(frontPosition + robot.wobbleCatcherFrontSpeed);
-                }
+            if (!robot.topWobbleLimit.getState()) {
+                robot.wobbleEncoder0 = robot.WobbleRotator.getCurrentPosition();
             }
 
-            // quick shortcuts:
-            // gamepad 2 x raises the wobble to pickup position
-            // gamepad 2 y raises the wobble to lifting position
-            if (gamepad2.x) {
-                wobblePosition = robot.wobbleRotatorPickup;
-            }
-            if (gamepad2.y) {
-                wobblePosition = robot.wobbleRotatorTop;
-            }
+            telemetry.addData("wobble catcher back position", robot.WobbleCatcherBack.getPosition());
+            telemetry.addData("wobble catcher front position", robot.WobbleCatcherFront.getPosition());
+
+
 
             if (encoderThread.revolutionsPerMinute > 4400) {
                 telemetry.addLine("Can shoot");

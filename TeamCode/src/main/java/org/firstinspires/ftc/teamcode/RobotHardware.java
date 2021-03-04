@@ -82,8 +82,8 @@ public class RobotHardware {
     final public double wobbleCatcherFrontMax = 0.6;
     final public double wobbleCatcherBackMin = 0.03;
     final public double wobbleCatcherBackMax = 0.36;
-    final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMin - wobbleCatcherFrontMax) * 0.03;
-    final public double wobbleCatcherBackSpeed = (wobbleCatcherBackMax - wobbleCatcherBackMin) * 0.03;
+    final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMin - wobbleCatcherFrontMax) * 0.1;
+    final public double wobbleCatcherBackSpeed = (wobbleCatcherBackMax - wobbleCatcherBackMin) * 0.1;
 
     public int wobbleEncoder0;
     public final int wobbleRotatorMinimum = -6150;
@@ -447,7 +447,7 @@ public class RobotHardware {
      */
     public void initWobble() {
         while (topWobbleLimit.getState()) {
-            WobbleRotator.setPower(.3);
+            WobbleRotator.setPower(.7);
         }
         WobbleRotator.setPower(0);
         this.wobbleEncoder0 = WobbleRotator.getCurrentPosition();
@@ -471,7 +471,7 @@ public class RobotHardware {
         int currentPosition = getWobblePosition();
         if (position - currentPosition != 0) {
             int signOfPower = Math.abs(position - currentPosition) / (position - currentPosition);
-            power = .6 * ((position - currentPosition) / 750.) + (.3 * signOfPower);
+            power =  ((position - currentPosition) / 600.) + (.4 * signOfPower);
             if (power > 1 || power < -1) {
                 power = Math.abs(power) / power;
             }
