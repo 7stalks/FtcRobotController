@@ -123,7 +123,7 @@ public class MainAuto extends LinearOpMode {
         odometryMove.zeroThetaDiagonalToPoint(-4, -8);
         odometryMove.rotateTo0();
         odometryMove.deltaRotate(-0.05);
-        robot.ShooterElevator.setPosition(.2455);
+        robot.ShooterElevator.setPosition(.465);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
 
@@ -212,7 +212,7 @@ public class MainAuto extends LinearOpMode {
 
         //vuforia time! gotta move over to the picture too. odometry time
         odometryMove.goToPoint(3, 0);
-        odometryMove.zeroThetaDiagonalToPoint(18, 24);
+        odometryMove.zeroThetaDiagonalToPoint(24, 24);
 
         // waits for the camera to switch. as soon as it's done it joins the thread
         while (nav == null && opModeIsActive()) {

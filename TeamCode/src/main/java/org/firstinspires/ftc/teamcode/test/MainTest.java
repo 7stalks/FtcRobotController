@@ -250,7 +250,7 @@ public class MainTest extends LinearOpMode {
                 robot.sleepTimer(50, this);
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
             } else if (robot.ShooterServo.getPosition() < robot.SHOOTER_SERVO_START) {
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START+.01);
+                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
             }
 
             // gamepad 2 right trigger (analog) gets the shooter motor itself. has to hold down for it to work

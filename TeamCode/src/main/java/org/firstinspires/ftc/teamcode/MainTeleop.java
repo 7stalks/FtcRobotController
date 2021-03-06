@@ -73,9 +73,9 @@ public class MainTeleop extends LinearOpMode {
 
             // gamepad 2 right bumper raises the shooter, left bumper lowers it
             if (gamepad2.right_bumper) {
-                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .003);
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .002);
             } else if (gamepad2.left_bumper) {
-                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .003);
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .002);
             }
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
 

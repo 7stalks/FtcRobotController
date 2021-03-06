@@ -17,7 +17,8 @@ public class genericServoTest extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot.init(hardwareMap, telemetry);
-        servo = robot.ShooterElevator;
+        servo = robot.ShooterServo;
+        waitForStart();
 
         while (opModeIsActive()) {
             telemetry.addLine("Dpad left to go to 0, right for 1");
