@@ -26,25 +26,23 @@ public class MainTest extends LinearOpMode {
     OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
     ShooterRpmThread encoderThread = new ShooterRpmThread(robot, this);
     ElapsedTime myShooterTimer = new ElapsedTime();
-    ElapsedTime manualShooterTimer = new ElapsedTime();
+    ElapsedTime thisIsMyTimer = new ElapsedTime();
     ElapsedTime manualWobbleTimer = new ElapsedTime();
     ElapsedTime anotherShootTimer = new ElapsedTime();
-    volatile boolean quitVuforiaThread = false;
-    Runnable vuforia = new Runnable() {
+    Runnable initWobbleRunnable = new Runnable() {
         @Override
         public void run() {
-            while (!quitVuforiaThread) {
-                nav.navigationNoTelemetry();
+            while (robot.topWobbleLimit.getState()) {
+                robot.WobbleRotator.setPower(.9);
             }
+            robot.WobbleRotator.setPower(0);
+            robot.wobbleEncoder0 = robot.WobbleRotator.getCurrentPosition();
         }
     };
-    Thread navThread = new Thread(vuforia);
+    Thread initWobble = new Thread(initWobbleRunnable);
 
     boolean intakeOn = false;
-    int wobblePosition = 0;
-    boolean wobbleRotatorOn = false;
     int counter = 0;
-    int servoCounter = 0;
     int position = 0;
 
     //// As of 31 December 2020:
@@ -66,6 +64,14 @@ public class MainTest extends LinearOpMode {
     // gamepad 2 X: raises wobble rotator to pickup position
     // gamepad 2 Y: raises the wobble rotator to lifting position
     // gamepad 2 start: shoots 3 rings automatically
+
+     double funThing() {
+         int total = 0;
+         for (int i=0; i<4; i++) {
+             total += encoderThread.revolutionsPerMinute;
+         }
+         return total * .01;
+     }
 
      void shooterTimerTime(int milliseconds) {
          anotherShootTimer.reset();
@@ -93,10 +99,10 @@ public class MainTest extends LinearOpMode {
          boolean attemptedShot = false;
          myShooterTimer.reset();
          while (i < numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.back) {
-             if (encoderThread.revolutionsPerMinute < 4200 && attemptedShot) {
-                 shooterTimerTime(25);
+             if (encoderThread.revolutionsPerMinute < 4400 && attemptedShot) {
+                 shooterTimerTime(20);
                  double avg = takeAverage(100);
-                 if (avg < 4200) {
+                 if (avg < 4400) {
                      telemetry.addData("revs per min while in if", encoderThread.revolutionsPerMinute);
                      Log.v("TAG", "revs per min in here " + encoderThread.revolutionsPerMinute);
                      i++;
@@ -104,7 +110,7 @@ public class MainTest extends LinearOpMode {
                      robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
                      shooterTimerTime(300);
                      if (i == 2) {
-                         shooterTimerTime(300);
+                         shooterTimerTime(200);
                      }
                  }
              }
@@ -132,34 +138,9 @@ public class MainTest extends LinearOpMode {
          }
      }
 
-     void shootPowerShots() {
-         odometryMove.zeroThetaDiagonalToPoint(-4, -8.7);
-         odometryMove.rotateTo0();
-         robot.ShooterElevator.setPosition(.2455);
-         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-         robot.Shooter.setPower(1);
-
-         while (encoderThread.revolutionsPerMinute < 4600) {
-             idle();
-         }
-         shoot(1, 2);
-         robot.sleepTimer(75, this);
-         odometryMove.rotate(0.11);
-         robot.sleepTimer(175, this);
-         shoot(1, 2);
-         robot.sleepTimer(25, this);
-         odometryMove.rotate(0.22);
-         robot.sleepTimer(175, this);
-         shoot(1, 2);
-         robot.sleepTimer(50, this);
-         robot.Shooter.setPower(0);
-
-         odometryMove.rotateTo0();
-     }
-
      void goToHighGoal() {
          double wantedAngle = (Math.round(odometry.robotPosition[2]/(2*Math.PI))) * 2 * Math.PI;
-         odometryMove.diagonalToPoint(0, 0, wantedAngle);
+         odometryMove.dirtyDiagonalToPoint(0, 0, wantedAngle);
          odometryMove.rotateTo0();
      }
 
@@ -167,44 +148,24 @@ public class MainTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot.init(hardwareMap, telemetry);
-        robot.initWobble();
+        initWobble.start();
         robot.closeWobble();
-//        robot.initVuforia(hardwareMap, telemetry);
-//        nav.navigationInit(robot);
-//        robot.switchableCamera.setActiveCamera(robot.backWebcam);
         encoderThread.start();
         manualWobbleTimer.reset();
-        telemetry.setMsTransmissionInterval(1);
-//        navThread.start();
+        telemetry.setMsTransmissionInterval(5);
+        thisIsMyTimer.reset();
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-//            if (nav.targetVisible && gamepad1.start) {
-//                double avgX = 0, avgY = 0, avgRot = 0, i;
-//                for (i=1; i<76; i++) {
-//                    avgX += (nav.X + 8);
-//                    avgY += nav.Y;
-//                    avgRot += (nav.Rotation + Math.PI/2);
-//                }
-//                avgX = avgX/i;
-//                avgY = avgY/i;
-//                avgRot = avgRot/i;
-//                odometry.inputVuforia(avgX, avgY, -avgRot);
-//            }
-//
-//            if (gamepad2.right_stick_button) {
-//                odometry.robotPosition[2] = 0;
-//            }
-
+            //// odometry convenience stuffs and drive
             if (gamepad1.back) {
                 goToHighGoal();
             }
             if (gamepad1.start) {
                 odometry.inputVuforia(0, 0, 0);
             }
-
             if (gamepad1.y) {
                 odometryMove.deltaRotate(0.097);
             }
@@ -216,10 +177,13 @@ public class MainTest extends LinearOpMode {
             drive.circlepadMove(-gamepad1.left_stick_y, -gamepad1.left_stick_x, gamepad1.right_stick_x);
             drive.dpadMove(gamepad1.dpad_left, gamepad1.dpad_up, gamepad1.dpad_right, gamepad1.dpad_down);
 
+            //// intake
             // gamepad 1 a can turn on and off the intake, b can reverse it and turn on/off
             if (intakeTimer.seconds() > .2) {
                 if (!intakeOn) {
                     if (gamepad1.a) {
+                        robot.ShooterElevator.setPosition(0);
+                        robot.sleepTimer(25, this);
                         robot.TopIntake.setPower(1);
                         robot.BottomIntake.setPower(1);
                         intakeOn = true;
@@ -238,17 +202,27 @@ public class MainTest extends LinearOpMode {
                 }
             }
 
+            //// shooter
             if (gamepad2.right_bumper) {
-                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .003);
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .006);
             } else if (gamepad2.left_bumper) {
-                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .003);
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .006);
             }
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
-            if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 5000)) {
-                robot.sleepTimer(50, this);
-                robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+            if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 4800)) {
+
+                //// THIS IS PROBABLY A VERY BAD IDEA
+                if (funThing() > 4800) {
+                    Log.v("SHOOTER", "timer: " + thisIsMyTimer.milliseconds());
+                    // myList.append(timer.milliseconds() - lastTime)
+                    // lastTime = thisIsMyTimer.milliseconds();
+                    // if (allThreeOfmyList is small) {
+                    //      wait;
+                    // }
+                    robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+                }
             } else if (robot.ShooterServo.getPosition() < robot.SHOOTER_SERVO_START) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
             }
@@ -266,28 +240,26 @@ public class MainTest extends LinearOpMode {
             // gamepad 2 a is for the high goal
             // gamepad 2 b is for the powershots
             if (gamepad2.a) {
-                robot.ShooterElevator.setPosition(.31);
+                robot.ShooterElevator.setPosition(.52);
             }
             if (gamepad2.b) {
-                robot.ShooterElevator.setPosition(.238);
+                robot.ShooterElevator.setPosition(.46);
             }
 
-
-
+            //// wobble
+            // change wobble position
             if (gamepad2.dpad_up && position < 0) {
                 position += 35;
             } else if (gamepad2.dpad_down && position > robot.wobbleRotatorMinimum) {
                 position -= 35;
             }
 
+            // convenience
             if (gamepad2.x || gamepad1.left_bumper) {
                 position = robot.wobbleRotatorMinimum;
             } else if (gamepad2.y || gamepad1.right_bumper) {
                 position = robot.wobbleRotatorFullUp;
             }
-            telemetry.addData("wobble encoder 0", robot.wobbleEncoder0);
-            telemetry.addData("position", position);
-            telemetry.addData("wobble position", robot.getWobblePosition());
             robot.wobbleSetPosition(position);
 
             // the back servo goes from min to max
@@ -311,31 +283,17 @@ public class MainTest extends LinearOpMode {
 
             telemetry.addData("wobble catcher back position", robot.WobbleCatcherBack.getPosition());
             telemetry.addData("wobble catcher front position", robot.WobbleCatcherFront.getPosition());
-
-
-
-            if (encoderThread.revolutionsPerMinute > 4400) {
-                telemetry.addLine("Can shoot");
-            } else {
-                telemetry.addLine("Can NOT shoot");
-            }
             telemetry.addData("revs per minute", encoderThread.revolutionsPerMinute);
             telemetry.addData("shooter servo position", robot.ShooterServo.getPosition());
-            telemetry.addData("counter", counter);
             odometry.queryOdometry();
 
+            //// super secret convenient shoot
             if (gamepad2.start) {
                 shoot(3, 3);
-                counter++;
             }
-
         }
         if (encoderThread.isAlive()) {
             encoderThread.quitThread = true;
         }
-        if (navThread.isAlive()) {
-            quitVuforiaThread = true;
-        }
-        nav.targetsUltimateGoal.deactivate();
     }
 }

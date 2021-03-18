@@ -447,7 +447,7 @@ public class RobotHardware {
      */
     public void initWobble() {
         while (topWobbleLimit.getState()) {
-            WobbleRotator.setPower(.7);
+            WobbleRotator.setPower(.9);
         }
         WobbleRotator.setPower(0);
         this.wobbleEncoder0 = WobbleRotator.getCurrentPosition();
@@ -471,7 +471,7 @@ public class RobotHardware {
         int currentPosition = getWobblePosition();
         if (position - currentPosition != 0) {
             int signOfPower = Math.abs(position - currentPosition) / (position - currentPosition);
-            power =  ((position - currentPosition) / 600.) + (.4 * signOfPower);
+            power =  ((position - currentPosition) / 550.) + (.35 * signOfPower);
             if (power > 1 || power < -1) {
                 power = Math.abs(power) / power;
             }

@@ -297,7 +297,7 @@ public class MainAuto extends LinearOpMode {
         drive.brake();
 
         // inch into the wobble goal and then clamp onto it before moving it up
-        odometryMove.diagonalToPoint(-39, -50.5, -Math.PI/2);
+        odometryMove.diagonalToPoint(-38, -50.5, -Math.PI/2);
         drive.brake();
         robot.sleepTimer(100, this);
         robot.closeWobble();

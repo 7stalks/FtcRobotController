@@ -138,7 +138,7 @@ public class OdometryMove {
         while ((odometry.robotPosition[2] < theta - .007 || odometry.robotPosition[2] > theta + .007) && opMode.opModeIsActive()) {
             // once there's a radian to go, start proportionally reducing drivespeed to .3
             if (Math.abs(odometry.robotPosition[2] - theta) < 1) {
-                driveSpeed = .12 + (.16 * Math.abs(odometry.robotPosition[2] - theta));
+                driveSpeed = .14 + (.17 * Math.abs(odometry.robotPosition[2] - theta));
             }
             if (odometry.robotPosition[2] < theta - .004) {
                 drive.circlepadMove(0, 0, driveSpeed);
@@ -193,6 +193,26 @@ public class OdometryMove {
         double thetaSpeed = 0;
         while (((odometry.robotPosition[0] < x-.3 || odometry.robotPosition[0] > x+.3) || (odometry.robotPosition[1] < y-.3 || odometry.robotPosition[1] > y+.3)) && opMode.opModeIsActive()) {
             thetaSpeed = -(odometry.robotPosition[2]-rotation);
+            distance = Math.sqrt(Math.pow(Math.abs(odometry.robotPosition[0] - x), 2) + Math.pow(Math.abs(odometry.robotPosition[1] - y), 2));
+            initialX = (x - odometry.robotPosition[0]) / distance;
+            initialY = (y - odometry.robotPosition[1]) / distance;
+            driveX = initialX * Math.cos(-rotation) - initialY * Math.sin(-rotation);
+            driveY = initialX * Math.sin(-rotation) + initialY * Math.cos(-rotation);
+            if (distance < 12) {
+                driveX = driveX * (.325 + (.95-.325)*(distance/12));
+                driveY = driveY * (.325 + (.95-.325)*(distance/12));
+            }
+            drive.circlepadMove(driveX, -driveY, thetaSpeed);
+            odometry.queryOdometry();
+        }
+        drive.brake();
+    }
+
+    public void dirtyDiagonalToPoint(double x, double y, double rotation) {
+        double initialX, initialY, driveX, driveY, distance;
+        double thetaSpeed = 0;
+        while (((odometry.robotPosition[0] < x-.3 || odometry.robotPosition[0] > x+.3) || (odometry.robotPosition[1] < y-.3 || odometry.robotPosition[1] > y+.3)) && opMode.opModeIsActive()) {
+            thetaSpeed = -(odometry.robotPosition[2]-rotation)/3;
             distance = Math.sqrt(Math.pow(Math.abs(odometry.robotPosition[0] - x), 2) + Math.pow(Math.abs(odometry.robotPosition[1] - y), 2));
             initialX = (x - odometry.robotPosition[0]) / distance;
             initialY = (y - odometry.robotPosition[1]) / distance;

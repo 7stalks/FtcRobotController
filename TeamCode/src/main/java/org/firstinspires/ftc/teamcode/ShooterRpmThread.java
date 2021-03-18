@@ -46,7 +46,7 @@ public class ShooterRpmThread extends Thread {
 
             // sleep for 10 ms
             try {
-                Thread.sleep(10);
+                Thread.sleep(13);
             } catch (InterruptedException ignored) { }
         }
     }
