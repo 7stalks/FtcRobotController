@@ -33,22 +33,24 @@ public class Odometry {
     double firstORight = 0;
     double firstOMiddle = 0;
     public double encoderCountsPerIn = 306.3816404153158;
+    public double inchesPerEncoderCounts = 1/encoderCountsPerIn;
 
     // The two "big" constants. The wheel distance is the distance between L and R encoders and
     // determines theta. The tick per degree offset is for the middle encoder
     // TODO add "final" to each of these when done testing
     public double robotEncoderWheelDistance = 15.5780;
+    public double inverseEncoderWheelDistance = 1/15.5780;
     public double horizontalEncoderTickPerDegreeOffset = -2100;
 
     // Gets the h used in the odometry calculation
     // (AKA get the hypotenuse of the mini triangle made when driving)
     private double getHypOrDistance(double leftDistance, double rightDistance, double deltaTheta) {
         if (deltaTheta != 0) {
-            double r = (leftDistance + rightDistance) / 2;
-            return (r / deltaTheta)*(Math.sin(deltaTheta)/Math.cos(deltaTheta/2));
+            double r = (leftDistance + rightDistance) * 0.5;
+            return (r / deltaTheta)*(Math.sin(deltaTheta)/Math.cos(deltaTheta*0.5));
         } else {
             // returns the distance travelled, averages L and R just to be accurate.
-            return (leftDistance + rightDistance) / 2;
+            return (leftDistance + rightDistance) * 0.5;
         }
     }
 
@@ -56,9 +58,9 @@ public class Odometry {
     // Finds the delta and turns it to inches, Sort of a 2-in-1
     private double[] odometryInfoToDeltaInches(double[] odometryInfo) {
         // OLeft's encoder is reversed, hence the negative
-        double deltaOLeft = -((odometryInfo[0]) - lastIterationOdometryInfo[0]) / encoderCountsPerIn;
-        double deltaORight = -(odometryInfo[1] - lastIterationOdometryInfo[1]) / encoderCountsPerIn;
-        double deltaOMiddle = -(odometryInfo[2] - lastIterationOdometryInfo[2]) / encoderCountsPerIn;
+        double deltaOLeft = -((odometryInfo[0]) - lastIterationOdometryInfo[0]) * inchesPerEncoderCounts;
+        double deltaORight = -(odometryInfo[1] - lastIterationOdometryInfo[1]) * inchesPerEncoderCounts;
+        double deltaOMiddle = -(odometryInfo[2] - lastIterationOdometryInfo[2]) * inchesPerEncoderCounts;
         // woooooaahhh. copies last odometryinfo onto lastiterodometryinfo
         System.arraycopy(odometryInfo, 0, lastIterationOdometryInfo, 0, 3);
         deltas[0] = deltaOLeft;
@@ -69,7 +71,7 @@ public class Odometry {
 
     // This one is self explanatory, the change in theta (orientation)
     private double getDeltaTheta(double leftDistance, double rightDistance) {
-        return (leftDistance - rightDistance) / robotEncoderWheelDistance;
+        return (leftDistance - rightDistance) * inverseEncoderWheelDistance;
     }
 
     // The main method. Will return the new (x, y) position. Feed it the old (x, y) position
@@ -96,7 +98,7 @@ public class Odometry {
 
         // calculate horizontal change using the tick per degree offset and then proceed to get the
         // hypotenuse of the triangle made when moving
-        double horizontalChange = deltaDistances[2] - ((horizontalEncoderTickPerDegreeOffset*deltaTheta)/encoderCountsPerIn);
+        double horizontalChange = deltaDistances[2] - ((horizontalEncoderTickPerDegreeOffset*deltaTheta)*inchesPerEncoderCounts);
         double h = getHypOrDistance(deltaDistances[0], deltaDistances[1], deltaTheta);
 
         // do a classic hyp * cos / sin to get x / y. also account for horizontal change

@@ -1,4 +1,4 @@
- package org.firstinspires.ftc.teamcode.test;
+package org.firstinspires.ftc.teamcode.test;
 
 import android.util.Log;
 
@@ -9,26 +9,21 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.ShooterRpmThread;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
-import org.firstinspires.ftc.teamcode.VuforiaNavigation;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
 import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 
-import java.util.Arrays;
-
- @TeleOp(name = "Main test", group = "Robot")
+@TeleOp(name = "Main test", group = "Robot")
 public class MainTest extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
     ElapsedTime intakeTimer = new ElapsedTime();
-    VuforiaNavigation nav = new VuforiaNavigation();
     Odometry odometry = new Odometry(robot, telemetry);
     OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
     ShooterRpmThread encoderThread = new ShooterRpmThread(robot, this);
-    ElapsedTime myShooterTimer = new ElapsedTime();
     ElapsedTime thisIsMyTimer = new ElapsedTime();
     ElapsedTime manualWobbleTimer = new ElapsedTime();
-    ElapsedTime anotherShootTimer = new ElapsedTime();
+    ElapsedTime myElapsedTime = new ElapsedTime();
     Runnable initWobbleRunnable = new Runnable() {
         @Override
         public void run() {
@@ -42,15 +37,18 @@ public class MainTest extends LinearOpMode {
     Thread initWobble = new Thread(initWobbleRunnable);
 
     boolean intakeOn = false;
-    int counter = 0;
+    boolean didNotShoot = true;
     int position = 0;
 
-    //// As of 31 December 2020:
     // gamepad 1 sticks: control drive
     // gamepad 1 A: turns on/off the intake
     // gamepad 1 B: reverses on/off the intake
-    // gamepad 1 start: takes picture
-    // gamepad 1 back: does all the powershot stuff after photos
+    // gamepad 1 X: rotate a lil to the left
+    // gamepad 1 Y: rotate a lil to the right
+    // gamepad 1 start: marks the high goal position
+    // gamepad 1 back: goes to high goal position
+    // gamepad 1 left bumper: wobble to pickup-ready position
+    // gamepad 1 right bumper: wobble to lifted position
     //
     // gamepad 2 right bumper: raises the shooter
     // gamepad 2 left bumper: lowers the shooter
@@ -63,86 +61,47 @@ public class MainTest extends LinearOpMode {
     // gamepad 2 B: aims the shooter at the power shots
     // gamepad 2 X: raises wobble rotator to pickup position
     // gamepad 2 Y: raises the wobble rotator to lifting position
-    // gamepad 2 start: shoots 3 rings automatically
 
-     double funThing() {
-         int total = 0;
-         for (int i=0; i<4; i++) {
-             total += encoderThread.revolutionsPerMinute;
-         }
-         return total * .01;
-     }
+    double averageOfLastRPMs() {
+        int total = 0;
+        for (int i = 0; i < 50; i++) {
+            total += encoderThread.revolutionsPerMinute;
+        }
+        return total * .02;
+    }
 
-     void shooterTimerTime(int milliseconds) {
-         anotherShootTimer.reset();
-         while (opModeIsActive() && !gamepad2.back && anotherShootTimer.milliseconds() < milliseconds) {
-             idle();
-             Log.v("TAG", "waiting in the shootertimertime");
-         }
-     }
+    void goToHighGoal() {
+        double wantedAngle = (Math.round(odometry.robotPosition[2] / (2 * Math.PI))) * 2 * Math.PI;
+        odometryMove.dirtyDiagonalToPoint(0, 0, wantedAngle);
+        odometryMove.rotateTo0();
+    }
 
-     double takeAverage(int n) {
-         double total = 0;
-         for (int i = 0; i<n; i++) {
-             total += encoderThread.revolutionsPerMinute;
-         }
-         return total/n;
-     }
+    double[] deltaTimes = new double[]{1000, 1000, 1000};
+    int x = 0;
+    double lastTime = 0;
+    double currentDeltaTime = 0;
 
-     void shoot(int numberOfRings, int timeout) {
-         robot.Shooter.setPower(1);
-         while (encoderThread.revolutionsPerMinute < 4800) {
-             idle();
-         }
-         int i = 0;
-         int numberOfFailedShots = 0;
-         boolean attemptedShot = false;
-         myShooterTimer.reset();
-         while (i < numberOfRings && numberOfFailedShots < timeout && opModeIsActive() && !gamepad2.back) {
-             if (encoderThread.revolutionsPerMinute < 4400 && attemptedShot) {
-                 shooterTimerTime(20);
-                 double avg = takeAverage(100);
-                 if (avg < 4400) {
-                     telemetry.addData("revs per min while in if", encoderThread.revolutionsPerMinute);
-                     Log.v("TAG", "revs per min in here " + encoderThread.revolutionsPerMinute);
-                     i++;
-                     attemptedShot = false;
-                     robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                     shooterTimerTime(300);
-                     if (i == 2) {
-                         shooterTimerTime(200);
-                     }
-                 }
-             }
-             if (encoderThread.revolutionsPerMinute > 4900 && !attemptedShot) {
-                 telemetry.addData("      revs per min while in if", encoderThread.revolutionsPerMinute);
-                 Log.v("TAG", "     revs per min in here " + encoderThread.revolutionsPerMinute);
-                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-                 attemptedShot = true;
-                 myShooterTimer.reset();
-             }
-             if (encoderThread.revolutionsPerMinute > 4900 && attemptedShot && myShooterTimer.milliseconds() > 400) {
-                 telemetry.addData("           revs per min while in if", encoderThread.revolutionsPerMinute);
-                 Log.v("TAG", "          revs per min in here " + encoderThread.revolutionsPerMinute);
-                 attemptedShot = false;
-                 numberOfFailedShots++;
-                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                 shooterTimerTime(300);
-             }
-             telemetry.addData("i", i);
-             telemetry.addData("number of failed shots", numberOfFailedShots);
-             telemetry.addData("attempted shot", attemptedShot);
-             telemetry.addData("encoder", encoderThread.revolutionsPerMinute);
-             telemetry.addLine("I'm inside of a while loop, hit BACK on GAMEPAD 2 to get out of it");
-             telemetry.update();
-         }
-     }
+    void updateDeltaTimesList() {
+        currentDeltaTime = thisIsMyTimer.milliseconds() - lastTime;
+        if (currentDeltaTime > 4000) {
+            x = 0;
+            deltaTimes[1] = 1000;
+            deltaTimes[2] = 1000;
+            Log.v("SHOOTER", "just set x to 0 normally");
 
-     void goToHighGoal() {
-         double wantedAngle = (Math.round(odometry.robotPosition[2]/(2*Math.PI))) * 2 * Math.PI;
-         odometryMove.dirtyDiagonalToPoint(0, 0, wantedAngle);
-         odometryMove.rotateTo0();
-     }
+        } else if (x > 2) {
+            x = 0;
+            Log.v("SHOOTER", "just set x to 0 because it was >2");
+        }
+        deltaTimes[x] = currentDeltaTime;
+        Log.v("SHOOTER", "here is my current delta time: " + currentDeltaTime);
+        x++;
+        lastTime = thisIsMyTimer.milliseconds();
+    }
+
+    boolean twoRingsShot() {
+        return deltaTimes[0] > 1000 && deltaTimes[1] < 600 && deltaTimes[2] < 600;
+    }
 
     // there wasn't an override here before and i think it worked fine... oh well! we'll see
     @Override
@@ -175,14 +134,13 @@ public class MainTest extends LinearOpMode {
 
             // drive goes to gamepad 1. the left and right sticks control circlepad, dpad is for the fast move
             drive.circlepadMove(-gamepad1.left_stick_y, -gamepad1.left_stick_x, gamepad1.right_stick_x);
-            drive.dpadMove(gamepad1.dpad_left, gamepad1.dpad_up, gamepad1.dpad_right, gamepad1.dpad_down);
 
             //// intake
             // gamepad 1 a can turn on and off the intake, b can reverse it and turn on/off
             if (intakeTimer.seconds() > .2) {
                 if (!intakeOn) {
                     if (gamepad1.a) {
-                        robot.ShooterElevator.setPosition(0);
+                        robot.ShooterElevator.setPosition(robot.SHOOTER_ELEVATOR_MIN);
                         robot.sleepTimer(25, this);
                         robot.TopIntake.setPower(1);
                         robot.BottomIntake.setPower(1);
@@ -203,28 +161,42 @@ public class MainTest extends LinearOpMode {
             }
 
             //// shooter
-            if (gamepad2.right_bumper) {
-                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .006);
-            } else if (gamepad2.left_bumper) {
-                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .006);
+            if (gamepad2.right_bumper && robot.ShooterElevator.getPosition() < 1) {
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .008);
+            } else if (gamepad2.left_bumper && robot.ShooterElevator.getPosition() > robot.SHOOTER_ELEVATOR_MIN) {
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .008);
             }
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
+
+
+
+
+
+
+
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
             if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 4800)) {
 
-                //// THIS IS PROBABLY A VERY BAD IDEA
-                if (funThing() > 4800) {
+                if (averageOfLastRPMs() > 4900 && didNotShoot) {
                     Log.v("SHOOTER", "timer: " + thisIsMyTimer.milliseconds());
-                    // myList.append(timer.milliseconds() - lastTime)
-                    // lastTime = thisIsMyTimer.milliseconds();
-                    // if (allThreeOfmyList is small) {
-                    //      wait;
-                    // }
+
+                    updateDeltaTimesList();
+                    if (twoRingsShot()) {
+                        robot.sleepTimer(200, this);
+                        Log.v("SHOOTER", "I AM HERE RIGHT AFTER THE DELAY");
+                    }
+
                     robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+                    didNotShoot = false;
+                    myElapsedTime.reset();
                 }
-            } else if (robot.ShooterServo.getPosition() < robot.SHOOTER_SERVO_START) {
+
+            } else if (robot.ShooterServo.getPosition() <= robot.SHOOTER_SERVO_START) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+                if (myElapsedTime.milliseconds() > 100) {
+                    didNotShoot = true;
+                }
             }
 
             // gamepad 2 right trigger (analog) gets the shooter motor itself. has to hold down for it to work
@@ -286,11 +258,6 @@ public class MainTest extends LinearOpMode {
             telemetry.addData("revs per minute", encoderThread.revolutionsPerMinute);
             telemetry.addData("shooter servo position", robot.ShooterServo.getPosition());
             odometry.queryOdometry();
-
-            //// super secret convenient shoot
-            if (gamepad2.start) {
-                shoot(3, 3);
-            }
         }
         if (encoderThread.isAlive()) {
             encoderThread.quitThread = true;

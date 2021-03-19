@@ -5,6 +5,13 @@ public class GoBildaDrive {
     // introduce variables and members
     private final RobotHardware robot;
 
+    double r;
+    double robotAngle;
+    double rFront;
+    double rBack;
+    double lFront;
+    double lBack;
+
     // constructor
     public GoBildaDrive(RobotHardware givenRobot) {
         robot = givenRobot;
@@ -24,18 +31,18 @@ public class GoBildaDrive {
             this.brake();
         } else {
             // Create the magnitude (or radius, r) and angle of the sticks
-            double r = Math.hypot(leftStickX, leftStickY);
-            double robotAngle = Math.atan2(leftStickY, leftStickX) - (Math.PI / 4);
+            r = Math.hypot(leftStickX, leftStickY);
+            robotAngle = Math.atan2(leftStickY, leftStickX) - (Math.PI / 4);
 
             // Set power to the motors corresponding to the angle and magnitude
-            final double RFront = r * Math.cos(robotAngle) + rightStickX;
-            final double RBack = r * Math.sin(robotAngle) + rightStickX;
-            final double LFront = r * Math.sin(robotAngle) - rightStickX;
-            final double LBack = r * Math.cos(robotAngle) - rightStickX;
-            robot.RightFront.setPower(RFront);
-            robot.RightBack.setPower(RBack);
-            robot.LeftFront.setPower(LFront);
-            robot.LeftBack.setPower(LBack);
+            rFront = r * Math.cos(robotAngle) + rightStickX;
+            rBack = r * Math.sin(robotAngle) + rightStickX;
+            lFront = r * Math.sin(robotAngle) - rightStickX;
+            lBack = r * Math.cos(robotAngle) - rightStickX;
+            robot.RightFront.setPower(rFront);
+            robot.RightBack.setPower(rBack);
+            robot.LeftFront.setPower(lFront);
+            robot.LeftBack.setPower(lBack);
         }
     }
 

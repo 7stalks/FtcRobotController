@@ -71,6 +71,8 @@ public class RobotHardware {
     final public double SHOOTER_SERVO_START = 0.52;
     final public double SHOOTER_SERVO_MAX = 0.32;
 
+    final public double SHOOTER_ELEVATOR_MIN = 0.38;
+
     // DEPRECATED
     final public int wobbleRotatorPickup = 30;
     final public int wobbleRotatorTop = 90;
@@ -229,6 +231,7 @@ public class RobotHardware {
         try {
             ShooterElevator = hardwareMap.get(Servo.class, "shooter_elevator");
             telemetry.addData("Status", "Servo: Shooter elevator identified");    //
+            ShooterElevator.setPosition(SHOOTER_ELEVATOR_MIN);
         } catch (IllegalArgumentException err) {
             telemetry.addData("Warning", "Servo: Shooter elevator not plugged in");    //
             ShooterElevator = null;
@@ -469,15 +472,14 @@ public class RobotHardware {
     public void wobbleSetPosition(int position) {
         double power = 0;
         int currentPosition = getWobblePosition();
-        if (position - currentPosition != 0) {
+        if (Math.abs(position - currentPosition) > 10) {
             int signOfPower = Math.abs(position - currentPosition) / (position - currentPosition);
-            power =  ((position - currentPosition) / 550.) + (.35 * signOfPower);
+            power =  ((position - currentPosition) / 600.) + (.4 * signOfPower);
             if (power > 1 || power < -1) {
                 power = Math.abs(power) / power;
             }
             if ((!topWobbleLimit.getState() && power > 0) || (!bottomWobbleLimit.getState() && power < 0)
-                    || (getWobblePosition() < wobbleRotatorMinimum && power < 0)
-                    || (getWobblePosition() > position - 10 && getWobblePosition() < position + 10)) {
+                    || (getWobblePosition() < wobbleRotatorMinimum && power < 0)) {
                 power = 0;
             }
         }
