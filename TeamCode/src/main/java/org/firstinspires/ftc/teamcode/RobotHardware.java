@@ -5,6 +5,7 @@ import android.util.Log;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -63,22 +64,20 @@ public class RobotHardware {
     public DigitalChannel topWobbleLimit;
     public DigitalChannel bottomWobbleLimit;
 
+    // Webcams
     public WebcamName frontWebcam;
     public WebcamName backWebcam;
 
+    // Various final values
     final public double stickThres = 0.05;
     final public double PIVOT_SPEED = -0.5;
+
     final public double SHOOTER_SERVO_START = 0.52;
     final public double SHOOTER_SERVO_MAX = 0.32;
-
     final public double SHOOTER_ELEVATOR_MIN = 0.38;
 
-    // DEPRECATED
+        // DEPRECATED
     final public int wobbleRotatorPickup = 30;
-    final public int wobbleRotatorTop = 90;
-
-    final public double shooterElevatorHighGoal = 0.32;
-
 
     final public double wobbleCatcherFrontMin = 0;
     final public double wobbleCatcherFrontMax = 0.6;
@@ -94,17 +93,15 @@ public class RobotHardware {
 
     ElapsedTime timer = new ElapsedTime();
 
+    // Vuforia and tensor stuffs
     private static final String VUFORIA_KEY = "AXl4o5z/////AAABmQyBF0iAaUTcguyLoBFeK1A7RHUVrQdTS" +
             "sPDqn4DelLm7BtbLuahVuZvBzuq5tPGrvi7D25P3xRzVgT1d+cADoNAMxuRVZs24o87S6gH0mM+Q/OrrQr5" +
             "7pTiumNffyuzBI728d+XgQJImM0rBxGcpwej8Ok0ZSCNIzzxVNf06dRwLEwu6jf0mCiA9yyffMFzreeL8UR" +
             "wm/xxuDsYxY7NrVtjlmslMTiu3nAUboaDP8jkhKvl8623x57MhYt4hof+iegRYjJzt+Knb5m5SfY5urWFGF" +
             "sLjZ4dqAhzXNiJmmKbKojUfjgvUld91gWm0UOXHkoezBuBVnLFasNmChD2uxpGGGeNdW1MvGitjFEvckKJ";
-
     public BetterVuforia vuforia;
     public SwitchableCamera switchableCamera;
-
     public TFObjectDetector tensorFlowEngine;
-
     private static final String TFOD_MODEL_ASSET = "UltimateGoal.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
@@ -253,7 +250,6 @@ public class RobotHardware {
             WobbleCatcherFront = null;
         }
 
-
         try {
             topWobbleLimit = hardwareMap.get(DigitalChannel.class, "top_wobble_limit");
             topWobbleLimit.setMode(DigitalChannel.Mode.INPUT);
@@ -269,7 +265,15 @@ public class RobotHardware {
             telemetry.addData("Warning", "Touch sensor: bottom wobble limit not working");    //
             bottomWobbleLimit = null;
         }
+        //end of robot init
+    }
 
+    /**
+     * Inits the top and bottom IMUs to be used for directional stuff
+     * @param hardwareMap the opMode's hardwaremap (pass in as just hardwareMap)
+     * @param telemetry the opMode's telemetry (pass in as telemetry)
+     */
+    public void initIMU(HardwareMap hardwareMap, Telemetry telemetry) {
         // Init the IMUs/Gyros
         try {
             bottom_imu = hardwareMap.get(BNO055IMU.class, "imu");
@@ -312,7 +316,6 @@ public class RobotHardware {
         } catch (IllegalArgumentException err) {
             telemetry.addData("Warning", "Top Imu not initialized");
         }
-        //end of robot init
     }
 
     /**

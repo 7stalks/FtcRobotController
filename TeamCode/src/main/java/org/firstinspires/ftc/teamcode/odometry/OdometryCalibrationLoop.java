@@ -38,6 +38,7 @@ public class OdometryCalibrationLoop extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         robot.init(hardwareMap, telemetry);
+        robot.initIMU(hardwareMap, telemetry);
 
         // set telemetry
         telemetry.setMsTransmissionInterval(5);

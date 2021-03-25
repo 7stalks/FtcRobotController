@@ -55,31 +55,6 @@ public class OdometryMove {
         drive.brake();
     }
 
-    // OLD
-    // moves left right (y direction)
-    public void goToStrafePoint(double y, double rotation) {
-        double moveSpeed = .75;
-        double thetaSpeed = 0;
-        while ((odometry.robotPosition[1] < (y-.1) || odometry.robotPosition[1] > (y+.1)) && opMode.opModeIsActive()) {
-            thetaSpeed = -(odometry.robotPosition[2]+(rotation));
-            if (odometry.robotPosition[1] < (y-.2)) {
-                drive.circlepadMove(0, -moveSpeed, thetaSpeed);
-                odometry.queryOdometry();
-            } else if (odometry.robotPosition[1] > (y+.2)) {
-                drive.circlepadMove(0, moveSpeed, thetaSpeed);
-                odometry.queryOdometry();
-            } else if (odometry.robotPosition[1] < (y-.1) || odometry.robotPosition[1] > (y+.1)) {
-                drive.brake();
-                break;
-            }
-            if (Math.abs(odometry.robotPosition[1] - y) < 10) {
-                moveSpeed = .25 + (((.85-.25)/(12)) * (Math.abs(odometry.robotPosition[1] - y)));
-            }
-        }
-        odometry.queryOdometry();
-        drive.brake();
-    }
-
     /**
      * Rotates the robot to wherever odometry thinks 0 theta is
      */
@@ -212,7 +187,7 @@ public class OdometryMove {
         double initialX, initialY, driveX, driveY, distance;
         double thetaSpeed = 0;
         while (((odometry.robotPosition[0] < x-.3 || odometry.robotPosition[0] > x+.3) || (odometry.robotPosition[1] < y-.3 || odometry.robotPosition[1] > y+.3)) && opMode.opModeIsActive()) {
-            thetaSpeed = -(odometry.robotPosition[2]-rotation)/3;
+            thetaSpeed = -(odometry.robotPosition[2]-rotation);
             distance = Math.sqrt(Math.pow(Math.abs(odometry.robotPosition[0] - x), 2) + Math.pow(Math.abs(odometry.robotPosition[1] - y), 2));
             initialX = (x - odometry.robotPosition[0]) / distance;
             initialY = (y - odometry.robotPosition[1]) / distance;

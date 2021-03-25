@@ -18,42 +18,6 @@ public class OdometryTests extends LinearOpMode {
     double[] odometryInfo;
     double[] robotPosition = {0, 0, 0};
 
-    private void testImu() {
-        // (goes before waitForStart())
-        // obtain the heading (is this 0 degrees? test it please)
-        double angle = robot.bottom_imu.getAngularOrientation().firstAngle;
-        telemetry.addData("ANGLE", angle);
-
-        // ONLY WORKS IF angle IS LESS THAN 270 TEST THIS
-        if (gamepad1.a) {
-            double initialAngle = robot.bottom_imu.getAngularOrientation().firstAngle;
-
-            while (angle < (initialAngle + 90) && opModeIsActive()) {
-                drive.circlepadMove(1, 0, .5);
-                angle = robot.bottom_imu.getAngularOrientation().firstAngle;
-                telemetry.addData("ANGLE", angle);
-                telemetry.update();
-            }
-            drive.brake();
-        }
-    }
-
-    //            if (gamepad1.a) {
-//                timer.reset();
-//                while (timer.time(TimeUnit.SECONDS) < 2 && opModeIsActive()) {
-//                    drive.circlepadMove(.8, 0, 0);
-//                    telemetry.addData("OLeft", robot.OLeft.getCurrentPosition());
-//                    telemetry.addData("ORight", robot.ORight.getCurrentPosition());
-//                    telemetry.addData("OMiddle", robot.OMiddle.getCurrentPosition());
-//                    telemetry.update();
-//                }
-//                drive.stop();
-//                sleep(1000);
-//                telemetry.addData("Left divided by right", robot.OLeft.getCurrentPosition() / robot.ORight.getCurrentPosition());
-//                telemetry.update();
-//                sleep(10000);
-//            }
-
     private void testOdometry() {
         drive.circlepadMove(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
         drive.dpadMove(gamepad1.dpad_right, gamepad1.dpad_up, gamepad1.dpad_left,
@@ -334,6 +298,7 @@ public class OdometryTests extends LinearOpMode {
 
         //init robot
         robot.init(hardwareMap, telemetry);
+        robot.initIMU(hardwareMap, telemetry);
 
         telemetry.setMsTransmissionInterval(5);
         telemetry.addData("Status", "Waiting for start");

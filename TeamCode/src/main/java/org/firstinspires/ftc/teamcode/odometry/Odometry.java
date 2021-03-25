@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 
 public class Odometry {
 
-    RobotHardware robot = new RobotHardware();
+    RobotHardware robot;
     Telemetry telemetry;
     ElapsedTime brokenThingsTimer = new ElapsedTime();
 
@@ -57,11 +57,9 @@ public class Odometry {
     // Changes raw odometry info into useful changes in distance
     // Finds the delta and turns it to inches, Sort of a 2-in-1
     private double[] odometryInfoToDeltaInches(double[] odometryInfo) {
-        // OLeft's encoder is reversed, hence the negative
         double deltaOLeft = -((odometryInfo[0]) - lastIterationOdometryInfo[0]) * inchesPerEncoderCounts;
         double deltaORight = -(odometryInfo[1] - lastIterationOdometryInfo[1]) * inchesPerEncoderCounts;
         double deltaOMiddle = -(odometryInfo[2] - lastIterationOdometryInfo[2]) * inchesPerEncoderCounts;
-        // woooooaahhh. copies last odometryinfo onto lastiterodometryinfo
         System.arraycopy(odometryInfo, 0, lastIterationOdometryInfo, 0, 3);
         deltas[0] = deltaOLeft;
         deltas[1] = deltaORight;
@@ -86,7 +84,6 @@ public class Odometry {
         telemetry.addData("Odometry info L", odometryInfo[0]);
         telemetry.addData("Odometry info R", odometryInfo[1]);
         telemetry.addData("Odometry info M", odometryInfo[2]);
-
 
         // get the changes (deltas) in distances/theta
         // deltaDistances has all 3 odometers (L, R, M)

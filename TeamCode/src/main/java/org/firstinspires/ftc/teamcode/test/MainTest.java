@@ -21,7 +21,7 @@ public class MainTest extends LinearOpMode {
     Odometry odometry = new Odometry(robot, telemetry);
     OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
     ShooterRpmThread encoderThread = new ShooterRpmThread(robot, this);
-    ElapsedTime thisIsMyTimer = new ElapsedTime();
+    ElapsedTime shooterTimer = new ElapsedTime();
     ElapsedTime manualWobbleTimer = new ElapsedTime();
     ElapsedTime myElapsedTime = new ElapsedTime();
     Runnable initWobbleRunnable = new Runnable() {
@@ -82,7 +82,7 @@ public class MainTest extends LinearOpMode {
     double currentDeltaTime = 0;
 
     void updateDeltaTimesList() {
-        currentDeltaTime = thisIsMyTimer.milliseconds() - lastTime;
+        currentDeltaTime = shooterTimer.milliseconds() - lastTime;
         if (currentDeltaTime > 4000) {
             x = 0;
             deltaTimes[1] = 1000;
@@ -96,7 +96,7 @@ public class MainTest extends LinearOpMode {
         deltaTimes[x] = currentDeltaTime;
         Log.v("SHOOTER", "here is my current delta time: " + currentDeltaTime);
         x++;
-        lastTime = thisIsMyTimer.milliseconds();
+        lastTime = shooterTimer.milliseconds();
     }
 
     boolean twoRingsShot() {
@@ -112,7 +112,7 @@ public class MainTest extends LinearOpMode {
         encoderThread.start();
         manualWobbleTimer.reset();
         telemetry.setMsTransmissionInterval(5);
-        thisIsMyTimer.reset();
+        shooterTimer.reset();
 
         waitForStart();
 
@@ -168,18 +168,11 @@ public class MainTest extends LinearOpMode {
             }
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
 
-
-
-
-
-
-
-
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
             if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 4800)) {
 
                 if (averageOfLastRPMs() > 4900 && didNotShoot) {
-                    Log.v("SHOOTER", "timer: " + thisIsMyTimer.milliseconds());
+                    Log.v("SHOOTER", "timer: " + shooterTimer.milliseconds());
 
                     updateDeltaTimesList();
                     if (twoRingsShot()) {
@@ -208,6 +201,7 @@ public class MainTest extends LinearOpMode {
             } else {
                 robot.Shooter.setPower(0);
             }
+
             // quick shortcuts:
             // gamepad 2 a is for the high goal
             // gamepad 2 b is for the powershots
