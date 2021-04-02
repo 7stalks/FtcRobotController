@@ -88,8 +88,8 @@ public class RobotHardware {
 
     public int wobbleEncoder0;
     public final int wobbleRotatorMinimum = -6150;
-    public final int wobbleRotatorFullUp = -3400;
-    public final int wobbleRotatorUp = -5750;
+    public final int wobbleRotatorFullUp = -2700;
+    public final int wobbleRotatorUp = -5850;
 
     ElapsedTime timer = new ElapsedTime();
 
@@ -464,7 +464,6 @@ public class RobotHardware {
      * @return the actual wobble position relative to the top
      */
     public int getWobblePosition() {
-        Log.v("in robothardware", "wobble encoder 0 " + this.wobbleEncoder0);
         return (WobbleRotator.getCurrentPosition() - this.wobbleEncoder0);
     }
 

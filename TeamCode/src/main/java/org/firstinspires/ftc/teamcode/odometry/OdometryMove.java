@@ -148,6 +148,9 @@ public class OdometryMove {
                 driveX = driveX * (.325 + (.95-.325)*(distance/12));
                 driveY = driveY * (.325 + (.95-.325)*(distance/12));
             }
+            Log.v("DIAGONALTOPOINT", "driveX: "+driveX);
+            Log.v("DIAGONALTOPOINT", "driveY: "+driveY);
+            Log.v("DIAGONALTOPOINT", "thetaSpeed: "+thetaSpeed);
             drive.circlepadMove(driveX, -driveY, thetaSpeed);
             odometry.queryOdometry();
         }

@@ -39,10 +39,10 @@ public class GoBildaDrive {
             rBack = r * Math.sin(robotAngle) + rightStickX;
             lFront = r * Math.sin(robotAngle) - rightStickX;
             lBack = r * Math.cos(robotAngle) - rightStickX;
-            robot.RightFront.setPower(rFront);
-            robot.RightBack.setPower(rBack);
-            robot.LeftFront.setPower(lFront);
-            robot.LeftBack.setPower(lBack);
+            robot.RightFront.setPower(-rFront);
+            robot.RightBack.setPower(-rBack);
+            robot.LeftFront.setPower(-lFront);
+            robot.LeftBack.setPower(-lBack);
         }
     }
 

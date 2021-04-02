@@ -37,8 +37,11 @@ public class MainTest extends LinearOpMode {
     Thread initWobble = new Thread(initWobbleRunnable);
 
     boolean intakeOn = false;
+    boolean setBackToStart = true;
     boolean didNotShoot = true;
     int position = 0;
+
+    boolean myBoolean = false;
 
     // gamepad 1 sticks: control drive
     // gamepad 1 A: turns on/off the intake
@@ -100,7 +103,7 @@ public class MainTest extends LinearOpMode {
     }
 
     boolean twoRingsShot() {
-        return deltaTimes[0] > 1000 && deltaTimes[1] < 600 && deltaTimes[2] < 600;
+        return deltaTimes[0] > 1400 && deltaTimes[1] < 800 && deltaTimes[2] < 800;
     }
 
     // there wasn't an override here before and i think it worked fine... oh well! we'll see
@@ -113,6 +116,7 @@ public class MainTest extends LinearOpMode {
         manualWobbleTimer.reset();
         telemetry.setMsTransmissionInterval(5);
         shooterTimer.reset();
+        myElapsedTime.reset();
 
         waitForStart();
 
@@ -169,7 +173,9 @@ public class MainTest extends LinearOpMode {
             telemetry.addData("shooter elevator position", robot.ShooterElevator.getPosition());
 
             // gamepad 2 left trigger gets the servo that hits the rings into the shooter wheel
-            if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 4800)) {
+            if ((gamepad2.left_trigger > .1) && (encoderThread.revolutionsPerMinute > 4900)) {
+                Log.v("SHOOTER", "RPM is greater than 4800");
+                Log.v("SHOOTER", "didNotShoot: " + didNotShoot);
 
                 if (averageOfLastRPMs() > 4900 && didNotShoot) {
                     Log.v("SHOOTER", "timer: " + shooterTimer.milliseconds());
@@ -181,15 +187,20 @@ public class MainTest extends LinearOpMode {
                     }
 
                     robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+                    robot.sleepTimer(150, this);
+                    setBackToStart = false;
                     didNotShoot = false;
                     myElapsedTime.reset();
                 }
 
             } else if (robot.ShooterServo.getPosition() <= robot.SHOOTER_SERVO_START) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-                if (myElapsedTime.milliseconds() > 100) {
-                    didNotShoot = true;
-                }
+                telemetry.addData("Hey shooter", "I'm inside the servo start place");
+                setBackToStart = true;
+            }
+
+            if (myElapsedTime.milliseconds() > 200 && setBackToStart) {
+                didNotShoot = true;
             }
 
             // gamepad 2 right trigger (analog) gets the shooter motor itself. has to hold down for it to work
@@ -206,7 +217,7 @@ public class MainTest extends LinearOpMode {
             // gamepad 2 a is for the high goal
             // gamepad 2 b is for the powershots
             if (gamepad2.a) {
-                robot.ShooterElevator.setPosition(.52);
+                robot.ShooterElevator.setPosition(.53);
             }
             if (gamepad2.b) {
                 robot.ShooterElevator.setPosition(.46);
@@ -223,6 +234,8 @@ public class MainTest extends LinearOpMode {
             // convenience
             if (gamepad2.x || gamepad1.left_bumper) {
                 position = robot.wobbleRotatorMinimum;
+                robot.WobbleCatcherFront.setPosition(robot.wobbleCatcherFrontMax);
+                robot.WobbleCatcherBack.setPosition(robot.wobbleCatcherBackMin);
             } else if (gamepad2.y || gamepad1.right_bumper) {
                 position = robot.wobbleRotatorFullUp;
             }
