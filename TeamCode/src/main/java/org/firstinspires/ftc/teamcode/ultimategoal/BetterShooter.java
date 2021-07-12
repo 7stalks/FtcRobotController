@@ -1,6 +1,8 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.ultimategoal;
 
 import android.util.Log;
+
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 public class BetterShooter {
 

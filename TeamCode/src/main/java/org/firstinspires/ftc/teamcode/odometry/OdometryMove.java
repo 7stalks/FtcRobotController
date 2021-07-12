@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.odometry;
 
 import android.util.Log;
-import android.util.LogPrinter;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 

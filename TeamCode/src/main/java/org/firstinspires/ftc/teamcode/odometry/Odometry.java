@@ -1,16 +1,9 @@
 package org.firstinspires.ftc.teamcode.odometry;
 
-import android.sax.StartElementListener;
-
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
-import org.firstinspires.ftc.teamcode.GoBildaDrive;
-import org.firstinspires.ftc.teamcode.R;
 import org.firstinspires.ftc.teamcode.RobotHardware;
-
-import java.util.logging.Logger;
 
 public class Odometry {
 

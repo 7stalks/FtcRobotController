@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.test;
+package org.firstinspires.ftc.teamcode.ultimategoal.test;
 
 import android.util.Log;
 
@@ -9,9 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
-import org.firstinspires.ftc.teamcode.ShooterRpmThread;
-
-import java.util.Arrays;
+import org.firstinspires.ftc.teamcode.ultimategoal.ShooterRpmThread;
 
 @TeleOp (name = "shooter test")
 @Disabled

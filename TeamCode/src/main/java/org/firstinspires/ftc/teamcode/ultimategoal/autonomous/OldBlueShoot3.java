@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.autonomous;
+package org.firstinspires.ftc.teamcode.ultimategoal.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -10,16 +10,19 @@ import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.VuforiaNavigation;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
+import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 
 import java.util.List;
+import java.util.Arrays;
 
-@Autonomous(name = "Blue Far Shoot 3")
+@Autonomous(name = "Old shoot 3")
 @Disabled
-public class OldBlueFarShoot3 extends LinearOpMode {
+public class OldBlueShoot3 extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
     Odometry odometry = new Odometry(robot, telemetry);
+    OdometryMove odometryMove = new OdometryMove(this, robot, odometry);
     VuforiaNavigation nav = new VuforiaNavigation();
     ElapsedTime timer = new ElapsedTime();
     Runnable switchCamera =
@@ -31,16 +34,8 @@ public class OldBlueFarShoot3 extends LinearOpMode {
             };
     Thread switchCameraThread = new Thread(switchCamera);
 
-
-    double[] odometryInfo;
-    double[] robotPosition = {0, 0, 0};
-    double firstOLeft = 0;
-    double firstORight = 0;
-    double firstOMiddle = 0;
-    double rotation = 0;
-
-    // yeah yeah, plucked straight from TensorTest... but it works!!! hypothetically
-    public String checkForRings(int seconds) {
+    // yeah yeah, plucked straight from TensorTest... but it works!!!
+    public String checkForRings(double seconds) {
         String numberOfRings = "";
         List<Recognition> updatedRecognitions;
         timer.reset();
@@ -70,104 +65,83 @@ public class OldBlueFarShoot3 extends LinearOpMode {
         return numberOfRings;
     }
 
-    // kind of a central method. give it some time and it'll prolly be moved to Odometry.java
-    private void queryOdometry() {
-        odometryInfo = new double[]{
-                robot.OLeft.getCurrentPosition() - firstOLeft,
-                robot.ORight.getCurrentPosition() - firstORight,
-                robot.OMiddle.getCurrentPosition() - firstOMiddle
-        };
-        robotPosition = odometry.getPosition(robotPosition, odometryInfo, telemetry);
-        telemetry.addData("X", robotPosition[0]);
-        telemetry.addData("Y", robotPosition[1]);
-        telemetry.addData("Theta", robotPosition[2]);
-
-        telemetry.update();
-    }
-
-    // moves forwards backwards (x direction)
-    void goToPoint(double x) {
-        double moveSpeed = .7;
-        double thetaSpeed = 0;
-        while ((robotPosition[0] < (x-.1) || robotPosition[1] > (x+.1)) && opModeIsActive()) {
-            thetaSpeed = -(robotPosition[2]+(rotation));
-            if (robotPosition[0] < (x-.2)) {
-                drive.circlepadMove(moveSpeed, 0, thetaSpeed);
-                queryOdometry();
-            } else if (robotPosition[0] > (x+.2)) {
-                drive.circlepadMove(-moveSpeed, 0, thetaSpeed);
-                queryOdometry();
-            } else if (robotPosition[0] < (x-.1) || robotPosition[1] > (x+.1)) {
-                drive.brake();
-                break;
-            }
-            if (Math.abs(robotPosition[0] - x) < 15) {
-                moveSpeed = .15 + (((.7-.15)/(15)) * (Math.abs(robotPosition[0] - x)));
-            }
-        }
-        drive.brake();
-    }
-
-    // moves left right (y direction)
-    void goToStrafePoint(double y) {
-        double moveSpeed = .55;
-        double thetaSpeed = 0;
-        while ((robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1)) && opModeIsActive()) {
-            thetaSpeed = -(robotPosition[2]+(rotation));
-            if (robotPosition[1] < (y-.2)) {
-                drive.circlepadMove(0, -moveSpeed, thetaSpeed);
-                queryOdometry();
-            } else if (robotPosition[1] > (y+.2)) {
-                drive.circlepadMove(0, moveSpeed, thetaSpeed);
-                queryOdometry();
-            } else if (robotPosition[1] < (y-.1) || robotPosition[1] > (y+.1)) {
-                drive.brake();
-                break;
-            }
-            if (Math.abs(robotPosition[1] - y) < 9) {
-                moveSpeed = .2 + (((.55-.2)/(9)) * (Math.abs(robotPosition[1] - y)));
-            }
-        }
-        drive.brake();
-    }
-
-    void shoot() {
+    void shootHighGoal() {
+        odometryMove.zeroThetaDiagonalToPoint(-4, -21.5);
+        robot.ShooterElevator.setPosition(0.245);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
-        sleep(1000);
+        robot.sleepTimer(1000, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
+        robot.sleepTimer(500, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
+        robot.sleepTimer(450, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
+        robot.sleepTimer(500, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
+        robot.sleepTimer(450, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
+        robot.sleepTimer(500, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
+        robot.sleepTimer(450, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
+        robot.sleepTimer(500, this);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
-        sleep(500);
-        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
-        sleep(500);
+//        robot.sleepTimer(700, this);
+//        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+//        robot.sleepTimer(400, this);
+//        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(0);
     }
 
+    void shootPowerShots() {
+        odometryMove.zeroThetaDiagonalToPoint(-4, -8);
+        robot.ShooterElevator.setPosition(0.235);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        robot.Shooter.setPower(1);
+
+        robot.sleepTimer(1000, this);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        robot.sleepTimer(250, this);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        robot.sleepTimer(450, this);
+
+        odometryMove.rotate(0.1);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        robot.sleepTimer(250, this);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        robot.sleepTimer(450, this);
+
+        odometryMove.rotate(0.2);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
+        robot.sleepTimer(250, this);
+        robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
+        robot.sleepTimer(450, this);
+        robot.Shooter.setPower(0);
+        odometryMove.rotateTo0();
+    }
+
     @Override
-    public void runOpMode() {
-        // initialization things. we'll have to see if it's too heavy for the robot to handle
+    public void runOpMode() throws InterruptedException {
+        try {
+            runMyOpMode();
+        } catch (InterruptedException err) {
+            if (switchCameraThread.isAlive()) {
+                switchCameraThread.join();
+            }
+        }
+    }
+
+
+    public void runMyOpMode() throws InterruptedException {
+        // initialization things
         robot.init(hardwareMap, telemetry);
         robot.WobbleRotatorServo.setPosition(robot.wobbleRotatorPickup+.07);
         robot.initVuforia(hardwareMap, telemetry);
         robot.initTFOD(telemetry);
         robot.tensorFlowEngine.activate();
-
         telemetry.update();
 
+        // loop through tensor during init to see if we have anything
         List<Recognition> beginningUpdatedRecognitions;
         while (!isStarted() && !isStopRequested()) {
             beginningUpdatedRecognitions = robot.tensorFlowEngine.getUpdatedRecognitions();
@@ -178,22 +152,18 @@ public class OldBlueFarShoot3 extends LinearOpMode {
                 if (beginningUpdatedRecognitions.size() == 0) {
                     telemetry.addData("Recognition", "None");
                 }
+                if (isStopRequested()) {
+                    break;
+                }
             }
             telemetry.update();
         }
-
-        // the start ends right here
-        //
-        //
-
-        // TODO: will there be any moving necessary to pick up the three rings? may need 2 opmodes for this
+        //// the start ends right here
 
         // tensor section. gets the number of rings (we'll have to fine tune the number of seconds)
         // before turning it into an int because that makes me more comfortable
         // then it turns off tensor so it stops eating away our power
-
-        //TODO take this out and use the value from init
-        String stringNumberOfRings = checkForRings(1);
+        String stringNumberOfRings = checkForRings(.5);
         int numberOfRings = 0;
         if (stringNumberOfRings.equals("Quad")) {
             numberOfRings = 4;
@@ -204,44 +174,62 @@ public class OldBlueFarShoot3 extends LinearOpMode {
         switchCameraThread.start();
 
         //vuforia time! gotta move over to the picture too. odometry time
-        goToPoint(6);
-        goToStrafePoint(50);
-        sleep(500);
-        // unsure if this will work. we'll find out
-        while (!nav.targetVisible && !isStopRequested()) {
+        odometryMove.goToPoint(3, 0);
+        odometryMove.zeroThetaDiagonalToPoint(12, 24);
+        robot.sleepTimer(100, this);
+
+        // waits for the camera to switch. as soon as it's done it joins the thread
+        while (nav == null && opModeIsActive()) {
+            idle();
+        }
+        switchCameraThread.join();
+
+        // waits until it sees a target and then averages 50 snapshots
+        double avgX = 0, avgY = 0, avgRot = 0;
+        while (!nav.targetVisible && opModeIsActive()) {
             nav.navigationNoTelemetry();
         }
+        int sampleSize = 100;
+        for (int i=0; i<sampleSize; i++) {
+            avgX += nav.X + 8;
+            avgY += nav.Y;
+            avgRot += nav.Rotation + Math.PI/2;
+        }
+        avgX = avgX / sampleSize;
+        avgY = avgY / sampleSize;
+        avgRot = avgRot / sampleSize;
+        telemetry.addData("avg x, y, z", Arrays.toString(new double[]{avgX, avgY, avgRot}));
+        telemetry.update();
+        odometry.inputVuforia(avgX, avgY, avgRot);
 
-        robotPosition = new double[] {nav.X+8, nav.Y, nav.Rotation + Math.PI/2};
-        firstOLeft = robot.OLeft.getCurrentPosition();
-        firstORight = robot.ORight.getCurrentPosition();
-        firstOMiddle = robot.OMiddle.getCurrentPosition();
-        odometry.lastIterationOdometryInfo = new double[] {0, 0, 0};
-        queryOdometry();
-        sleep(3000);
+        // shoots the rings. pop pop pop pop pop (5 times)
+        shootPowerShots();
 
-        goToPoint(-3.5);
-        goToStrafePoint(-22);
-//        drive.circlepadMove(0, 0, -.4);
-//        sleep(100);
-        drive.brake();
-
-        robot.ShooterElevator.setPosition(0.33);
-        sleep(300);
-        shoot();
-        sleep(100);
-
+        // calculates where it needs to go to drop wobble using numberOfRings from earlier
         int wobbleX, wobbleY;
         if (numberOfRings == 0) {
-            wobbleX = -8;
+            wobbleX = 8;
             wobbleY = -48;
         } else if (numberOfRings == 1) {
-            wobbleX = -32;
+            wobbleX = 32;
             wobbleY = -24;
         } else {
-            wobbleX = -56;
+            wobbleX = 56;
             wobbleY = -48;
         }
-        sleep(10000);
+        // proceeds to go to that point and drop the wobble goal
+        odometryMove.zeroThetaDiagonalToPoint(wobbleX, wobbleY);
+        robot.WobbleRotatorServo.setPosition(robot.wobbleRotatorPickup - .05);
+        robot.WobbleCatcherFront.setPosition(robot.wobbleCatcherFrontMax);
+        robot.WobbleCatcherBack.setPosition(robot.wobbleCatcherBackMin);
+        robot.sleepTimer(300, this);
+
+        // moves a little to the right and then back to the line
+        timer.reset();
+        while (timer.milliseconds() < 500 && opModeIsActive()) {
+            drive.circlepadMove(0, -.6, 0);
+        }
+        drive.brake();
+//        odometryMove.doubleStrafeToPoint();
     }
 }

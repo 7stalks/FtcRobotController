@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.ultimategoal;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.odometry.OdometryThread;
+import org.firstinspires.ftc.teamcode.RobotHardware;
 
 public class ShooterRpmThread extends Thread {
 

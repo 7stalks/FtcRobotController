@@ -1,6 +1,4 @@
-package org.firstinspires.ftc.teamcode.test;
-
-import android.graphics.Path;
+package org.firstinspires.ftc.teamcode.ultimategoal.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;

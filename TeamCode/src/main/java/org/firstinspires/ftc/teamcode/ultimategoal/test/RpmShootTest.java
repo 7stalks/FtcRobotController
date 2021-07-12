@@ -1,14 +1,11 @@
-package org.firstinspires.ftc.teamcode.test;
-
-import android.util.Log;
+package org.firstinspires.ftc.teamcode.ultimategoal.test;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.RobotHardware;
-import org.firstinspires.ftc.teamcode.ShooterRpmThread;
-import org.firstinspires.ftc.teamcode.BetterShooter;
+import org.firstinspires.ftc.teamcode.ultimategoal.ShooterRpmThread;
+import org.firstinspires.ftc.teamcode.ultimategoal.BetterShooter;
 
 @TeleOp(name = "an rpm shoot test")
 public class RpmShootTest extends LinearOpMode {

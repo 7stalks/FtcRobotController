@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.test;
+package org.firstinspires.ftc.teamcode.ultimategoal.test;
 
 import android.util.Log;
 
@@ -6,14 +6,14 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.ShooterRpmThread;
+import org.firstinspires.ftc.teamcode.ultimategoal.ShooterRpmThread;
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
 import org.firstinspires.ftc.teamcode.odometry.Odometry;
 import org.firstinspires.ftc.teamcode.odometry.OdometryMove;
 
-@TeleOp(name = "MainTestRemoteShoot", group = "Robot")
-public class MainTestRemoteShoot extends LinearOpMode {
+@TeleOp(name = "Main test", group = "Robot")
+public class MainTest extends LinearOpMode {
 
     RobotHardware robot = new RobotHardware();
     GoBildaDrive drive = new GoBildaDrive(robot);
@@ -40,9 +40,6 @@ public class MainTestRemoteShoot extends LinearOpMode {
     boolean setBackToStart = true;
     boolean didNotShoot = true;
     int position = 0;
-
-    double finalAngle = 0;
-    double distanceToGoal = 0;
 
     boolean myBoolean = false;
 
@@ -109,26 +106,6 @@ public class MainTestRemoteShoot extends LinearOpMode {
         return deltaTimes[0] > 1400 && deltaTimes[1] < 800 && deltaTimes[2] < 800;
     }
 
-    public void fancyRotate(double angle) {
-        double wantedAngle = ((Math.round(odometry.robotPosition[2]/(2*Math.PI))) * 2 * Math.PI) + angle;
-        double driveSpeed = .65;
-        while (odometry.robotPosition[2] < wantedAngle - .0065 || odometry.robotPosition[2] > wantedAngle + .0065 && opModeIsActive()) {
-            if (odometry.robotPosition[2] < wantedAngle - .01) {
-                drive.circlepadMove(0, 0, driveSpeed);
-                odometry.queryOdometry();
-            } else if (odometry.robotPosition[2] > wantedAngle + .01) {
-                drive.circlepadMove(0, 0, -driveSpeed);
-                odometry.queryOdometry();
-            }
-            // once there's a radian to go, start proportionally reducing drivespeed to .27
-            if (Math.abs(odometry.robotPosition[2] - wantedAngle) < 1) {
-                driveSpeed = .27 + (.2 * Math.abs(odometry.robotPosition[2] - wantedAngle));
-            }
-            odometry.queryOdometry();
-        }
-        drive.brake();
-    }
-
     // there wasn't an override here before and i think it worked fine... oh well! we'll see
     @Override
     public void runOpMode() throws InterruptedException {
@@ -147,30 +124,10 @@ public class MainTestRemoteShoot extends LinearOpMode {
 
             //// odometry convenience stuffs and drive
             if (gamepad1.back) {
-                // should be pointing towards 0, 0?
-                finalAngle = -Math.atan(odometry.robotPosition[1] / -odometry.robotPosition[0]);
-                if (odometry.robotPosition[1] < -10) {
-                    finalAngle -= .02;
-                }
-                distanceToGoal = Math.sqrt(Math.pow(odometry.robotPosition[0], 2) + Math.pow(odometry.robotPosition[1], 2));
-                if (odometry.robotPosition[1] > 20 && distanceToGoal >= 140) {
-                    finalAngle += .005;
-                }
-                fancyRotate(finalAngle);
-                if (distanceToGoal >= 130) {
-                    if (odometry.robotPosition[1] > 10) {
-                        robot.ShooterElevator.setPosition(.49);
-                    } else {
-                        robot.ShooterElevator.setPosition(.48);
-                    }
-                } else {
-                    robot.ShooterElevator.setPosition(.51);
-                }
-                Log.v("REMOTE SHOOTER", "distance to goal: " + distanceToGoal);
-                Log.v("REMOTE SHOOTER", "final angle: " + finalAngle);
+                goToHighGoal();
             }
             if (gamepad1.start) {
-                odometry.inputVuforia(-80, 0, 0);
+                odometry.inputVuforia(0, 0, 0);
             }
             if (gamepad1.y) {
                 odometryMove.deltaRotate(0.097);
@@ -248,12 +205,12 @@ public class MainTestRemoteShoot extends LinearOpMode {
 
             // gamepad 2 right trigger (analog) gets the shooter motor itself. has to hold down for it to work
             if (gamepad2.right_trigger > .1) {
-                robot.ShooterNew.setVelocity(85);
+                robot.Shooter.setPower(1);
                 robot.BottomIntake.setPower(0);
                 robot.TopIntake.setPower(0);
                 intakeOn = false;
             } else {
-                robot.ShooterNew.setVelocity(0);
+                robot.Shooter.setPower(0);
             }
 
             // quick shortcuts:

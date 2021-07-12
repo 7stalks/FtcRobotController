@@ -1,11 +1,7 @@
-package org.firstinspires.ftc.teamcode.test;
+package org.firstinspires.ftc.teamcode.ultimategoal.test;
 
 
 import android.util.Log;
-import android.util.LogPrinter;
-
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import java.io.BufferedReader;
 import java.io.IOException;
