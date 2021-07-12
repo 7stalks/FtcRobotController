@@ -8,6 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorImplEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DigitalChannel;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -42,6 +44,9 @@ public class RobotHardware {
     public DcMotor BottomIntake;
     public DcMotor Shooter;
     public DcMotor WobbleRotator;
+
+    // TEST
+    public DcMotorEx ShooterNew;
 
     // Odometers
     public DcMotor OLeft;
@@ -80,16 +85,16 @@ public class RobotHardware {
     final public int wobbleRotatorPickup = 30;
 
     final public double wobbleCatcherFrontMin = 0;
-    final public double wobbleCatcherFrontMax = 0.6;
+    final public double wobbleCatcherFrontMax = 0.3;
     final public double wobbleCatcherBackMin = 0.03;
     final public double wobbleCatcherBackMax = 0.36;
     final public double wobbleCatcherFrontSpeed = (wobbleCatcherFrontMin - wobbleCatcherFrontMax) * 0.1;
     final public double wobbleCatcherBackSpeed = (wobbleCatcherBackMax - wobbleCatcherBackMin) * 0.1;
 
     public int wobbleEncoder0;
-    public final int wobbleRotatorMinimum = -6150;
+    public final int wobbleRotatorMinimum = -6450;
     public final int wobbleRotatorFullUp = -2700;
-    public final int wobbleRotatorUp = -5850;
+    public final int wobbleRotatorUp = -5750;
 
     ElapsedTime timer = new ElapsedTime();
 
@@ -198,12 +203,15 @@ public class RobotHardware {
             Shooter.setDirection(DcMotor.Direction.REVERSE);
             Shooter.setPower(0);
             Shooter.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            Shooter.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            Shooter.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             telemetry.addData("Status", "Motor: shooter identified");    //
         } catch (IllegalArgumentException err) {
             telemetry.addData("Warning", "Motor: shooter not plugged in");    //
             Shooter = null;
         }
+
+        ShooterNew = (DcMotorImplEx) Shooter;
+
         try {
             WobbleRotator = hardwareMap.get(DcMotor.class, "wobble_rotator");
             WobbleRotator.setDirection(DcMotor.Direction.FORWARD);

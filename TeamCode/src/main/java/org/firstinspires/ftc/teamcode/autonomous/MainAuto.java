@@ -120,14 +120,14 @@ public class MainAuto extends LinearOpMode {
     }
 
     void shootPowerShots() {
-        odometryMove.zeroThetaDiagonalToPoint(-4, -6.5);
+        odometryMove.zeroThetaDiagonalToPoint(-5, -6.5);
         odometryMove.rotateTo0();
-        odometryMove.deltaRotate(-0.04);
+        odometryMove.deltaRotate(-0.0425);
         robot.ShooterElevator.setPosition(.472);
         robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
         robot.Shooter.setPower(1);
 
-        while (encoderThread.revolutionsPerMinute < 4800) {
+        while (encoderThread.revolutionsPerMinute < 5000) {
             idle();
         }
         shoot(1, 3);
@@ -213,6 +213,7 @@ public class MainAuto extends LinearOpMode {
         //vuforia time! gotta move over to the picture too. odometry time
         odometryMove.goToPoint(3, 0);
         odometryMove.zeroThetaDiagonalToPoint(24, 24);
+        odometryMove.rotateTo0();
 
         // waits for the camera to switch. as soon as it's done it joins the thread
         while (nav == null && opModeIsActive()) {
@@ -243,7 +244,7 @@ public class MainAuto extends LinearOpMode {
         Log.v("VUFORAISTUFF", "avgX: " + avgX);
         Log.v("VUFORAISTUFF", "avgY + .6: " + (avgY+0.6));
         Log.v("VUFORAISTUFF", "robotPosition[2]: " + odometry.robotPosition[2]);
-        odometry.inputVuforia(avgX, avgY-1.5, odometry.robotPosition[2]);
+        odometry.inputVuforia(avgX, avgY-.7, odometry.robotPosition[2]);
 
         // shoots the rings
         shootPowerShots();
@@ -279,7 +280,7 @@ public class MainAuto extends LinearOpMode {
         }
 
         // proceeds to go to that point and drop the wobble goal
-        odometryMove.zeroThetaDiagonalToPoint(wobbleX+2, wobbleY+3);
+        odometryMove.zeroThetaDiagonalToPoint(wobbleX+2, wobbleY+4);
         wobbleThread.position = robot.wobbleRotatorMinimum-225;
         while (robot.getWobblePosition() > robot.wobbleRotatorMinimum + 100) {
             idle();
@@ -296,11 +297,11 @@ public class MainAuto extends LinearOpMode {
 
         // move up the wobble rotator to pickup position and hightail it to the other wobble
         wobbleThread.position = robot.wobbleRotatorMinimum-125;
-        odometryMove.diagonalToPoint(-30, -50.2, -Math.PI/2);
+        odometryMove.diagonalToPoint(-30, -51, -Math.PI/2);
         drive.brake();
 
         // inch into the wobble goal and then clamp onto it before moving it up
-        odometryMove.diagonalToPoint(-37.2, -50.2, -Math.PI/2);
+        odometryMove.diagonalToPoint(-37.2, -51, -Math.PI/2);
         drive.brake();
         robot.sleepTimer(100, this);
         robot.closeWobble();

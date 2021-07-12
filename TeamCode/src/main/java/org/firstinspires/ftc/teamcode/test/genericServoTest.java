@@ -17,7 +17,7 @@ public class genericServoTest extends LinearOpMode {
     @Override
     public void runOpMode() {
         robot.init(hardwareMap, telemetry);
-        servo = robot.ShooterServo;
+        servo = robot.WobbleCatcherFront;
         waitForStart();
 
         while (opModeIsActive()) {

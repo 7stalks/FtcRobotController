@@ -43,12 +43,12 @@ public class OdometryMove {
             } else if (odometry.robotPosition[0] > (x+.2)) {
                 drive.circlepadMove(-moveSpeed, 0, thetaSpeed);
                 odometry.queryOdometry();
-            } else if (odometry.robotPosition[0] < (x-.1) || odometry.robotPosition[0] > (x+.1)) {
+            } else if (odometry.robotPosition[0] < (x+.1) || odometry.robotPosition[0] > (x-.1)) {
                 drive.brake();
                 break;
             }
             if (Math.abs(odometry.robotPosition[0] - x) < 16) {
-                moveSpeed = .16 + (((.6-.15)/(16)) * (Math.abs(odometry.robotPosition[0] - x)));
+                moveSpeed = .25 + (((.6-.25)/(16)) * (Math.abs(odometry.robotPosition[0] - x)));
             }
         }
         odometry.queryOdometry();
@@ -113,7 +113,7 @@ public class OdometryMove {
         while ((odometry.robotPosition[2] < theta - .007 || odometry.robotPosition[2] > theta + .007) && opMode.opModeIsActive()) {
             // once there's a radian to go, start proportionally reducing drivespeed to .3
             if (Math.abs(odometry.robotPosition[2] - theta) < 1) {
-                driveSpeed = .14 + (.17 * Math.abs(odometry.robotPosition[2] - theta));
+                driveSpeed = .17 + (.17 * Math.abs(odometry.robotPosition[2] - theta));
             }
             if (odometry.robotPosition[2] < theta - .004) {
                 drive.circlepadMove(0, 0, driveSpeed);

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.GoBildaDrive;
 import org.firstinspires.ftc.teamcode.RobotHardware;
@@ -58,21 +59,31 @@ public class RemoteShootTest extends LinearOpMode {
             if (gamepad1.back) {
                 // should be pointing towards 0, 0?
                 finalAngle = -Math.atan(odometry.robotPosition[1] / -odometry.robotPosition[0]);
-                fancyRotate(finalAngle);
+                if (odometry.robotPosition[1] < -10) {
+                    finalAngle -= .02;
+                }
                 distanceToGoal = Math.sqrt(Math.pow(odometry.robotPosition[0], 2) + Math.pow(odometry.robotPosition[1], 2));
+                if (odometry.robotPosition[1] > 20 && distanceToGoal >= 140) {
+                    finalAngle += .02;
+                }
+                fancyRotate(finalAngle);
                 if (distanceToGoal >= 100) {
-                    robot.ShooterElevator.setPosition(.48);
+                    if (odometry.robotPosition[1] > 10) {
+                        robot.ShooterElevator.setPosition(.49);
+                    } else {
+                        robot.ShooterElevator.setPosition(.47);
+                    }
                 } else {
-                    robot.ShooterElevator.setPosition(.49);
+                    robot.ShooterElevator.setPosition(.52);
                 }
                 Log.v("REMOTE SHOOTER", "distance to goal: " + distanceToGoal);
                 Log.v("REMOTE SHOOTER", "final angle: " + finalAngle);
             }
 
             if (gamepad2.right_trigger > 0.2) {
-                robot.Shooter.setPower(1);
+                robot.ShooterNew.setVelocity(83);
             } else {
-                robot.Shooter.setPower(0);
+                robot.ShooterNew.setVelocity(0);
             }
             if (gamepad2.left_trigger > 0.2) {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_MAX);
@@ -80,10 +91,12 @@ public class RemoteShootTest extends LinearOpMode {
                 robot.ShooterServo.setPosition(robot.SHOOTER_SERVO_START);
             }
             if  (gamepad2.right_bumper) {
-                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .005);
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() + .0035);
             } else if (gamepad2.left_bumper) {
-                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .005);
+                robot.ShooterElevator.setPosition(robot.ShooterElevator.getPosition() - .0035);
             }
+
+            telemetry.addData("pidf coeffs", robot.ShooterNew.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER));
 
             telemetry.addData("shooter elevator", robot.ShooterElevator.getPosition());
             odometry.queryOdometry();
